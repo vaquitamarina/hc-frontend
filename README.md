@@ -138,18 +138,18 @@ Para mantener un flujo de trabajo organizado usaremos ramas según la metodolog�
 
 Siempre empieza desde `main` actualizado:
 
-git checkout main
-git pull
-git checkout -b nombre-de-la-rama
+`git checkout main`
+`git pull`
+`git checkout -b nombre-de-la-rama`
 
-Ejemplo: git checkout -b feature/button-component
+Ejemplo: `git checkout -b feature/button-component`
 
 ---
 
 ### 🔹 Subir la rama al remoto (GitHub)
 
-git push origin nombre-de-la-rama
-Ejemplo: git push origin feature/button-component
+`git push origin nombre-de-la-rama`
+Ejemplo: `git push origin feature/button-component`
 
 ---
 
