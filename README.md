@@ -133,3 +133,7 @@ Usaremos la metodología **Ship/Show/Ask** para gestionar commits:
 - Código en **JavaScript**
 - Componentes en **PascalCase** (ejemplo: `Button.tsx`, `PacienteCard.tsx`)
 - Hooks y funciones en **camelCase** (ejemplo: `useAuth.ts`, `formatDate.ts`)
+
+## Notas
+
+- El repo tiene autoformteo y linteo ya configurado, se activa al momento de hacer algun commit
