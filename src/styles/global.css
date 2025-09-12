@@ -1,0 +1,18 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary: #478f94;
+  --primary-dark: #3b6769;
+  --secondary: #386567;
+
+  --bg-1: #ebf4f4;
+  --bg-2: #f3f5f5;
+  --bg-3: #e7ebeb;
+
+  --white: #ffffff;
+  --off-white: #fdfdfd;
+}
