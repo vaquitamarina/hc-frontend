@@ -128,11 +128,47 @@ Usaremos la metodología **Ship/Show/Ask** para gestionar commits:
 
 ---
 
+## 🌱 Guía de Ramas en Git
+
+Para mantener un flujo de trabajo organizado usaremos ramas según la metodología **Ship / Show / Ask**.
+
+---
+
+### 🔹 Crear una rama nueva
+
+Siempre empieza desde `main` actualizado:
+
+git checkout main
+git pull
+git checkout -b nombre-de-la-rama
+
+Ejemplo: git checkout -b feature/button-component
+
+---
+
+### 🔹 Subir la rama al remoto (GitHub)
+
+git push origin nombre-de-la-rama
+Ejemplo: git push origin feature/button-component
+
+---
+
+### 📌 Convenciones de nombres de ramas
+
+- `feature/...` → nuevas funcionalidades
+- `fix/...` → correcciones de errores
+- `docs/...` → documentación
+- `chore/...` → tareas de configuración o mantenimiento
+
+---
+
 ## 📖 Convenciones
 
 - Código en **JavaScript**
 - Componentes en **PascalCase** (ejemplo: `Button.tsx`, `PacienteCard.tsx`)
 - Hooks y funciones en **camelCase** (ejemplo: `useAuth.ts`, `formatDate.ts`)
+
+---
 
 ## Notas
 
