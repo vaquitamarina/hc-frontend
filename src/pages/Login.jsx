@@ -4,7 +4,7 @@ function Login() {
   return (
     <div>
       <Home />
-      <h1>Sistema de Gestión de Historias Clínicas</h1>
+      <h1>LOGIN PROVISIONAL</h1>
     </div>
   );
 }
