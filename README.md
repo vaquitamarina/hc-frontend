@@ -85,6 +85,9 @@ Antes de comenzar, asegúrate de tener instalado:
 2. **Instalar dependencias**  
    `npm install`
 
+3. **Iniciar en local**
+   `npm run dev`
+
 ---
 
 ## 🛠️ Scripts disponibles
