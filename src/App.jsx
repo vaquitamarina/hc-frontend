@@ -1,11 +1,14 @@
-import { CameraOff } from 'lucide-react';
+import { Routes, Route } from 'react-router';
+import AuthLayout from './layouts/AuthLayout';
+import Login from './pages/Login';
 
 function App() {
   return (
-    <>
-      <h1>SISTEMA DE GESTION DE HISTORIAS CLINICAS</h1>
-      <CameraOff color="#990101" size={48} />
-    </>
+    <Routes>
+      <Route element={<AuthLayout />}>
+        <Route path="login" element={<Login />} />
+      </Route>
+    </Routes>
   );
 }
 
