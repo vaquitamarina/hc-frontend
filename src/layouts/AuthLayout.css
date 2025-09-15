@@ -1,0 +1,33 @@
+.auth-layout {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('./img/fond1.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.auth-layout::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.auth-container {
+  position: relative;
+  z-index: 2;
+  background-color: white;
+  padding: 32px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 450px;
+  min-width: 320px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
