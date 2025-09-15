@@ -1,0 +1,44 @@
+.btn {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Estado disabled */
+.btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Variantes */
+.btn-primary {
+  background-color: #1e8b8d; /* color similar al verde azulado de tu UI */
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #166c6d;
+}
+
+.btn-secondary {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #dcdcdc;
+}
+
+.btn-danger {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #c0392b;
+}
