@@ -3,6 +3,7 @@ import AuthLayout from './layouts/AuthLayout';
 import Login from './pages/Login';
 import { useState } from 'react';
 import TextInput from './components/ui/TextInput/TextInput';
+import Header from './components/layout/Header/Header';
 
 function App() {
   const [username, setUsername] = useState('');
@@ -15,6 +16,7 @@ function App() {
   //ejemplo
   return (
     <div>
+      <Header />
       <div>
         <TextInput
           label="Nombre de usuario"
