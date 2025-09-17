@@ -1,6 +1,6 @@
 import { Routes, Route } from 'react-router';
-import AuthLayout from './layouts/AuthLayout';
-import Login from './pages/Login';
+import Login from './pages/Login/Login.jsx';
+import AuthLayout from './layouts/AuthLayout/AuthLayout.jsx';
 
 function App() {
   return (

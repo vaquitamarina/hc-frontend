@@ -5,7 +5,7 @@
   position: relative;
   width: 100vw;
   height: 100vh;
-  background-image: url('./img/fond1.png');
+  background-image: url('../img/fond1.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
