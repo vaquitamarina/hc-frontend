@@ -1,6 +1,6 @@
 import React from 'react';
 import './Header.css';
-import { FiLogOut } from 'react-icons/fi'; // icono de salida
+import { LogOut } from 'lucide-react';
 
 export default function Header() {
   return (
@@ -12,7 +12,7 @@ export default function Header() {
         BASADRINA
       </div>
       <div className="right">
-        <FiLogOut className="logout-icon" />
+        <LogOut />
       </div>
     </header>
   );
