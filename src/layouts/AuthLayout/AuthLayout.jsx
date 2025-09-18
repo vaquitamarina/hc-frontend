@@ -7,7 +7,7 @@ function AuthLayout() {
     <>
       <Header />
       <div className="auth-layout">
-        <div className="auth-container">
+        <div className="auth-layout__container">
           <Outlet />
         </div>
       </div>

@@ -20,7 +20,7 @@
   z-index: 1;
 }
 
-.auth-container {
+.auth-layout__container {
   position: relative;
   z-index: 2;
   background-color: white;
