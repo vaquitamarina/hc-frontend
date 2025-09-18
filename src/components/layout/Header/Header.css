@@ -3,7 +3,9 @@
   justify-content: space-between; /* deja un espacio igual entre los 3 bloques */
   align-items: center; /* centra verticalmente */
   padding: 0.8rem 1.5rem;
-  background-color: #219195; /* azul corporativo (puedes cambiar) */
+  background-color: var(
+    --color-primary
+  ); /* azul corporativo (puedes cambiar) */
   color: #fff;
   font-family: Arial, sans-serif;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);

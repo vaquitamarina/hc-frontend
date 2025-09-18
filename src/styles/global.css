@@ -1,20 +1,41 @@
+@import '@fontsource/alexandria';
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: 'Alexandria', sans-serif;
 }
 
 :root {
-  --primary: #478f94;
-  --primary-dark: #3b6769;
-  --secondary: #386567;
+  /* Marca principal */
+  --color-primary: #003b5c; /* Azul oscuro corporativo (navbar, títulos) */
+  --color-primary-light: #145da0; /* Azul intermedio para resaltes o hover */
+  --color-primary-soft: #4a90e2; /* Azul claro para fondos secundarios */
 
-  --bg-1: #ebf4f4;
-  --bg-2: #f3f5f5;
-  --bg-3: #e7ebeb;
+  /* Neutros */
+  --color-bg: #f8f9fa; /* Fondo principal */
+  --color-bg-alt: #e9ecef; /* Fondos alternativos (cards, paneles) */
+  --color-border: #ced4da; /* Bordes y divisores */
+  --color-surface: #ffffff; /* Superficies (tarjetas, formularios) */
 
-  --fg-1: #45efff;
-  --fg-2: #2b686a;
-  --white: #ffffff;
-  --off-white: #fdfdfd;
+  /* Texto */
+  --color-text: #212529; /* Texto principal */
+  --color-text-muted: #6c757d; /* Texto secundario */
+  --color-text-inverse: #ffffff; /* Texto sobre fondos oscuros */
+
+  /* Estados */
+  --color-accent: #2d9cdb; /* Botones primarios, links */
+  --color-success: #27ae60; /* Éxito */
+  --color-warning: #f2c94c; /* Advertencia */
+  --color-danger: #eb5757; /* Error */
+
+  /* Extras */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
