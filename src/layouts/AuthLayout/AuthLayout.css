@@ -1,14 +1,18 @@
 .authlayout {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  width: 100vw;
+  flex-direction: column;
   height: 100vh;
+}
+
+.authlayout__content {
   background-image: url('../img/fond1.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 
 .authlayout::before {
@@ -25,15 +29,4 @@
   padding: 3.5rem;
   border-radius: 8px;
   z-index: 2;
-}
-
-.authlayout__container {
-  position: relative;
-  z-index: 2;
-  background-color: white;
-  padding: 32px;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 450px;
-  min-width: 320px;
 }

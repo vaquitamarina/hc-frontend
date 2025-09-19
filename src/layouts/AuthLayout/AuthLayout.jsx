@@ -6,8 +6,10 @@ function AuthLayout() {
   return (
     <div className="authlayout">
       <Header />
-      <div className="authlayout__login">
-        <Outlet />
+      <div className="authlayout__content">
+        <div className="authlayout__login">
+          <Outlet />
+        </div>
       </div>
     </div>
   );

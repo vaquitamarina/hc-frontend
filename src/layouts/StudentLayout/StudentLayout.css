@@ -1,0 +1,19 @@
+.student-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex: 1;
+  background-color: var(--color-secondary);
+  padding: 20px;
+  display: flex;
+}
+
+.student-layout__content {
+  background-color: var(--color-white);
+  flex: 1;
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
