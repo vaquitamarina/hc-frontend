@@ -10,7 +10,7 @@ const Button = ({
 }) => {
   return (
     <button
-      className={`btn btn-${variant}`}
+      className={`button button--${variant} ${disabled ? 'button--disabled' : ''}`}
       onClick={onClick}
       disabled={disabled}
     >
@@ -19,7 +19,6 @@ const Button = ({
   );
 };
 
-// Validación de props
 Button.propTypes = {
   variant: PropTypes.oneOf(['primary', 'secondary', 'danger']),
   onClick: PropTypes.func,

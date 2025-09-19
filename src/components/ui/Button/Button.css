@@ -1,44 +1,41 @@
-.btn {
-  padding: 8px 18px;
+.button {
+  padding: 0.6em 1.2em;
   border: none;
   border-radius: 6px;
-  font-weight: bold;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  font-family: 'Roboto', sans-serif;
+  transition: background-color 0.3s ease;
+  color: #ffffff;
 }
 
-/* Estado disabled */
-.btn:disabled {
-  background-color: #ccc;
+/* Variants */
+.button--primary {
+  background-color: #007bff;
+}
+
+.button--primary:hover:not(.button--disabled) {
+  background-color: #0056b3;
+}
+
+.button--secondary {
+  background-color: #6c757d;
+}
+
+.button--secondary:hover:not(.button--disabled) {
+  background-color: #545b62;
+}
+
+.button--danger {
+  background-color: #dc3545;
+}
+
+.button--danger:hover:not(.button--disabled) {
+  background-color: #a71d2a;
+}
+
+/* Disabled state */
+.button--disabled {
+  opacity: 0.6;
   cursor: not-allowed;
-  opacity: 0.7;
-}
-
-/* Variantes */
-.btn-primary {
-  background-color: #1e8b8d; /* color similar al verde azulado de tu UI */
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: #166c6d;
-}
-
-.btn-secondary {
-  background-color: #f0f0f0;
-  color: #333;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background-color: #dcdcdc;
-}
-
-.btn-danger {
-  background-color: #e74c3c;
-  color: white;
-}
-
-.btn-danger:hover:not(:disabled) {
-  background-color: #c0392b;
 }
