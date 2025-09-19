@@ -4,14 +4,12 @@ import './AuthLayout.css';
 
 function AuthLayout() {
   return (
-    <>
+    <div className="authlayout">
       <Header />
-      <div className="auth-layout">
-        <div className="auth-layout__container">
-          <Outlet />
-        </div>
+      <div className="authlayout__login">
+        <Outlet />
       </div>
-    </>
+    </div>
   );
 }
 

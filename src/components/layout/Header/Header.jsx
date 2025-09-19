@@ -5,14 +5,16 @@ import { LogOut } from 'lucide-react';
 export default function Header() {
   return (
     <header className="header">
-      <div className="left">UNJBG</div>
-      <div className="center">
-        CLINICA ODONTOLÓGICA
-        <br />
-        BASADRINA
+      <div className="header__left">
+        <div className="header__name">UNJBG</div>
+        <div className="header__title">
+          CLÍNICA ODONTOLÓGICA
+          <br />
+          BASADRINA
+        </div>
       </div>
-      <div className="right">
-        <LogOut />
+      <div className="header__actions">
+        <LogOut className="header__icon" />
       </div>
     </header>
   );

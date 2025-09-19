@@ -1,4 +1,4 @@
-.auth-layout {
+.authlayout {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -11,16 +11,23 @@
   background-repeat: no-repeat;
 }
 
-.auth-layout::before {
+.authlayout::before {
   content: '';
   position: absolute;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.4);
   pointer-events: none;
   z-index: 1;
 }
 
-.auth-layout__container {
+.authlayout__login {
+  background-color: white;
+  padding: 3.5rem;
+  border-radius: 8px;
+  z-index: 2;
+}
+
+.authlayout__container {
   position: relative;
   z-index: 2;
   background-color: white;
@@ -29,5 +36,4 @@
   width: 100%;
   max-width: 450px;
   min-width: 320px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
