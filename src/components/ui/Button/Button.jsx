@@ -8,7 +8,7 @@ const Button = ({
   onClick,
   disabled = false,
   children,
-  to, // nueva prop
+  to,
 }) => {
   const navigate = useNavigate();
 
@@ -19,7 +19,7 @@ const Button = ({
 
   return (
     <button
-      className={`btn btn-${variant}`}
+      className={`button button--${variant} ${disabled ? 'button--disabled' : ''}`}
       onClick={handleClick}
       disabled={disabled}
     >
