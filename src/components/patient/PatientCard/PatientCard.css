@@ -1,0 +1,23 @@
+.patient-card {
+  background-color: var(--color-secondary);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  max-width: 382px;
+  height: 100%;
+  max-height: 183px;
+  padding: 18px 30px;
+  gap: 20px;
+  font-size: 24px;
+}
+
+.patient-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.patient-card--soft {
+  background-color: var(--color-secondary-soft);
+}

@@ -1,3 +1,4 @@
+import { Outlet } from 'react-router';
 import Header from '../../components/layout/Header/Header';
 import './StudentLayout.css';
 
@@ -7,7 +8,7 @@ function StudentLayout() {
       <Header />
       <main>
         <div className="student-layout__content">
-          <h1>Student Layout</h1>
+          <Outlet></Outlet>
         </div>
       </main>
     </div>
