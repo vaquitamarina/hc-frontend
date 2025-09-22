@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router';
+import { Routes, Route, Navigate } from 'react-router';
 import Login from './pages/Login/Login.jsx';
 import AuthLayout from './layouts/AuthLayout/AuthLayout.jsx';
 
@@ -9,12 +9,13 @@ function App() {
   return (
     <div>
       <Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} />
         <Route element={<AuthLayout />}>
-          <Route path="login" element={<Login />} />
+          <Route path="/login" element={<Login />} />
         </Route>
 
         <Route element={<StudentLayout />}>
-          <Route path="student/dashboard" element={<StudentDashboard />} />
+          <Route path="/student/dashboard" element={<StudentDashboard />} />
         </Route>
       </Routes>
     </div>
