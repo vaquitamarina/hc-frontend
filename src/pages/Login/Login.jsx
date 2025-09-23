@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import TextInput from '../../components/ui/TextInput/TextInput';
 import useLogin from '../../hooks/useLogin';
 const Login = () => {
   const [userCode, setUserCode] = useState('');
@@ -21,20 +22,21 @@ const Login = () => {
     <form onSubmit={handleSubmit}>
       <h2>Login</h2>
       <div>
-        <label htmlFor="userCode">Código de usuario:</label>
-        <input
+        <TextInput
           id="userCode"
-          type="text"
           value={userCode}
+          label="Código de Usuario:"
+          placeholder="Ingrese su código de usuario"
           onChange={(e) => setUserCode(e.target.value)}
         />
       </div>
       <div>
-        <label htmlFor="password">Contraseña:</label>
-        <input
+        <TextInput
           id="password"
           type="password"
           value={password}
+          label="Contraseña:"
+          placeholder="Ingrese su contraseña"
           onChange={(e) => setPassword(e.target.value)}
         />
       </div>
