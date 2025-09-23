@@ -5,6 +5,7 @@ import './Button.css';
 
 const Button = ({
   variant = 'primary',
+  type,
   onClick,
   disabled = false,
   children,
@@ -22,6 +23,7 @@ const Button = ({
       className={`button button--${variant} ${disabled ? 'button--disabled' : ''}`}
       onClick={handleClick}
       disabled={disabled}
+      type={type}
     >
       {children}
     </button>
@@ -30,6 +32,7 @@ const Button = ({
 
 Button.propTypes = {
   variant: PropTypes.oneOf(['primary', 'secondary', 'danger']),
+  type: PropTypes.oneOf(['button', 'submit', 'reset']),
   onClick: PropTypes.func,
   disabled: PropTypes.bool,
   children: PropTypes.node.isRequired,

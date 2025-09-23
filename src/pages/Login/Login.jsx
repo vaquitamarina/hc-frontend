@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import TextInput from '../../components/ui/TextInput/TextInput';
+import Button from '../../components/ui/Button/Button';
 import useLogin from '../../hooks/useLogin';
 const Login = () => {
   const [userCode, setUserCode] = useState('');
@@ -41,9 +42,9 @@ const Login = () => {
         />
       </div>
 
-      <button type="submit" disabled={loading}>
-        {loading ? 'Cargando...' : 'Iniciar Sesión'}
-      </button>
+      <Button type="submit" disabled={loading}>
+        Iniciar Sesión
+      </Button>
 
       {/* Mensajes en la interfaz de usuario */}
       {data && <p>Inicio de sesión exitoso. ¡Bienvenido!</p>}
