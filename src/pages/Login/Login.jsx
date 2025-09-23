@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import TextInput from '../../components/ui/TextInput/TextInput';
 import Button from '../../components/ui/Button/Button';
 import useLogin from '../../hooks/useLogin';
@@ -6,7 +7,7 @@ const Login = () => {
   const [userCode, setUserCode] = useState('');
   const [password, setPassword] = useState('');
   const { data, loading, error, login } = useLogin();
-
+  const navigate = useNavigate();
   const handleSubmit = (e) => {
     e.preventDefault();
     login(userCode, password);
@@ -14,8 +15,7 @@ const Login = () => {
 
   useEffect(() => {
     if (data) {
-      console.log('¡Inicio de sesión exitoso!');
-      console.log('Datos del usuario:', data);
+      navigate('/student/dashboard'); // Redirige al dashboard
     }
   }, [data]); // El efecto se ejecuta cada vez que 'data' cambia
 
