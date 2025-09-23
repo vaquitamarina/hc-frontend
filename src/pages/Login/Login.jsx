@@ -49,7 +49,7 @@ const Login = () => {
       {/* Mensajes en la interfaz de usuario */}
       {data && <p>Inicio de sesión exitoso. ¡Bienvenido!</p>}
       {loading && <p>Cargando datos...</p>}
-      {error && <p style={{ color: 'red' }}>Error: {error.message}</p>}
+      {error && <p style={{ color: 'red' }}>Credenciales invalidas</p>}
     </form>
   );
 };
