@@ -1,0 +1,17 @@
+/* src/components/common/NavButton.css */
+.nav-button {
+  display: inline-block;
+  padding: 0.6em 1.2em;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background-color: var(--color-primary, #00517e);
+  color: #ffffff;
+  transition: background-color 0.3s ease;
+}
+
+.nav-button:hover {
+  background-color: var(--color-primary-hover, #003b5c);
+}

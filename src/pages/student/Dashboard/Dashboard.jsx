@@ -1,4 +1,5 @@
 import PatientCard from '../../../components/patient/PatientCard/PatientCard';
+
 function StudentDashboard() {
   return (
     <>
