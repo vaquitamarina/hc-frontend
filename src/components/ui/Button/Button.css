@@ -1,7 +1,7 @@
 .button {
   padding: 0.6em 1.2em;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
@@ -11,27 +11,27 @@
 
 /* Variants */
 .button--primary {
-  background-color: #007bff;
+  background-color: var(--color-primary);
 }
 
 .button--primary:hover:not(.button--disabled) {
-  background-color: #0056b3;
+  background-color: var(--color-primary-hover);
 }
 
 .button--secondary {
-  background-color: #6c757d;
+  background-color: var(--color-secondary);
 }
 
 .button--secondary:hover:not(.button--disabled) {
-  background-color: #545b62;
+  background-color: var(--color-secondary-hover);
 }
 
 .button--danger {
-  background-color: #dc3545;
+  background-color: var(--color-danger);
 }
 
 .button--danger:hover:not(.button--disabled) {
-  background-color: #a71d2a;
+  background-color: var(--color-danger-hover);
 }
 
 /* Disabled state */

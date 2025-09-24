@@ -12,6 +12,14 @@
   --color-primary-soft: #00517e;
   --color-secondary: #779bbc;
   --color-secondary-soft: #b9cadb;
+
+  --color-primary: #00517e;
+  --color-primary-hover: #003b5c;
+  --color-secondary: #779bbc;
+  --color-secondary-hover: #567a99;
+  --color-danger: #dc3545;
+  --color-danger-hover: #a71d2a;
+
   --color-background: #e0e8eb;
   --color-text: #4e5a5b;
   --color-white: #ffffff;
