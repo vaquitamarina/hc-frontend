@@ -11,7 +11,7 @@
 
 /* Variants */
 .button--primary {
-  background-color: var(--color-primary);
+  background-color: var(--color-primary-soft);
 }
 
 .button--primary:hover:not(.button--disabled) {
