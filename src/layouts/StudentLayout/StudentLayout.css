@@ -15,5 +15,5 @@ main {
   background-color: var(--color-white);
   flex: 1;
   border-radius: var(--radius-lg);
-  padding: 20px;
+  padding: 40px;
 }

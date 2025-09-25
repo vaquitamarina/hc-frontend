@@ -1,19 +1,13 @@
-import PatientCard from '../../../components/patient/PatientCard/PatientCard';
+import Button from '../../../components/ui/Button/Button';
+import './Dashboard.css';
 function StudentDashboard() {
   return (
-    <>
-      <PatientCard
-        name="Cristhian Angel Flores Miranda"
-        img="https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/avatars/fe/fe481579023a433c20b46e7d9c31f43c07fcbc0e_medium.jpg"
-        date="2024-06-10"
-      />
-      <PatientCard
-        name="Cristhian Angel Flores Miranda"
-        img="https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/avatars/fe/fe481579023a433c20b46e7d9c31f43c07fcbc0e_medium.jpg"
-        date="2024-06-10"
-        type="soft"
-      />
-    </>
+    <div className={'studentdashboard'}>
+      <div className={'studentdashboard__adult'}>
+        <h2>Adulto</h2>
+        <Button>Crear</Button>
+      </div>
+    </div>
   );
 }
 
