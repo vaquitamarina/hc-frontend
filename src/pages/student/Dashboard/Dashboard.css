@@ -1,4 +1,4 @@
-.studentdashboard__adult {
+.studentdashboard__adult__title {
   display: flex;
   flex-direction: wrap;
   justify-content: left;
@@ -6,6 +6,6 @@
   margin: 0;
 }
 
-.studentdashboard__adult h2 {
+.studentdashboard__adult__title h2 {
   font-size: 50px;
 }
