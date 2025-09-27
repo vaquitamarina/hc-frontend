@@ -15,10 +15,9 @@ const Login = () => {
 
   useEffect(() => {
     if (data) {
-      navigate('/student/dashboard'); // Redirige al dashboard
+      navigate('/student/dashboard');
     }
-  }, [data]); // El efecto se ejecuta cada vez que 'data' cambia
-
+  }, [data]);
   return (
     <form onSubmit={handleSubmit}>
       <h2>Login</h2>

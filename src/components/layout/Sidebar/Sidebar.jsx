@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import NavButton from '../ui/NavButton/NavButton';
+import NavButton from '@ui/NavButton/NavButton';
 import './Sidebar.css';
 
 const Sidebar = ({ title, items }) => {

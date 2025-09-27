@@ -1,5 +1,5 @@
 import 'Adult.css';
-import Button from '../../ui/Button/Button';
+import Button from '@ui/Button/Button';
 
 function Adult() {
   return (

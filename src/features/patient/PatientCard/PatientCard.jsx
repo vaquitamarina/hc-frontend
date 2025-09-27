@@ -1,5 +1,5 @@
 import './PatientCard.css';
-import Avatar from '../../ui/Avatar/Avatar';
+import Avatar from '@ui/Avatar/Avatar';
 
 import PropTypes from 'prop-types';
 function PatientCard({ name, img, date, type = 'default' }) {
