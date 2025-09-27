@@ -2,18 +2,26 @@
 
 ## Descripción
 
-El componente `NavButton` es un botón de navegación reutilizable que permite redirigir al usuario a diferentes rutas internas de la aplicación utilizando las herramientas de **React Router**, sin depender de `react-router-dom`.  
+El componente `NavButton` es un botón de navegación reutilizable que permite redirigir al usuario a diferentes rutas internas de la aplicación utilizando las herramientas de **React Router**.  
 En lugar de un `<Link>`, este componente usa la función `useNavigate` para realizar la navegación programática cuando el usuario hace clic en el botón.
 
 ## Props
 
-- `to` (string) → **Obligatorio**. Ruta de destino a la que se redirigirá al hacer clic.
-- `label` (string) → **Obligatorio**. Texto que se muestra dentro del botón.
+| Prop       | Tipo            | Requerido | Descripción                                                       |
+| ---------- | --------------- | --------- | ----------------------------------------------------------------- |
+| `to`       | string          | ✅        | Ruta de destino a la que se redirigirá al hacer clic.             |
+| `children` | React.ReactNode | ✅        | Contenido que se mostrará dentro del botón (texto, iconos, etc.). |
 
 ## Uso
 
 ```jsx
 import NavButton from './NavButton';
 
-<NavButton to="/perfil" label="Ir al Perfil" />;
+// Con texto simple
+<NavButton to="/perfil">Ir al Perfil</NavButton>
+
+// Con contenido más complejo
+<NavButton to="/dashboard">
+  <span>📊 Dashboard</span>
+</NavButton>
 ```

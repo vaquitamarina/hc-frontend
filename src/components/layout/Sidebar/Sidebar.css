@@ -1,0 +1,30 @@
+.sidebar {
+  width: 280px;
+  background-color: var(--color-primary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar__header {
+  background-color: var(--color-primary);
+  padding: 28px 18px;
+  text-align: center;
+}
+
+.sidebar__title {
+  color: var(--color-white);
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.sidebar__nav {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: transparent;
+}

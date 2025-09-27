@@ -1,17 +1,40 @@
-/* src/components/common/NavButton.css */
+/* === ESTILO BASE (uso independiente) === */
 .nav-button {
   display: inline-block;
-  padding: 0.6em 1.2em;
-  border-radius: 8px;
+  padding: 12px 18px;
+  border-radius: 6px;
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
   border: none;
-  background-color: var(--color-primary, #00517e);
-  color: #ffffff;
-  transition: background-color 0.3s ease;
+  background: var(--color-primary);
+  color: var(--color-white);
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease;
 }
 
-.nav-button:hover {
-  background-color: var(--color-primary-hover, #003b5c);
+.nav-button:hover,
+.nav-button:focus {
+  background: var(--color-primary-hover);
+  outline: none;
+}
+
+.sidebar .nav-button {
+  display: block;
+  text-align: left;
+  background: transparent;
+  color: var(--color-white);
+  border-radius: 1px;
+
+  width: calc(100% + 28px);
+  margin: 0 -14px;
+  box-sizing: border-box;
+}
+
+.sidebar .nav-button:hover,
+.sidebar .nav-button:focus {
+  background: var(--color-white);
+  color: #000;
+  transform: translateY(-1px);
 }

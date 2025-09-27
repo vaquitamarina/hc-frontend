@@ -1,25 +1,24 @@
-// src/components/common/NavButton.jsx
 import { useNavigate } from 'react-router';
 import PropTypes from 'prop-types';
 import './NavButton.css';
 
-function NavButton({ to, label }) {
+const NavButton = ({ to, children }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(to); // redirige a la ruta indicada
+    navigate(to);
   };
 
   return (
-    <button className="nav-button" onClick={handleClick}>
-      {label}
+    <button className="nav-button" onClick={handleClick} type="button">
+      {children} {/* Aquí va cualquier contenido */}
     </button>
   );
-}
+};
 
 NavButton.propTypes = {
-  to: PropTypes.string.isRequired, // Ruta destino
-  label: PropTypes.string.isRequired, // Texto del botón
+  to: PropTypes.string.isRequired,
+  children: PropTypes.node.isRequired, // ahora validamos children
 };
 
 export default NavButton;

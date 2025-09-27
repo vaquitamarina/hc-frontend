@@ -1,23 +1,19 @@
 import PropTypes from 'prop-types';
-import { NavLink } from 'react-router';
+import NavButton from '../ui/NavButton/NavButton';
 import './Sidebar.css';
 
 const Sidebar = ({ title, items }) => {
   return (
     <aside className="sidebar">
-      <h2 className="sidebar__title">{title}</h2>
+      <div className="sidebar__header">
+        <h2 className="sidebar__title">{title}</h2>
+      </div>
 
-      <nav className="sidebar__nav">
+      <nav className="sidebar__nav" aria-label={`${title} navigation`}>
         {items.map((item, index) => (
-          <NavLink
-            key={index}
-            to={item.path}
-            className={({ isActive }) =>
-              isActive ? 'sidebar__item sidebar__item--active' : 'sidebar__item'
-            }
-          >
-            {item.label}
-          </NavLink>
+          <NavButton key={index} to={item.path}>
+            {item.label} {/*asd*/}
+          </NavButton>
         ))}
       </nav>
     </aside>
