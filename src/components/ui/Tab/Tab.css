@@ -1,0 +1,17 @@
+.tab {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  max-width: 200px;
+  border-radius: var(--radius-md);
+  color: var(--color-primary);
+  gap: 30px;
+}
+
+.tab--active {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
