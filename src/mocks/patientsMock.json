@@ -1,0 +1,12 @@
+[
+  {
+    "idPatient": "7f6a8b24-5c2d-43af-9e3a-4d1b9adf1234",
+    "name": "Juan Pérez",
+    "lastUpdate": "2025-09-28T14:35:22.000Z"
+  },
+  {
+    "idPatient": "5e3b9f42-1d2a-4a91-a2f9-8d6e2d6f5678",
+    "name": "Ana López",
+    "lastUpdate": "2025-09-20T11:12:45.000Z"
+  }
+]
