@@ -1,0 +1,31 @@
+.adult-patients-list {
+  width: 100%;
+}
+
+.adult-patients-list__container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.adult-patients-list__loading,
+.adult-patients-list__error,
+.adult-patients-list__empty {
+  padding: 2rem;
+  text-align: center;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+}
+
+.adult-patients-list__loading {
+  color: #666;
+}
+
+.adult-patients-list__error {
+  color: #d32f2f;
+  background-color: #ffebee;
+}
+
+.adult-patients-list__empty {
+  color: #666;
+}
