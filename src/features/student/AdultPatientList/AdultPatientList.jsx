@@ -1,6 +1,6 @@
-import { usePatients } from '../../hooks/usePatients';
-import PatientCard from '../../features/patient/PatientCard/PatientCard';
-import './AdultPatientsList.css';
+import { usePatients } from '@hooks/usePatients';
+import PatientCard from '@features/patient/PatientCard/PatientCard';
+import './AdultPatientList.css';
 import PropTypes from 'prop-types';
 
 /**
@@ -10,11 +10,6 @@ import PropTypes from 'prop-types';
 function AdultPatientsList({ studentId }) {
   const { data: patients, isLoading, isError, error } = usePatients(studentId);
 
-  /**
-   * Formatea una fecha ISO a formato dd/mm/yyyy
-   * @param {string} isoDate - Fecha en formato ISO
-   * @returns {string} - Fecha formateada
-   */
   const formatDate = (isoDate) => {
     const date = new Date(isoDate);
     const day = String(date.getDate()).padStart(2, '0');
@@ -52,17 +47,27 @@ function AdultPatientsList({ studentId }) {
   }
 
   return (
-    <div className="adult-patients-list">
-      <div className="adult-patients-list__container">
-        {patients.map((patient) => (
+    <div className="adult-patients-list__container">
+      {patients.map((patient, index) => {
+        const row = Math.floor(index / 2); // fila (0, 1, 2...)
+        const col = index % 2; // columna (0 izquierda, 1 derecha)
+
+        // alternar tipo según fila
+        const isEvenRow = row % 2 === 0;
+        const type =
+          (isEvenRow && col === 0) || (!isEvenRow && col === 1)
+            ? 'soft'
+            : 'default';
+
+        return (
           <PatientCard
             key={patient.idPatient}
             name={patient.name}
             date={formatDate(patient.lastUpdate)}
-            img="" // Imagen por defecto o placeholder
+            type={type}
           />
-        ))}
-      </div>
+        );
+      })}{' '}
     </div>
   );
 }

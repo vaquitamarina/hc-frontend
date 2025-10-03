@@ -12,12 +12,7 @@ function Dashboard() {
         return <div>Admin Content</div>;
     }
   };
-  return (
-    <div>
-      Hello {data?.userCode}
-      {renderContent()}
-    </div>
-  );
+  return <div>{renderContent()}</div>;
 }
 
 export default Dashboard;

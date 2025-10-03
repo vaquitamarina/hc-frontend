@@ -3,9 +3,10 @@
 }
 
 .adult-patients-list__container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+  gap: 20px; /* espacio entre cards */
+  max-width: 800px; /* opcional, para que no crezca demasiado */
 }
 
 .adult-patients-list__loading,

@@ -8,17 +8,17 @@ Componente para listar pacientes adultos de un estudiante.
 import AdultPatientsList from '@components/AdultPatientsList/AdultPatientsList';
 
 function MyComponent() {
-  const studentId = "123";
-  
+  const studentId = '123';
+
   return <AdultPatientsList studentId={studentId} />;
 }
 ```
 
 ## Props
 
-| Prop | Tipo | Requerido | Descripción |
-|------|------|-----------|-------------|
-| `studentId` | `string` | Sí | ID del estudiante para obtener sus pacientes adultos |
+| Prop        | Tipo     | Requerido | Descripción                                          |
+| ----------- | -------- | --------- | ---------------------------------------------------- |
+| `studentId` | `string` | Sí        | ID del estudiante para obtener sus pacientes adultos |
 
 ## Estados
 

@@ -16,7 +16,8 @@ main {
   background-color: var(--color-background);
   flex: 1;
   border-radius: var(--radius-lg);
-  padding: 40px;
+  padding: 50px;
+  padding-top: 80px;
 }
 .student-layout__tabs {
   top: 120px;

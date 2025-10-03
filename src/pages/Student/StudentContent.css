@@ -1,0 +1,14 @@
+.student-content {
+  display: flex;
+  flex-direction: row;
+  gap: 70px;
+}
+
+.student-content__tittle {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: row;
+  gap: 60px;
+}
