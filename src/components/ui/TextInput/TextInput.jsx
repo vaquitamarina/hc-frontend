@@ -8,18 +8,19 @@ function TextInput({
   value,
   onChange,
   error,
-  id,
+  name,
   type = 'text',
 }) {
   return (
     <div className="text-input">
-      <label htmlFor={id} className="text-input__label">
+      <label htmlFor={name} className="text-input__label">
         {label}
       </label>
       <div className="text-input__wrapper">
         <input
           type={type}
-          id={id}
+          id={name}
+          name={name}
           className={`text-input__field${error ? ' text-input__field--error' : ''}`}
           placeholder={placeholder}
           value={value}
@@ -39,6 +40,7 @@ TextInput.propTypes = {
   error: PropTypes.string,
   id: PropTypes.string.isRequired,
   type: PropTypes.string,
+  name: PropTypes.string.isRequired,
 };
 
 TextInput.defaultProps = {

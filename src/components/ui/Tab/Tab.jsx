@@ -6,7 +6,7 @@ function Tab({ children, isActive, name }) {
   return (
     <NavLink to={''}>
       <div className={`tab ${isActive ? 'tab--active' : ''}`}>
-        {name === 'appointment' && <NotebookPen />}
+        {name === 'cita' && <NotebookPen />}
         {name === 'hc' && <ClipboardClock />}
         <div>{children}</div>
       </div>

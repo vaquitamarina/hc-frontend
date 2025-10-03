@@ -8,12 +8,19 @@ main {
   flex: 1;
   background-color: var(--color-secondary);
   padding: 20px;
+  padding-top: 45px;
   display: flex;
 }
 
 .student-layout__content {
-  background-color: var(--color-white);
+  background-color: var(--color-background);
   flex: 1;
   border-radius: var(--radius-lg);
   padding: 40px;
+}
+.student-layout__tabs {
+  top: 120px;
+  position: absolute;
+  display: flex;
+  flex-direction: row;
 }

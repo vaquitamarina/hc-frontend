@@ -1,24 +1,29 @@
 import { Routes, Route, Navigate } from 'react-router';
 import Login from './pages/Login/Login.jsx';
 import AuthLayout from './layouts/AuthLayout/AuthLayout.jsx';
-
+import ProtectedRoutes from './components/routes/ProtectedRoutes.jsx';
 import StudentLayout from './layouts/StudentLayout/StudentLayout.jsx';
-import StudentDashboard from './pages/student/Dashboard/Dashboard.jsx';
+import Dashboard from './pages/Dashboard/Dashboard.jsx';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 function App() {
   return (
-    <div>
+    <>
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
+
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
         </Route>
 
-        <Route element={<StudentLayout />}>
-          <Route path="/student/dashboard" element={<StudentDashboard />} />
+        <Route element={<ProtectedRoutes />}>
+          <Route element={<StudentLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+          </Route>
         </Route>
       </Routes>
-    </div>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </>
   );
 }
 
