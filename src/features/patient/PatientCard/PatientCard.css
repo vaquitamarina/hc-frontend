@@ -21,3 +21,8 @@
 .patient-card--soft {
   background-color: var(--color-secondary-soft);
 }
+
+a {
+  text-decoration: none;
+  color: inherit;
+}

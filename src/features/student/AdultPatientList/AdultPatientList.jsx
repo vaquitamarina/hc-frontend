@@ -65,9 +65,10 @@ function AdultPatientsList({ studentId }) {
             name={patient.name}
             date={formatDate(patient.lastUpdate)}
             type={type}
+            idHistory={patient.idHistory}
           />
         );
-      })}{' '}
+      })}
     </div>
   );
 }
