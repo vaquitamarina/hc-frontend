@@ -1,8 +1,8 @@
 import AdultPatientList from '@features/student/AdultPatientList/AdultPatientList';
 import { useCurrentUser } from '@hooks/useAuth';
 import Button from '@ui/Button/Button';
-import './StudentContent.css';
-export function StudentContent() {
+import './StudentDashboard.css';
+export function StudentDashboard() {
   const { data } = useCurrentUser();
   return (
     <div className="student-content">
@@ -24,4 +24,4 @@ export function StudentContent() {
   );
 }
 
-export default StudentContent;
+export default StudentDashboard;

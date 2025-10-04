@@ -1,11 +1,11 @@
 import { useCurrentUser } from '@hooks/useAuth';
-import StudentContent from '@pages/Student/StudentContent';
+import StudentDashboard from '@pages/Student/StudentDashboard/StudentDashboard';
 function Dashboard() {
   const { data } = useCurrentUser();
   const renderContent = () => {
     switch (data?.role) {
       case 'student':
-        return <StudentContent></StudentContent>;
+        return <StudentDashboard />;
       case 'teacher':
         return <div>Teacher Content</div>;
       case 'admin':

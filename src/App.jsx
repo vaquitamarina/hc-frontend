@@ -4,6 +4,7 @@ import AuthLayout from './layouts/AuthLayout/AuthLayout.jsx';
 import ProtectedRoutes from './components/routes/ProtectedRoutes.jsx';
 import StudentLayout from './layouts/StudentLayout/StudentLayout.jsx';
 import Dashboard from './pages/Dashboard/Dashboard.jsx';
+import StudentHc from './pages/Student/StudentHc/StudentHc.jsx';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
         <Route element={<ProtectedRoutes />}>
           <Route element={<StudentLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/historia-clinica/:id" element={<StudentHc />} />
           </Route>
         </Route>
       </Routes>
