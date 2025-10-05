@@ -2,9 +2,8 @@ import { useFiliation } from '@hooks/usePatients';
 import { useCurrentPatientStore } from '@stores/usePatientStore';
 import './Filiation.css';
 export function Filiation() {
-  const historyId = '0dde049b-12ec-42bd-9ed7-51cec150f4dd';
-  const { data: filiation, isLoading } = useFiliation(historyId);
   const patient = useCurrentPatientStore((state) => state.currentPatient);
+  const { data: filiation, isLoading } = useFiliation(patient.idHistory);
 
   if (isLoading) {
     return <div>Cargando filiacion...</div>;
