@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router';
 import './Card.css';
 import PropTypes from 'prop-types';
-export function Card({ children }, path) {
+export function Card({ children, path }) {
   return (
     <NavLink to={path} className={'card'}>
       {children}

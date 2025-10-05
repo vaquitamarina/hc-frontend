@@ -9,7 +9,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.2s ease-in-out;
   color: var(--color-white);
 }
 
@@ -17,5 +17,5 @@
   box-shadow: var(--shadow-lg);
   cursor: pointer;
   transform: translateY(-5px);
-  transition: all 0.3s ease-in-out;
+  transition: all 0.2s ease-in-out;
 }

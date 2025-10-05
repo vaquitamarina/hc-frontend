@@ -51,10 +51,9 @@ function AdultPatientsList({ studentId }) {
   return (
     <div className="adult-patients-list__container">
       {patients.map((patient, index) => {
-        const row = Math.floor(index / 2); // fila (0, 1, 2...)
-        const col = index % 2; // columna (0 izquierda, 1 derecha)
+        const row = Math.floor(index / 2);
+        const col = index % 2;
 
-        // alternar tipo según fila
         const isEvenRow = row % 2 === 0;
         const type =
           (isEvenRow && col === 0) || (!isEvenRow && col === 1)

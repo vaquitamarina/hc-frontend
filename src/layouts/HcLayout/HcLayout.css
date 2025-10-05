@@ -11,13 +11,24 @@ main {
   background-color: var(--color-secondary);
   display: flex;
 }
+.hc__patient {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 10px;
+  font-size: 24px;
+  max-width: 400px;
+}
 
 .hc-layout__content {
   background-color: var(--color-background);
   flex: 1;
   border-radius: var(--radius-lg);
   padding: 50px;
-  padding-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding-top: 80px;
 }
 
 .hc-layout__content-wrapper {
