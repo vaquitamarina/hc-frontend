@@ -4,15 +4,17 @@ import PropTypes from 'prop-types';
 import { NavLink } from 'react-router';
 function PatientCard({
   name,
-  img = 'https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg',
+  img,
   date,
   type = 'default',
   idHistory,
+  handleClick,
 }) {
   return (
     <NavLink
-      to={`/historia-clinica/${idHistory}`}
+      to={`/historia/${idHistory}/anamnesis`}
       className={`patient-card patient-card--${type}`}
+      onClick={handleClick}
     >
       <Avatar src={img} alt={name} size={65} />
       <div className="patient-card__info">
@@ -29,6 +31,7 @@ PatientCard.propTypes = {
   date: PropTypes.string.isRequired,
   type: PropTypes.oneOf(['default', 'soft']),
   idHistory: PropTypes.string.isRequired,
+  handleClick: PropTypes.func,
 };
 
 export default PatientCard;

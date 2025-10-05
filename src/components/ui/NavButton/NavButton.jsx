@@ -1,24 +1,23 @@
-import { useNavigate } from 'react-router';
+import { NavLink } from 'react-router';
 import PropTypes from 'prop-types';
 import './NavButton.css';
 
 const NavButton = ({ to, children }) => {
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    navigate(to);
-  };
-
   return (
-    <button className="nav-button" onClick={handleClick} type="button">
-      {children} {/* Aquí va cualquier contenido */}
-    </button>
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        `nav-button ${isActive ? 'nav-button--active' : ''}`
+      }
+    >
+      {children}
+    </NavLink>
   );
 };
 
 NavButton.propTypes = {
   to: PropTypes.string.isRequired,
-  children: PropTypes.node.isRequired, // ahora validamos children
+  children: PropTypes.node.isRequired,
 };
 
 export default NavButton;

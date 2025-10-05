@@ -1,10 +1,17 @@
 import PropTypes from 'prop-types';
 import NavButton from '@ui/NavButton/NavButton';
+import Tab from '@ui/Tab/Tab';
 import './Sidebar.css';
 
 const Sidebar = ({ title, items }) => {
   return (
     <aside className="sidebar">
+      <div className="sidebar__tabs">
+        <Tab isActive={true} name="hc">
+          HISTORIA CLÍNICA
+        </Tab>
+      </div>
+
       <div className="sidebar__header">
         <h2 className="sidebar__title">{title}</h2>
       </div>

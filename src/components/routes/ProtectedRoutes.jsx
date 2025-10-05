@@ -1,9 +1,8 @@
 import { Navigate, Outlet } from 'react-router';
-// import { useCurrentUser } from '@hooks/useAuth';
+import { useCurrentUser } from '@hooks/useAuth';
 
 function ProtectedRoutes() {
-  const { isError } = false;
-
+  const { isError } = useCurrentUser();
   if (isError) {
     return <Navigate to="/login" replace />;
   }

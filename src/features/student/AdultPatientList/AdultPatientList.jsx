@@ -2,6 +2,7 @@ import { usePatients } from '@hooks/usePatients';
 import PatientCard from '@features/patient/PatientCard/PatientCard';
 import './AdultPatientList.css';
 import PropTypes from 'prop-types';
+import { useCurrentPatientStore } from '@stores/usePatientStore';
 
 /**
  * Componente para listar pacientes adultos de un estudiante
@@ -10,6 +11,7 @@ import PropTypes from 'prop-types';
 function AdultPatientsList({ studentId }) {
   const { data: patients, isLoading, isError, error } = usePatients(studentId);
 
+  const { setCurrentPatient } = useCurrentPatientStore();
   const formatDate = (isoDate) => {
     const date = new Date(isoDate);
     const day = String(date.getDate()).padStart(2, '0');
@@ -66,6 +68,7 @@ function AdultPatientsList({ studentId }) {
             date={formatDate(patient.lastUpdate)}
             type={type}
             idHistory={patient.idHistory}
+            handleClick={() => setCurrentPatient(patient)}
           />
         );
       })}

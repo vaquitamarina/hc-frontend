@@ -4,12 +4,12 @@
   justify-content: center;
   align-items: center;
   padding: 12px 40px;
-  min-width: 210px;
-  max-width: 300px;
+  width: 280px;
   border-radius: var(--radius-md);
   color: var(--color-primary);
-  gap: 30px;
+  gap: 25px;
   background-color: var(--color-white);
+  white-space: nowrap;
 }
 
 .tab--active {

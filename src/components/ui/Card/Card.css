@@ -1,0 +1,21 @@
+.card {
+  background-color: var(--color-primary-soft);
+  border-radius: var(--radius-lg);
+  min-height: 200px;
+  min-width: 400px;
+  padding: 18px 30px;
+  gap: 20px;
+  font-size: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease-in-out;
+  color: var(--color-white);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+  transform: translateY(-5px);
+  transition: all 0.3s ease-in-out;
+}
