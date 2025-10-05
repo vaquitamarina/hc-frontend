@@ -36,11 +36,12 @@ export default [
       },
     },
     rules: {
-      'react/prop-types': 'off',
       ...pluginReact.configs.recommended.rules,
       ...pluginReactHooks.configs.recommended.rules,
       ...pluginJsxA11y.configs.recommended.rules,
       'react/react-in-jsx-scope': 'off',
+
+      'react/prop-types': 'off',
     },
   },
 

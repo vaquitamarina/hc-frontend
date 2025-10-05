@@ -9,13 +9,17 @@
   max-height: 183px;
   padding: 18px 30px;
   gap: 20px;
-  font-size: 24px;
+  font-size: 20px;
+  transition: all 0.2s ease-in-out;
 }
 
 .patient-card__info {
   display: flex;
   flex-direction: column;
   gap: 30px;
+}
+.patient-card__name {
+  max-width: 200px;
 }
 
 .patient-card--soft {
@@ -25,4 +29,11 @@
 a {
   text-decoration: none;
   color: inherit;
+}
+
+.patient-card:hover {
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+  transform: translateY(-5px);
+  transition: all 0.2s ease-in-out;
 }

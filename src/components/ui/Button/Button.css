@@ -4,6 +4,7 @@
   border-radius: 8px;
   font-size: 1rem;
   font-weight: 500;
+  max-height: 40px;
   cursor: pointer;
   transition: background-color 0.3s ease;
   color: #ffffff;

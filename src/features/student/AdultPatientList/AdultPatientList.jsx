@@ -4,10 +4,6 @@ import './AdultPatientList.css';
 import PropTypes from 'prop-types';
 import { useCurrentPatientStore } from '@stores/usePatientStore';
 
-/**
- * Componente para listar pacientes adultos de un estudiante
- * @param {string} studentId - ID del estudiante
- */
 function AdultPatientsList({ studentId }) {
   const { data: patients, isLoading, isError, error } = usePatients(studentId);
 

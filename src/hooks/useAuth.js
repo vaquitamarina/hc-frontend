@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchLogin, fetchAuth } from '../services/fetchLogin.js';
 import { useNavigate } from 'react-router';
 
@@ -7,12 +7,16 @@ export function useCurrentUser() {
     queryKey: ['currentUser'],
     queryFn: fetchAuth,
     retry: false,
+    staleTime: Infinity, // nunca se considera "stale"
+    cacheTime: Infinity, // lo mantiene en caché todo el tiempo
+    refetchOnWindowFocus: false,
   });
 }
 
 export function useLogin() {
   const navigate = useNavigate();
-
+  const queryClient = useQueryClient();
+  queryClient.invalidateQueries({ queryKey: ['currentUser'] });
   return useMutation({
     mutationFn: fetchLogin,
     onSuccess: () => {

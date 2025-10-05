@@ -4,10 +4,13 @@
   padding: 20px;
   width: 100%;
   margin-top: -200x;
+  font-size: 18px;
+  height: 50dvh;
 }
 
 .filiation__info {
-  max-width: 1000px;
+  max-width: 1200px;
+  min-width: 1000px;
   background-color: var(--color-background);
   display: flex;
   flex-direction: column;
@@ -42,13 +45,30 @@
 }
 
 .filiation__info__item {
-  padding: 10px 20px;
+  padding: 10px 40px;
   background-color: var(--color-secondary-soft);
   border-radius: var(--radius-md);
 }
 
 .filiation__info__item--alt {
-  padding: 10px 20px;
+  padding: 10px 40px;
   border-radius: var(--radius-md);
   background-color: var(--color-secondary);
+}
+
+.filiation__form-field {
+  padding: 4px 40px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.filiation__form-input {
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  padding: 5px;
+  width: 100%;
+  font-size: 18px;
+}
+.filiation__form-label {
+  white-space: nowrap;
 }

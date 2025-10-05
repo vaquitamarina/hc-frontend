@@ -1,7 +1,8 @@
 .hc-layout {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100dvh;
+  overflow: auto;
 }
 
 main {
@@ -27,7 +28,7 @@ main {
   padding: 50px;
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 20px;
   padding-top: 80px;
 }
 

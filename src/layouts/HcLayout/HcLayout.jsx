@@ -33,7 +33,9 @@ function HcLayout() {
                   style={{ color: 'var(--color-primary)' }}
                 />
               </div>
-              <h2 className="anamnesis__title">{patient?.name}</h2>
+              <h2 className="anamnesis__title">
+                {patient?.name || 'Paciente ingresante'}
+              </h2>
             </div>
             <div className="hc-layout__outlet">
               <Outlet></Outlet>
