@@ -11,11 +11,11 @@ function HcLayout() {
   const patient = useCurrentPatientStore((state) => state.currentPatient);
   const menuItems = [
     { path: `/historia/${id}/anamnesis`, label: 'Anamnesis' },
-    { path: '', label: 'Examen Fisico' },
-    { path: '', label: 'Diagnosticos presuntivos' },
-    { path: '', label: 'Derivado a clinicas' },
-    { path: '', label: 'Diagnostico en clinicas' },
-    { path: '/evoluciones', label: 'Evoluciones' },
+    { path: `/dashboard`, label: 'Examen Fisico' },
+    { path: `/dashboard`, label: 'Diagnosticos presuntivos' },
+    { path: '/dashboard', label: 'Derivado a clinicas' },
+    { path: '/dashboard', label: 'Diagnostico en clinicas' },
+    { path: '/dashboard', label: 'Evoluciones' },
   ];
   return (
     <div className="hc-layout">
