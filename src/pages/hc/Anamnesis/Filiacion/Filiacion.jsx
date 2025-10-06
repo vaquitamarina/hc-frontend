@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useFiliation } from '@hooks/usePatients';
 import { useCurrentPatientStore } from '@stores/usePatientStore';
 import { useForm } from '@stores/useForm';
@@ -6,37 +5,8 @@ import './Filiation.css';
 
 export function Filiation() {
   const patient = useCurrentPatientStore((state) => state.currentPatient);
-  const { data: filiation, isLoading } = useFiliation(patient?.idHistory);
+  const { data: filiation } = useFiliation(patient?.idHistory);
   const isFormMode = useForm((state) => state.isFormMode);
-
-  const [formData, setFormData] = useState({
-    nombre: '',
-    edad: '',
-    sexo: '',
-    raza: '',
-    fecha_nacimiento: '',
-    lugar: '',
-    estado_civil: '',
-    nombre_conyuge: '',
-    ocupacion: '',
-    lugar_procedencia: '',
-    tiempo_residencia_tacna: '',
-    direccion: '',
-    telefono: '',
-    ultima_visita_dentista: '',
-    motivo_visita_dentista: '',
-    ultima_visita_medico: '',
-    motivo_visita_medico: '',
-  });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-  };
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -48,32 +18,12 @@ export function Filiation() {
     });
   };
 
-  const formatDateForInput = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toISOString().split('T')[0];
-  };
-
-  if (isLoading) {
-    return <div>Cargando filiacion...</div>;
-  }
-
   const Field = ({ label, value, name, type = 'text' }) => {
     if (isFormMode) {
       return (
         <div className="filiation__form-field">
           <label className="filiation__form-label">{label}:</label>
-          <input
-            className="filiation__form-input"
-            type={type}
-            name={name}
-            value={
-              type === 'date'
-                ? formatDateForInput(formData[name])
-                : formData[name]
-            }
-            onChange={handleChange}
-          />
+          <input className="filiation__form-input" type={type} name={name} />
         </div>
       );
     }
@@ -89,17 +39,7 @@ export function Filiation() {
       return (
         <div className="filiation__form-field">
           <label className="filiation__form-label">{label}:</label>
-          <input
-            className="filiation__form-input"
-            type={type}
-            name={name}
-            value={
-              type === 'date'
-                ? formatDateForInput(formData[name])
-                : formData[name]
-            }
-            onChange={handleChange}
-          />
+          <input className="filiation__form-input" type={type} name={name} />
         </div>
       );
     }
@@ -210,7 +150,7 @@ export function Filiation() {
     </div>
   );
 
-  return isFormMode ? <form onSubmit={handleSubmit}>{content}</form> : content;
+  return isFormMode ? <form>{content}</form> : content;
 }
 
 export default Filiation;

@@ -5,7 +5,7 @@
   flex-direction: row;
   width: 100%;
   max-width: 382px;
-  height: 100%;
+  height: auto;
   max-height: 183px;
   padding: 18px 30px;
   gap: 20px;

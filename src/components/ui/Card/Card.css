@@ -1,11 +1,11 @@
 .card {
   background-color: var(--color-primary-soft);
   border-radius: var(--radius-lg);
-  min-height: 200px;
-  min-width: 400px;
+  min-height: 130px;
+  min-width: 300px;
   padding: 18px 30px;
   gap: 20px;
-  font-size: 24px;
+  font-size: 1.3rem;
   display: flex;
   justify-content: center;
   align-items: center;
