@@ -2,6 +2,7 @@ import './PatientCard.css';
 import Avatar from '@ui/Avatar/Avatar';
 import PropTypes from 'prop-types';
 import { NavLink } from 'react-router';
+import { useForm } from '@stores/useForm';
 function PatientCard({
   name,
   img,
@@ -10,11 +11,15 @@ function PatientCard({
   idHistory,
   handleClick,
 }) {
+  const newHandleClick = () => {
+    handleClick();
+    useForm.setState({ isFormMode: false });
+  };
   return (
     <NavLink
       to={`/historia/${idHistory}/anamnesis`}
       className={`patient-card patient-card--${type}`}
-      onClick={handleClick}
+      onClick={newHandleClick}
     >
       <Avatar src={img} alt={name} size={65} />
       <div className="patient-card__info">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useFiliation } from '@hooks/usePatients';
 import { useCurrentPatientStore } from '@stores/usePatientStore';
 import { useForm } from '@stores/useForm';
@@ -28,30 +28,6 @@ export function Filiation() {
     ultima_visita_medico: '',
     motivo_visita_medico: '',
   });
-
-  useEffect(() => {
-    if (filiation && isFormMode) {
-      setFormData({
-        nombre: patient.name || '',
-        edad: patient.age || '',
-        genero: patient.gender || '',
-        raza: filiation.raza || '',
-        fecha_nacimiento: filiation.fecha_nacimiento || '',
-        lugar: filiation.lugar || '',
-        estado_civil: filiation.estado_civil || '',
-        nombre_conyuge: filiation.nombre_conyuge || '',
-        ocupacion: filiation.ocupacion || '',
-        lugar_procedencia: filiation.lugar_procedencia || '',
-        tiempo_residencia_tacna: filiation.tiempo_residencia_tacna || '',
-        direccion: filiation.direccion || '',
-        telefono: patient.phone || '',
-        ultima_visita_dentista: filiation.ultima_visita_dentista || '',
-        motivo_visita_dentista: filiation.motivo_visita_dentista || '',
-        ultima_visita_medico: filiation.ultima_visita_medico || '',
-        motivo_visita_medico: filiation.motivo_visita_medico || '',
-      });
-    }
-  }, [filiation, isFormMode]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

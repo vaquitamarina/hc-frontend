@@ -6,7 +6,6 @@ import { useCurrentPatientStore } from '@stores/usePatientStore';
 
 function AdultPatientsList({ studentId }) {
   const { data: patients, isLoading, isError, error } = usePatients(studentId);
-
   const { setCurrentPatient } = useCurrentPatientStore();
   const formatDate = (isoDate) => {
     const date = new Date(isoDate);
