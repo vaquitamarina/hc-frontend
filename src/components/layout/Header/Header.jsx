@@ -6,6 +6,7 @@ export default function Header() {
   return (
     <header className="header">
       <div className="header__left">
+        <img src="./logo1.png" alt="Logo" className="header__logo" />
         <div className="header__name">UNJBG</div>
         <div className="header__title">
           CLÍNICA ODONTOLÓGICA
