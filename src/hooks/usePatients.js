@@ -21,3 +21,5 @@ export function useFiliation(historyId) {
     refetchOnReconnect: false,
   });
 }
+
+export function useMutateFiliation() {}
