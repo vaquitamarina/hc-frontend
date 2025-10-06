@@ -12,6 +12,10 @@
   height: 96px;
   flex-shrink: 0;
 }
+.header__logo {
+  height: 3rem;
+  width: auto;
+}
 
 .header__left {
   display: flex;
