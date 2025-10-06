@@ -5,6 +5,7 @@
   width: 100%;
   font-size: 0.75rem;
   height: 50dvh;
+  flex-direction: column;
 }
 
 .filiation__info {
@@ -71,4 +72,11 @@
 }
 .filiation__form-label {
   white-space: nowrap;
+}
+
+.filiation__form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
 }

@@ -2,6 +2,7 @@ import { useFiliation } from '@hooks/usePatients';
 import { useCurrentPatientStore } from '@stores/usePatientStore';
 import { useForm } from '@stores/useForm';
 import './Filiation.css';
+import Button from '@ui/Button/Button';
 
 export function Filiation() {
   const patient = useCurrentPatientStore((state) => state.currentPatient);
@@ -147,6 +148,12 @@ export function Filiation() {
           />
         </div>
       </div>
+      {isFormMode && (
+        <div className="filiation__form-actions">
+          <Button>Guardar cambios</Button>
+          <Button variant={'secondary'}>Cancelar</Button>
+        </div>
+      )}
     </div>
   );
 

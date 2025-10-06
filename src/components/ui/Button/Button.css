@@ -2,7 +2,7 @@
   padding: 0.6em 1.2em;
   border: none;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 0.75rem;
   font-weight: 500;
   max-height: 40px;
   cursor: pointer;
@@ -20,11 +20,14 @@
 }
 
 .button--secondary {
-  background-color: var(--color-secondary);
+  background-color: var(--color-background);
+  border: 2px solid var(--color-primary-soft);
+  color: var(--color-text);
 }
 
 .button--secondary:hover:not(.button--disabled) {
   background-color: var(--color-secondary-hover);
+  color: var(--color-white);
 }
 
 .button--danger {
