@@ -21,7 +21,7 @@ function PatientCard({
       className={`patient-card patient-card--${type}`}
       onClick={newHandleClick}
     >
-      <Avatar src={img} alt={name} size={65} />
+      <Avatar src={img} alt={name} size={'3rem'} />
       <div className="patient-card__info">
         <div className="patient-card__name">{name}</div>
         <div className="patient-card__date">{date}</div>
