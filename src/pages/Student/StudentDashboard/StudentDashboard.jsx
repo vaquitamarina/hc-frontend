@@ -24,7 +24,7 @@ export function StudentDashboard() {
       <div>
         <div className="student-content__tittle">
           <h2>Adulto</h2>
-          <Button>Añadir</Button>
+          <Button onClick={handleAddHc}>Añadir</Button>
         </div>
         <AdultPatientList studentId={data.id}></AdultPatientList>
       </div>
