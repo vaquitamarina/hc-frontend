@@ -21,13 +21,15 @@ export function StudentDashboard() {
 
   return (
     <div className="student-content">
-      <div>
+      <div className="student-content__adult">
         <div className="student-content__tittle">
           <h2>Adulto</h2>
           <Button onClick={handleAddHc}>Añadir</Button>
         </div>
         <AdultPatientList studentId={data.id}></AdultPatientList>
       </div>
+      <div className="linea-vertical"></div>
+
       <div className="student-content__child">
         <div className="student-content__tittle">
           <h2>Niño</h2>
