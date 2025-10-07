@@ -1,7 +1,7 @@
 .student-content {
   display: flex;
   flex-direction: row;
-  gap: 70px;
+  gap: 2rem;
 }
 
 .student-content__tittle {
@@ -13,4 +13,8 @@
   flex-direction: row;
   gap: 60px;
   align-items: center;
+}
+
+.student-content__patient {
+  flex: 1;
 }

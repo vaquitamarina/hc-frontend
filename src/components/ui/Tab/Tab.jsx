@@ -4,13 +4,15 @@ import { NavLink } from 'react-router';
 import PropTypes from 'prop-types';
 function Tab({ children, isActive, name }) {
   return (
-    <NavLink>
-      <div className={`tab ${isActive ? 'tab--active' : ''}`}>
-        {name === 'cita' && <NotebookPen />}
-        {name === 'hc' && <ClipboardClock />}
-        <div>{children}</div>
-      </div>
-    </NavLink>
+    <div className="tab__container">
+      <NavLink>
+        <div className={`tab ${isActive ? 'tab--active' : ''}`}>
+          {name === 'cita' && <NotebookPen />}
+          {name === 'hc' && <ClipboardClock />}
+          <div>{children}</div>
+        </div>
+      </NavLink>
+    </div>
   );
 }
 

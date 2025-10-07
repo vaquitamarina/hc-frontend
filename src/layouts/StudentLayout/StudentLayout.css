@@ -27,6 +27,7 @@ main {
   position: absolute;
   display: flex;
   flex-direction: row;
+  width: 500px;
 }
 .student-layout__outlet {
   max-width: auto;

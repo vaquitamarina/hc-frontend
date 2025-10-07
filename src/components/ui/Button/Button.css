@@ -3,8 +3,6 @@
   border: none;
   border-radius: 8px;
   font-size: 0.75rem;
-  font-weight: 500;
-  max-height: 40px;
   cursor: pointer;
   transition: background-color 0.3s ease;
   color: #ffffff;

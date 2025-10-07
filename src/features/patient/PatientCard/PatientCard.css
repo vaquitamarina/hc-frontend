@@ -3,11 +3,8 @@
   border-radius: var(--radius-lg);
   display: flex;
   flex-direction: row;
-  max-width: 100%;
-  width: 100%;
   height: auto;
-  max-height: 183px;
-  padding: 0.75rem 1rem;
+  padding: 1rem 1rem;
   gap: 1rem;
   font-size: 1rem;
   transition: all 0.2s ease-in-out;
@@ -16,10 +13,10 @@
 .patient-card__info {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 1.5rem;
 }
 .patient-card__name {
-  max-width: 140px;
+  word-wrap: break-word;
 }
 
 .patient-card--soft {
