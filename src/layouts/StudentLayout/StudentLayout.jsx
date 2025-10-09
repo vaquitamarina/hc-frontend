@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router';
-import Header from '@cmlayout/Header/Header';
+import Header from '@cmlayout/Header';
 import './StudentLayout.css';
-import Tab from '@ui/Tab/Tab';
+import Tab from '@ui/Tab';
 
 function StudentLayout() {
   return (

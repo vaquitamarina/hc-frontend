@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import TextInput from '../../components/ui/TextInput/TextInput';
-import Button from '../../components/ui/Button/Button';
+import TextInput from '@ui/TextInput';
+import Button from '../../components/ui/Button';
 import { useLogin } from '@hooks/useAuth';
 function Login() {
   const [userCode, setUserCode] = useState('');

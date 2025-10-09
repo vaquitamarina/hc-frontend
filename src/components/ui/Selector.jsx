@@ -1,6 +1,113 @@
 import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import './Selector.css';
+import { tv } from 'tailwind-variants';
+
+// Definir variantes del Selector usando tailwind-variants
+const selectorContainer = tv({
+  base: ['my-4', 'font-[Alexandria]'],
+});
+
+const selectorWrapper = tv({
+  base: ['relative', 'w-full'],
+});
+
+const selectorPlaceholder = tv({
+  base: [
+    'flex',
+    'justify-between',
+    'items-center',
+    'px-4 py-3',
+    'border-2',
+    'rounded-[var(--radius-md)]',
+    'bg-[var(--color-white)]',
+    'cursor-pointer',
+    'shadow-[var(--shadow-md)]',
+    'transition-all',
+    'duration-200',
+    'ease-in-out',
+  ],
+  variants: {
+    isActive: {
+      true: 'border-[var(--color-primary)]',
+      false:
+        'border-[var(--color-primary-soft)] hover:border-[var(--color-primary)]',
+    },
+    disabled: {
+      true: [
+        'bg-[var(--color-secondary-soft)]',
+        'cursor-not-allowed',
+        'opacity-70',
+      ],
+    },
+  },
+  defaultVariants: {
+    isActive: false,
+    disabled: false,
+  },
+});
+
+const selectorIcon = tv({
+  base: [
+    'transition-transform',
+    'duration-200',
+    'ease-in-out',
+    'text-xl',
+    'text-[var(--color-primary)]',
+  ],
+  variants: {
+    isOpen: {
+      true: 'rotate-180',
+    },
+  },
+  defaultVariants: {
+    isOpen: false,
+  },
+});
+
+const selectorOptions = tv({
+  base: [
+    'absolute',
+    'top-full',
+    'left-0',
+    'right-0',
+    'mt-1',
+    'border-2',
+    'border-[var(--color-primary)]',
+    'rounded-[var(--radius-md)]',
+    'bg-[var(--color-white)]',
+    'z-10',
+    'list-none',
+    'p-0',
+    'max-h-[200px]',
+    'overflow-y-auto',
+    'shadow-[var(--shadow-lg)]',
+    'animate-[fadeIn_0.3s_ease-in-out]',
+  ],
+});
+
+const selectorOption = tv({
+  base: [
+    'px-4 py-3',
+    'cursor-pointer',
+    'transition-colors',
+    'duration-200',
+    'font-normal',
+    'text-[var(--color-text)]',
+  ],
+  variants: {
+    isSelected: {
+      true: [
+        'bg-[var(--color-secondary)]',
+        'font-bold',
+        'text-[var(--color-white)]',
+      ],
+      false: 'hover:bg-[var(--color-secondary-soft)]',
+    },
+  },
+  defaultVariants: {
+    isSelected: false,
+  },
+});
 
 const Selector = ({ options, onChange, defaultValue, disabled, className }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -64,10 +171,13 @@ const Selector = ({ options, onChange, defaultValue, disabled, className }) => {
   };
 
   return (
-    <div className={`selector-container ${className || ''}`} ref={selectorRef}>
-      <div className={`selector-wrapper ${disabled ? 'disabled' : ''}`}>
+    <div
+      className={`${selectorContainer()} ${className || ''}`}
+      ref={selectorRef}
+    >
+      <div className={selectorWrapper()}>
         <div
-          className={`selector-placeholder ${isOpen ? 'active' : ''} ${disabled ? 'disabled' : ''}`}
+          className={selectorPlaceholder({ isActive: isOpen, disabled })}
           onClick={toggleDropdown}
           onKeyDown={(e) =>
             (e.key === 'Enter' || e.key === ' ') && toggleDropdown()
@@ -78,11 +188,11 @@ const Selector = ({ options, onChange, defaultValue, disabled, className }) => {
           tabIndex={disabled ? -1 : 0}
         >
           <span>{getLabel()}</span>
-          <span className={`selector-icon ${isOpen ? 'open' : ''}`}>▼</span>
+          <span className={selectorIcon({ isOpen })}>▼</span>
         </div>
 
         {isOpen && !disabled && (
-          <ul className="selector-options" role="listbox">
+          <ul className={selectorOptions()} role="listbox">
             {options.map((option) => {
               const optionValue =
                 typeof option === 'object' ? option.value : option;
@@ -93,7 +203,7 @@ const Selector = ({ options, onChange, defaultValue, disabled, className }) => {
               return (
                 <li
                   key={optionValue}
-                  className={`selector-option ${isSelected ? 'selected' : ''}`}
+                  className={selectorOption({ isSelected })}
                   onClick={() => handleSelect(option)}
                   onKeyDown={(e) =>
                     (e.key === 'Enter' || e.key === ' ') && handleSelect(option)

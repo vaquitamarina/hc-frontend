@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router';
-import Header from '@cmlayout/Header/Header';
+import Header from '@cmlayout/Header';
 import './AuthLayout.css';
 
 function AuthLayout() {

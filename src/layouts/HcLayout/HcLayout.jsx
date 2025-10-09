@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router';
-import Header from '@cmlayout/Header/Header';
+import Header from '@cmlayout/Header';
 import './HcLayout.css';
-import Sidebar from '@cmlayout/Sidebar/Sidebar';
+import Sidebar from '@cmlayout/Sidebar';
 import { useParams } from 'react-router';
 import { CircleUserRound } from 'lucide-react';
 import { useCurrentPatientStore } from '@stores/usePatientStore';
