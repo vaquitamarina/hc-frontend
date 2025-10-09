@@ -1,10 +1,10 @@
-import './Avatar.css';
 import { CircleUserRound } from 'lucide-react';
 import PropTypes from 'prop-types';
+
 function Avatar({ src, alt, size = 50 }) {
   if (!src) {
     return (
-      <div>
+      <div className="inline-block">
         <CircleUserRound
           size={size}
           strokeWidth={1}
@@ -13,16 +13,17 @@ function Avatar({ src, alt, size = 50 }) {
       </div>
     );
   }
+
   return (
     <img
-      className="avatar"
+      className="rounded-full object-cover"
       src={src}
       alt={alt}
       style={{
         width: size,
         height: size,
       }}
-    ></img>
+    />
   );
 }
 
