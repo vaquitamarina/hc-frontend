@@ -1,5 +1,5 @@
 import './PatientCard.css';
-import Avatar from '@ui/Avatar/Avatar';
+import Avatar from '@ui/Avatar';
 import PropTypes from 'prop-types';
 import { NavLink } from 'react-router';
 import { useForm } from '@stores/useForm';

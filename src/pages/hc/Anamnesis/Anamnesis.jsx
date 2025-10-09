@@ -1,4 +1,4 @@
-import Card from '@ui/Card/Card';
+import Card from '@ui/Card';
 import './Anamnesis.css';
 
 export function Anamnesis() {

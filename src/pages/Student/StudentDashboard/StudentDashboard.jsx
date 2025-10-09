@@ -1,6 +1,6 @@
 import AdultPatientList from '@features/student/AdultPatientList/AdultPatientList';
 import { useCurrentUser } from '@hooks/useAuth';
-import Button from '@ui/Button/Button';
+import Button from '@ui/Button';
 import { useNavigate } from 'react-router';
 import './StudentDashboard.css';
 import { useCurrentPatientStore } from '@stores/usePatientStore';

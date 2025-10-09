@@ -2,7 +2,7 @@ import { useFiliation } from '@hooks/usePatients';
 import { useCurrentPatientStore } from '@stores/usePatientStore';
 import { useForm } from '@stores/useForm';
 import './Filiation.css';
-import Button from '@ui/Button/Button';
+import Button from '@ui/Button';
 
 export function Filiation() {
   const patient = useCurrentPatientStore((state) => state.currentPatient);
