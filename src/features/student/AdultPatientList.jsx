@@ -1,6 +1,5 @@
 import { usePatients } from '@hooks/usePatients';
-import PatientCard from '@features/patient/PatientCard/PatientCard';
-import './AdultPatientList.css';
+import PatientCard from '@features/patient/PatientCard';
 import PropTypes from 'prop-types';
 import { useCurrentPatientStore } from '@stores/usePatientStore';
 
@@ -17,16 +16,18 @@ function AdultPatientsList({ studentId }) {
 
   if (isLoading) {
     return (
-      <div className="adult-patients-list">
-        <p className="adult-patients-list__loading">Cargando pacientes...</p>
+      <div className="w-full">
+        <p className="p-8 text-center rounded-lg bg-[#f5f5f5] text-[#666]">
+          Cargando pacientes...
+        </p>
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="adult-patients-list">
-        <p className="adult-patients-list__error">
+      <div className="w-full">
+        <p className="p-8 text-center rounded-lg bg-[#ffebee] text-[#d32f2f]">
           Error al cargar pacientes: {error?.message || 'Error desconocido'}
         </p>
       </div>
@@ -35,8 +36,8 @@ function AdultPatientsList({ studentId }) {
 
   if (!patients || patients.length === 0) {
     return (
-      <div className="adult-patients-list">
-        <p className="adult-patients-list__empty">
+      <div className="w-full">
+        <p className="p-8 text-center rounded-lg bg-[#f5f5f5] text-[#666]">
           No hay pacientes disponibles
         </p>
       </div>
@@ -44,7 +45,7 @@ function AdultPatientsList({ studentId }) {
   }
 
   return (
-    <div className="adult-patients-list__container">
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-5">
       {patients.map((patient, index) => {
         const row = Math.floor(index / 2);
         const col = index % 2;

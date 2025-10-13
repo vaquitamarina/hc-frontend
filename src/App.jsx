@@ -1,12 +1,12 @@
 import { Routes, Route, Navigate } from 'react-router';
 import Login from './pages/Login/Login.jsx';
-import AuthLayout from './layouts/AuthLayout/AuthLayout.jsx';
+import AuthLayout from './layouts/AuthLayout.jsx';
 import ProtectedRoutes from './components/routes/ProtectedRoutes.jsx';
-import StudentLayout from './layouts/StudentLayout/StudentLayout.jsx';
+import StudentLayout from './layouts/StudentLayout.jsx';
 import Dashboard from './pages/Dashboard/Dashboard.jsx';
 import Anamnesis from './pages/hc/Anamnesis/Anamnesis.jsx';
 import Filiation from './pages/hc/Anamnesis/Filiacion/Filiacion.jsx';
-import HcLayout from './layouts/HcLayout/HcLayout.jsx';
+import HcLayout from './layouts/HcLayout.jsx';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 function App() {

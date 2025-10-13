@@ -1,4 +1,4 @@
-import AdultPatientList from '@features/student/AdultPatientList/AdultPatientList';
+import AdultPatientList from '@features/student/AdultPatientList';
 import { useCurrentUser } from '@hooks/useAuth';
 import Button from '@ui/Button';
 import { useNavigate } from 'react-router';

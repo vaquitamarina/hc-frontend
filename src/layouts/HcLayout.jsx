@@ -1,6 +1,5 @@
 import { Outlet } from 'react-router';
 import Header from '@cmlayout/Header';
-import './HcLayout.css';
 import Sidebar from '@cmlayout/Sidebar';
 import { useParams } from 'react-router';
 import { CircleUserRound } from 'lucide-react';
@@ -18,14 +17,14 @@ function HcLayout() {
     { path: '/dashboard', label: 'Evoluciones' },
   ];
   return (
-    <div className="hc-layout">
+    <div className="flex flex-col h-dvh overflow-auto">
       <Header />
 
-      <main>
-        <div className="hc-layout__content-wrapper">
+      <main className="flex-1 p-4 pt-8 bg-[var(--color-secondary)] flex overflow-hidden">
+        <div className="flex bg-[var(--color-background)] rounded-[var(--radius-lg)] flex-1">
           <Sidebar title="Adulto" items={menuItems} />
-          <div className="hc-layout__content">
-            <div className="hc__patient">
+          <div className="bg-[var(--color-background)] flex-1 rounded-[var(--radius-lg)] p-12 flex flex-col gap-10">
+            <div className="flex items-center gap-8 text-2xl max-w-[350px]">
               <div>
                 <CircleUserRound
                   size={84}
@@ -33,11 +32,9 @@ function HcLayout() {
                   style={{ color: 'var(--color-primary)' }}
                 />
               </div>
-              <h2 className="hc__title">
-                {patient?.name || 'Paciente ingresante'}
-              </h2>
+              <h2>{patient?.name || 'Paciente ingresante'}</h2>
             </div>
-            <div className="hc-layout__outlet">
+            <div>
               <Outlet></Outlet>
             </div>
           </div>

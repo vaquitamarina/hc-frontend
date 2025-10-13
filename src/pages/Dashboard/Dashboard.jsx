@@ -4,10 +4,10 @@ function Dashboard() {
   const { data } = useCurrentUser();
   const renderContent = () => {
     switch (data?.role) {
-      case 'student':
+      case 'estudiante':
         return <StudentDashboard />;
-      case 'teacher':
-        return <div>Teacher Content</div>;
+      case 'profesor':
+        return <div>Profesor Content</div>;
       case 'admin':
         return <div>Admin Content</div>;
     }
