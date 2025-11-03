@@ -1,54 +1,22 @@
 import { useFiliation } from '@hooks/usePatients';
-import { useCurrentPatientStore } from '@stores/usePatientStore';
 import { useForm } from '@stores/useForm';
-import './Filiation.css';
+import FormField from '@ui/FormField/FormField';
 import Button from '@ui/Button';
+import { usePatientByHistory } from '@hooks/useHistoria';
+import { useParams } from 'react-router';
+import './Filiacion.css';
 
 export function Filiation() {
-  const patient = useCurrentPatientStore((state) => state.currentPatient);
-  const { data: filiation } = useFiliation(patient?.idHistory);
+  const { id } = useParams();
+  const { data: patient } = usePatientByHistory(id);
+  const { data: filiation } = useFiliation(id);
   const isFormMode = useForm((state) => state.isFormMode);
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-PE', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
-  };
-
-  const Field = ({ label, value, name, type = 'text' }) => {
-    if (isFormMode) {
-      return (
-        <div className="filiation__form-field">
-          <label className="filiation__form-label">{label}:</label>
-          <input className="filiation__form-input" type={type} name={name} />
-        </div>
-      );
-    }
-    return (
-      <div className="filiation__info__item">
-        {label}: {type === 'date' ? formatDate(value) : value || '-'}
-      </div>
-    );
-  };
-
-  const FieldAlt = ({ label, value, name, type = 'text' }) => {
-    if (isFormMode) {
-      return (
-        <div className="filiation__form-field">
-          <label className="filiation__form-label">{label}:</label>
-          <input className="filiation__form-input" type={type} name={name} />
-        </div>
-      );
-    }
-    return (
-      <div className="filiation__info__item--alt">
-        {label}: {type === 'date' ? formatDate(value) : value || '-'}
-      </div>
-    );
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    console.log('Form data submitted:', Object.fromEntries(formData));
+    alert('Funcionalidad de guardado no implementada aún.');
   };
 
   const content = (
@@ -57,107 +25,185 @@ export function Filiation() {
         <div className="filiation__info__header">
           {isFormMode ? 'Formulario de Filiación' : 'Filiación'}
         </div>
-        <Field label="Nombre y Apellido" value={patient?.name} name="nombre" />
 
-        <div className="filiation__info__container-1">
-          <FieldAlt label="Edad" value={patient?.age} name="edad" />
-          <Field label="Sexo" value={patient?.gender} name="sexo" />
-          <FieldAlt label="Raza" value={filiation?.raza} name="raza" />
+        {/* Nombre y Apellido */}
+        <FormField
+          label="Nombre y Apellido"
+          value={
+            patient?.nombre && patient?.apellido
+              ? `${patient.nombre} ${patient.apellido}`
+              : '-'
+          }
+          name="nombre_apellido"
+          isFormMode={isFormMode}
+        />
+
+        {/* Edad, Sexo, Raza */}
+        <div className="filiation__info__container">
+          <FormField
+            label="Edad"
+            value={patient?.edad}
+            name="edad"
+            variant="alt"
+            flex="1"
+            isFormMode={isFormMode}
+          />
+          <FormField
+            label="Sexo"
+            value={patient?.sexo}
+            name="sexo"
+            flex="1"
+            isFormMode={isFormMode}
+          />
+          <FormField
+            label="Raza"
+            value={filiation?.raza}
+            name="raza"
+            variant="alt"
+            flex="1"
+            isFormMode={isFormMode}
+          />
         </div>
 
-        <div className="filiation__info__container-2">
-          <Field
-            label="Fecha de nacimiento"
+        {/* Fecha Nacimiento, Lugar */}
+        <div className="filiation__info__container">
+          <FormField
+            label="Fecha de Nacimiento"
             value={filiation?.fecha_nacimiento}
             name="fecha_nacimiento"
             type="date"
+            flex="1"
+            isFormMode={isFormMode}
           />
-          <FieldAlt
-            label="Lugar de nacimiento"
+          <FormField
+            label="Lugar"
             value={filiation?.lugar}
             name="lugar"
+            variant="alt"
+            flex="1"
+            isFormMode={isFormMode}
           />
         </div>
 
-        <div className="filiation__info_container-2">
-          <Field
-            label="Estado civil"
+        {/* Estado Civil, Nombre Cónyuge */}
+        <div className="filiation__info__container">
+          <FormField
+            label="Estado Civil"
             value={filiation?.estado_civil}
             name="estado_civil"
+            flex="1"
+            isFormMode={isFormMode}
           />
-          <FieldAlt
-            label="Nombre del cónyuge"
+          <FormField
+            label="Nombre del Cónyuge"
             value={filiation?.nombre_conyuge}
             name="nombre_conyuge"
+            variant="alt"
+            flex="3"
+            isFormMode={isFormMode}
           />
         </div>
 
-        <div className="filiation__info__container-2">
-          <Field
+        {/* Ocupación, Lugar Procedencia */}
+        <div className="filiation__info__container">
+          <FormField
             label="Ocupación"
             value={filiation?.ocupacion}
             name="ocupacion"
+            flex="1"
+            isFormMode={isFormMode}
           />
-          <FieldAlt
-            label="Lugar de procedencia"
+          <FormField
+            label="Lugar de Procedencia"
             value={filiation?.lugar_procedencia}
             name="lugar_procedencia"
+            variant="alt"
+            flex="1"
+            isFormMode={isFormMode}
           />
         </div>
 
-        <Field
-          label="Tiempo de residencia en Tacna"
-          value={filiation?.tiempo_residencia_tacna}
-          name="tiempo_residencia_tacna"
+        {/* Dirección */}
+        <FormField
+          label="Dirección"
+          value={filiation?.direccion}
+          name="direccion"
+          isFormMode={isFormMode}
         />
 
-        <div className="filiation__info__container-3">
-          <Field
-            label="Dirección"
-            value={filiation?.direccion}
-            name="direccion"
+        {/* Tiempo Residencia, Teléfono */}
+        <div className="filiation__info__container">
+          <FormField
+            label="Tiempo de Residencia en Tacna"
+            value={filiation?.tiempo_residencia_tacna}
+            name="tiempo_residencia_tacna"
+            flex="3"
+            isFormMode={isFormMode}
           />
-          <FieldAlt label="Teléfono" value={patient?.phone} name="telefono" />
+          <FormField
+            label="Teléfono"
+            value={patient?.telefono}
+            name="telefono"
+            type="tel"
+            variant="alt"
+            flex="1"
+            isFormMode={isFormMode}
+          />
         </div>
 
-        <div className="filiation__info__container-3">
-          <Field
-            label="Última visita al dentista"
+        {/* Última Visita Dentista, Motivo */}
+        <div className="filiation__info__container">
+          <FormField
+            label="Última Visita al Dentista"
             value={filiation?.ultima_visita_dentista}
             name="ultima_visita_dentista"
             type="date"
+            flex="1"
+            isFormMode={isFormMode}
           />
-          <FieldAlt
+          <FormField
             label="Motivo"
             value={filiation?.motivo_visita_dentista}
             name="motivo_visita_dentista"
+            variant="alt"
+            flex="1"
+            isFormMode={isFormMode}
           />
         </div>
 
-        <div className="filiation__info__container-3">
-          <Field
-            label="Última visita al médico"
+        {/* Última Visita Médico, Motivo */}
+        <div className="filiation__info__container">
+          <FormField
+            label="Última Visita al Médico"
             value={filiation?.ultima_visita_medico}
             name="ultima_visita_medico"
             type="date"
+            flex="1"
+            isFormMode={isFormMode}
           />
-          <FieldAlt
+          <FormField
             label="Motivo"
             value={filiation?.motivo_visita_medico}
             name="motivo_visita_medico"
+            variant="alt"
+            flex="1"
+            isFormMode={isFormMode}
           />
         </div>
       </div>
+
       {isFormMode && (
         <div className="filiation__form-actions">
-          <Button>Guardar cambios</Button>
-          <Button variant={'secondary'}>Cancelar</Button>
+          <Button type="submit">Guardar cambios</Button>
+          <Button variant="secondary" type="button">
+            Cancelar
+          </Button>
         </div>
       )}
     </div>
   );
 
-  return isFormMode ? <form>{content}</form> : content;
+  return isFormMode ? <form onSubmit={handleSubmit}>{content}</form> : content;
 }
 
 export default Filiation;

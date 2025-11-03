@@ -3,11 +3,11 @@ import Header from '@cmlayout/Header';
 import Sidebar from '@cmlayout/Sidebar';
 import { useParams } from 'react-router';
 import { CircleUserRound } from 'lucide-react';
-import { useCurrentPatientStore } from '@stores/usePatientStore';
+import { usePatientByHistory } from '@hooks/useHistoria';
 
 function HcLayout() {
   const { id } = useParams();
-  const patient = useCurrentPatientStore((state) => state.currentPatient);
+  const { data: patient } = usePatientByHistory(id);
   const menuItems = [
     { path: `/historia/${id}/anamnesis`, label: 'Anamnesis' },
     { path: `/dashboard`, label: 'Examen Fisico' },
@@ -32,7 +32,11 @@ function HcLayout() {
                   style={{ color: 'var(--color-primary)' }}
                 />
               </div>
-              <h2>{patient?.name || 'Paciente ingresante'}</h2>
+              <h2>
+                {patient?.nombre && patient?.apellido
+                  ? `${patient.nombre} ${patient.apellido}`
+                  : 'Paciente ingresante'}
+              </h2>
             </div>
             <div>
               <Outlet></Outlet>

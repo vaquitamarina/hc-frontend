@@ -1,22 +1,25 @@
 import AdultPatientList from '@features/student/AdultPatientList';
 import { useCurrentUser } from '@hooks/useAuth';
+import { useCreateDraft } from '@hooks/useHistoria';
 import Button from '@ui/Button';
 import { useNavigate } from 'react-router';
 import './StudentDashboard.css';
-import { useCurrentPatientStore } from '@stores/usePatientStore';
 import { useForm } from '@stores/useForm';
-//solo para la prueba
-//
+
 export function StudentDashboard() {
   const { data } = useCurrentUser();
   const navigate = useNavigate();
-  const { removeCurrentPatient } = useCurrentPatientStore();
   const { setFormMode } = useForm();
+  const createDraft = useCreateDraft();
 
-  const handleAddHc = () => {
-    removeCurrentPatient();
-    setFormMode();
-    navigate('/historia/0/anamnesis/');
+  const handleAddHc = async () => {
+    try {
+      setFormMode();
+      const res = await createDraft.mutateAsync();
+      navigate(`/historia/${res.id_historia}/anamnesis/`);
+    } catch (error) {
+      console.error('Error al crear borrador:', error);
+    }
   };
 
   return (

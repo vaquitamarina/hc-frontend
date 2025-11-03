@@ -1,11 +1,9 @@
 import { usePatients } from '@hooks/usePatients';
 import PatientCard from '@features/patient/PatientCard';
 import PropTypes from 'prop-types';
-import { useCurrentPatientStore } from '@stores/usePatientStore';
 
 function AdultPatientsList({ studentId }) {
   const { data: patients, isLoading, isError, error } = usePatients(studentId);
-  const { setCurrentPatient } = useCurrentPatientStore();
   const formatDate = (isoDate) => {
     const date = new Date(isoDate);
     const day = String(date.getDate()).padStart(2, '0');
@@ -58,12 +56,11 @@ function AdultPatientsList({ studentId }) {
 
         return (
           <PatientCard
-            key={patient.idPatient}
-            name={patient.name}
-            date={formatDate(patient.lastUpdate)}
+            key={patient.id_paciente}
+            name={patient.nombre_completo}
+            date={formatDate(patient.ultima_modificacion)}
             type={type}
-            idHistory={patient.idHistory}
-            handleClick={() => setCurrentPatient(patient)}
+            idHistory={patient.id_historia}
           />
         );
       })}

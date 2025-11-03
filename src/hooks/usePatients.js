@@ -1,6 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchPatients } from '@services/fetchPatients.js';
 import { fetchFiliation } from '@services/fetchFiliation';
+import { fetchCreatePatient } from '@services/fetchPatient';
 
 export const usePatients = (studentId) => {
   return useQuery({
@@ -23,3 +24,18 @@ export function useFiliation(historyId) {
 }
 
 export function useMutateFiliation() {}
+
+/**
+ * Hook para crear un nuevo paciente
+ */
+export function useCreatePatient() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: fetchCreatePatient,
+    onSuccess: () => {
+      // Invalidar la lista de pacientes para refrescar
+      queryClient.invalidateQueries({ queryKey: ['patients'] });
+    },
+  });
+}
