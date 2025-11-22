@@ -1,5 +1,7 @@
 import { useCurrentUser } from '@hooks/useAuth';
 import StudentDashboard from '@pages/Student/StudentDashboard/StudentDashboard';
+import AdminDashboard from '@pages/Admin/AdminDashboard';
+
 function Dashboard() {
   const { data } = useCurrentUser();
   const renderContent = () => {
@@ -9,7 +11,9 @@ function Dashboard() {
       case 'profesor':
         return <div>Profesor Content</div>;
       case 'admin':
-        return <div>Admin Content</div>;
+        return <AdminDashboard />;
+      default:
+        return <div />;
     }
   };
   return <div>{renderContent()}</div>;
