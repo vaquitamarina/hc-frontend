@@ -14,3 +14,22 @@ export const fetchFiliation = async (historyId) => {
   }
   return response.json();
 };
+
+export const fetchUpdateFiliation = async ({ idHistory, data }) => {
+  const response = await fetch(
+    `${import.meta.env.VITE_API_URL}/hc/${idHistory}/filiacion`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+      credentials: 'include',
+    }
+  );
+
+  if (!response.ok) {
+    const errBody = await response.json().catch(() => null);
+    throw new Error(errBody?.error || `Error: ${response.status}`);
+  }
+
+  return response.json();
+};

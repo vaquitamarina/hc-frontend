@@ -8,23 +8,28 @@ import { usePatientByHistory } from '@hooks/useHistoria';
 function HcLayout() {
   const { id } = useParams();
   const { data: patient } = usePatientByHistory(id);
+
   const menuItems = [
     { path: `/historia/${id}/anamnesis`, label: 'Anamnesis' },
-    { path: `/dashboard`, label: 'Examen Fisico' },
+    { path: `/historia/${id}/examen-fisico`, label: 'Examen Fisico' },
     { path: `/dashboard`, label: 'Diagnosticos presuntivos' },
     { path: '/dashboard', label: 'Derivado a clinicas' },
     { path: '/dashboard', label: 'Diagnostico en clinicas' },
     { path: '/dashboard', label: 'Evoluciones' },
   ];
+
   return (
-    <div className="flex flex-col h-dvh overflow-auto">
+    <div className="flex flex-col h-dvh overflow-hidden">
       <Header />
 
-      <main className="flex-1 p-4 pt-8 bg-[var(--color-secondary)] flex overflow-hidden">
-        <div className="flex bg-[var(--color-background)] rounded-[var(--radius-lg)] flex-1">
+      {/* min-h-0 es vital para que el flex anidado permita scroll */}
+      <main className="flex-1 p-4 pt-8 bg-[var(--color-secondary)] flex min-h-0">
+        <div className="flex bg-[var(--color-background)] rounded-[var(--radius-lg)] flex-1 overflow-hidden">
           <Sidebar title="Adulto" items={menuItems} />
-          <div className="bg-[var(--color-background)] flex-1 rounded-[var(--radius-lg)] p-12 flex flex-col gap-10">
-            <div className="flex items-center gap-8 text-2xl max-w-[350px]">
+
+          {/* Habilitamos scroll SOLO en esta sección derecha */}
+          <div className="flex-1 p-12 flex flex-col gap-10 overflow-y-auto h-full">
+            <div className="flex items-center gap-8 text-2xl max-w-[350px] flex-shrink-0">
               <div>
                 <CircleUserRound
                   size={84}
@@ -35,11 +40,13 @@ function HcLayout() {
               <h2>
                 {patient?.nombre && patient?.apellido
                   ? `${patient.nombre} ${patient.apellido}`
-                  : 'Paciente ingresante'}
+                  : 'Paciente Nuevo'}
               </h2>
             </div>
-            <div>
-              <Outlet></Outlet>
+
+            {/* Padding bottom extra para proteger el botón de guardar al final */}
+            <div className="pb-20">
+              <Outlet />
             </div>
           </div>
         </div>

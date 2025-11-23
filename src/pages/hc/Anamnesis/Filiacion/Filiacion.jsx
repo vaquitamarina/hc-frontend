@@ -1,82 +1,200 @@
-import { useFiliation } from '@hooks/usePatients';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+  useFiliation,
+  useMutateFiliation,
+  useCreatePatient,
+  useUpdatePatient,
+} from '@hooks/usePatients';
+import { usePatientByHistory, useAssignPatient } from '@hooks/useHistoria';
 import { useForm } from '@stores/useForm';
 import FormField from '@ui/FormField/FormField';
 import Button from '@ui/Button';
-import { usePatientByHistory } from '@hooks/useHistoria';
-import { useParams } from 'react-router';
 import './Filiacion.css';
 
 export function Filiation() {
-  const { id } = useParams();
-  const { data: patient } = usePatientByHistory(id);
-  const { data: filiation } = useFiliation(id);
-  const isFormMode = useForm((state) => state.isFormMode);
+  const { id } = useParams(); // ID de la Historia (draft o real)
+  const queryClient = useQueryClient();
 
-  const handleSubmit = (e) => {
+  // 1. Obtener datos (si existen)
+  const { data: patient, isLoading: loadingPatient } = usePatientByHistory(id);
+  const { data: filiation } = useFiliation(id);
+
+  // 2. Hooks de Acción
+  const createPatientMutation = useCreatePatient();
+  const updatePatientMutation = useUpdatePatient(); // <--- Nuevo hook
+  const assignPatientMutation = useAssignPatient();
+  const saveFiliationMutation = useMutateFiliation();
+
+  const { isFormMode, setViewMode, setFormMode } = useForm();
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Si entramos y la historia no tiene paciente (es un borrador nuevo),
+  // forzamos el modo edición automáticamente para que el usuario empiece a escribir.
+  useEffect(() => {
+    if (!loadingPatient && !patient && !isFormMode) {
+      setFormMode();
+    }
+  }, [patient, loadingPatient, isFormMode, setFormMode]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSaving(true);
+
     const formData = new FormData(e.target);
-    console.log('Form data submitted:', Object.fromEntries(formData));
-    alert('Funcionalidad de guardado no implementada aún.');
+    const data = Object.fromEntries(formData);
+
+    try {
+      let currentPatientId = patient?.id_paciente;
+
+      // === PASO A: GESTIÓN DEL PACIENTE ===
+      if (!currentPatientId) {
+        // CASO 1: PACIENTE NUEVO (La historia estaba vacía)
+        // 1. Crear Paciente en BD
+        const newPatient = await createPatientMutation.mutateAsync({
+          nombre: data.nombre,
+          apellido: data.apellido,
+          dni: data.dni,
+          fechaNacimiento: data.fechaNacimiento,
+          sexo: data.sexo,
+          telefono: data.telefono,
+          email: data.email,
+        });
+        currentPatientId = newPatient.id;
+
+        // 2. Asignar este paciente nuevo a la historia (draft)
+        await assignPatientMutation.mutateAsync({
+          idHistory: id,
+          idPatient: currentPatientId,
+        });
+      } else {
+        // CASO 2: PACIENTE EXISTENTE (Actualización)
+        // Si el usuario corrigió el nombre o teléfono, actualizamos
+        await updatePatientMutation.mutateAsync({
+          id: currentPatientId,
+          data: {
+            nombre: data.nombre,
+            apellido: data.apellido,
+            telefono: data.telefono,
+            email: data.email,
+            // Nota: Por seguridad y consistencia, DNI y Sexo suelen ser inmutables
+            // o requerir procesos especiales, así que no los enviamos al update aquí.
+          },
+        });
+      }
+
+      // === PASO B: GESTIÓN DE FILIACIÓN ===
+      // Guardar los datos específicos de la ficha clínica
+      await saveFiliationMutation.mutateAsync({
+        idHistory: id,
+        data: data,
+      });
+
+      // === FINALIZAR ===
+      // Refrescar los datos en pantalla
+      await queryClient.invalidateQueries({
+        queryKey: ['patient-by-history', id],
+      });
+      // Salir del modo edición
+      setViewMode();
+    } catch (error) {
+      console.error('Error al guardar:', error);
+      alert('Error al guardar: ' + (error.message || 'Verifique los datos'));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
+  // Renderizado del formulario
   const content = (
     <div className="filiation">
       <div className="filiation__info">
         <div className="filiation__info__header">
-          {isFormMode ? 'Formulario de Filiación' : 'Filiación'}
+          {isFormMode ? 'Ficha de Filiación (Edición)' : 'Ficha de Filiación'}
         </div>
 
-        {/* Nombre y Apellido */}
-        <FormField
-          label="Nombre y Apellido"
-          value={
-            patient?.nombre && patient?.apellido
-              ? `${patient.nombre} ${patient.apellido}`
-              : '-'
-          }
-          name="nombre_apellido"
-          isFormMode={isFormMode}
-        />
+        {/* --- SECCIÓN 1: DATOS DEL PACIENTE (Tabla Paciente) --- */}
+        <h3 className="text-sm font-bold text-gray-500 uppercase mb-4 mt-2 border-b pb-2">
+          Identificación del Paciente
+        </h3>
 
-        {/* Edad, Sexo, Raza */}
         <div className="filiation__info__container">
           <FormField
-            label="Edad"
-            value={patient?.edad}
-            name="edad"
-            variant="alt"
+            label="Nombre"
+            name="nombre"
+            value={patient?.nombre}
+            isFormMode={isFormMode} // Ahora sí editable
+            required
             flex="1"
-            isFormMode={isFormMode}
+          />
+          <FormField
+            label="Apellido"
+            name="apellido"
+            value={patient?.apellido}
+            isFormMode={isFormMode} // Ahora sí editable
+            required
+            flex="1"
+          />
+          <FormField
+            label="DNI"
+            name="dni"
+            value={patient?.dni}
+            // El DNI solo es editable si es un paciente NUEVO (para evitar errores en pacientes históricos)
+            isFormMode={isFormMode && !patient}
+            required
+            flex="1"
+            placeholder={patient ? 'No editable' : '8 dígitos'}
+            title={patient ? 'El DNI no se puede cambiar una vez creado' : ''}
+          />
+        </div>
+
+        <div className="filiation__info__container">
+          <FormField
+            label="Fecha Nacimiento"
+            name="fechaNacimiento"
+            value={patient?.fecha_nacimiento}
+            type="date"
+            // Fecha nac. y sexo definen la historia clínica, mejor bloquearlos si ya existen
+            isFormMode={isFormMode && !patient}
+            required
+            flex="1"
           />
           <FormField
             label="Sexo"
-            value={patient?.sexo}
             name="sexo"
+            value={patient?.sexo}
+            placeholder="Masculino/Femenino"
+            isFormMode={isFormMode && !patient}
+            required
             flex="1"
-            isFormMode={isFormMode}
           />
+          <FormField
+            label="Teléfono"
+            name="telefono"
+            value={patient?.telefono}
+            type="tel"
+            isFormMode={isFormMode} // Teléfono siempre editable
+            variant="alt"
+            flex="1"
+          />
+        </div>
+
+        {/* --- SECCIÓN 2: DATOS DE FILIACIÓN (Tabla Filiacion) --- */}
+        <h3 className="text-sm font-bold text-gray-500 uppercase mb-4 mt-6 border-b pb-2">
+          Datos Sociodemográficos
+        </h3>
+
+        <div className="filiation__info__container">
           <FormField
             label="Raza"
             value={filiation?.raza}
             name="raza"
-            variant="alt"
-            flex="1"
-            isFormMode={isFormMode}
-          />
-        </div>
-
-        {/* Fecha Nacimiento, Lugar */}
-        <div className="filiation__info__container">
-          <FormField
-            label="Fecha de Nacimiento"
-            value={filiation?.fecha_nacimiento}
-            name="fecha_nacimiento"
-            type="date"
             flex="1"
             isFormMode={isFormMode}
           />
           <FormField
-            label="Lugar"
+            label="Lugar Nacimiento"
             value={filiation?.lugar}
             name="lugar"
             variant="alt"
@@ -85,106 +203,112 @@ export function Filiation() {
           />
         </div>
 
-        {/* Estado Civil, Nombre Cónyuge */}
         <div className="filiation__info__container">
           <FormField
             label="Estado Civil"
             value={filiation?.estado_civil}
-            name="estado_civil"
+            name="estadoCivil"
+            placeholder="Ej: Soltero"
             flex="1"
             isFormMode={isFormMode}
           />
           <FormField
-            label="Nombre del Cónyuge"
+            label="Cónyuge"
             value={filiation?.nombre_conyuge}
-            name="nombre_conyuge"
+            name="nombreConyuge"
             variant="alt"
-            flex="3"
+            flex="2"
             isFormMode={isFormMode}
           />
         </div>
 
-        {/* Ocupación, Lugar Procedencia */}
         <div className="filiation__info__container">
+          <FormField
+            label="Grado Instrucción"
+            value={filiation?.grado_instruccion}
+            name="gradoInstruccion"
+            placeholder="Ej: Secundaria completa"
+            flex="1"
+            isFormMode={isFormMode}
+          />
           <FormField
             label="Ocupación"
             value={filiation?.ocupacion}
             name="ocupacion"
+            placeholder="Ej: Estudiante"
+            variant="alt"
             flex="1"
             isFormMode={isFormMode}
           />
+        </div>
+
+        <div className="filiation__info__container">
           <FormField
-            label="Lugar de Procedencia"
+            label="Dirección"
+            value={filiation?.direccion}
+            name="direccion"
+            flex="2"
+            isFormMode={isFormMode}
+          />
+          <FormField
+            label="Lugar Procedencia"
             value={filiation?.lugar_procedencia}
-            name="lugar_procedencia"
+            name="lugarProcedencia"
             variant="alt"
             flex="1"
             isFormMode={isFormMode}
           />
         </div>
 
-        {/* Dirección */}
-        <FormField
-          label="Dirección"
-          value={filiation?.direccion}
-          name="direccion"
-          isFormMode={isFormMode}
-        />
-
-        {/* Tiempo Residencia, Teléfono */}
         <div className="filiation__info__container">
           <FormField
-            label="Tiempo de Residencia en Tacna"
+            label="Tiempo en Tacna"
             value={filiation?.tiempo_residencia_tacna}
-            name="tiempo_residencia_tacna"
-            flex="3"
+            name="tiempoResidencia"
+            flex="1"
             isFormMode={isFormMode}
           />
           <FormField
-            label="Teléfono"
-            value={patient?.telefono}
-            name="telefono"
-            type="tel"
+            label="Acompañante"
+            value={filiation?.acompaniante}
+            name="acompaniante"
             variant="alt"
             flex="1"
             isFormMode={isFormMode}
           />
         </div>
 
-        {/* Última Visita Dentista, Motivo */}
         <div className="filiation__info__container">
           <FormField
-            label="Última Visita al Dentista"
+            label="Contacto Emergencia"
+            value={filiation?.contacto_emergencia}
+            name="contactoEmergencia"
+            flex="2"
+            isFormMode={isFormMode}
+          />
+          <FormField
+            label="Teléfono Emergencia"
+            value={filiation?.telefono_emergencia}
+            name="telefonoEmergencia"
+            variant="alt"
+            flex="1"
+            isFormMode={isFormMode}
+          />
+        </div>
+
+        <div className="filiation__info__container">
+          <FormField
+            label="Última Visita Dentista"
             value={filiation?.ultima_visita_dentista}
-            name="ultima_visita_dentista"
+            name="ultimaVisitaDentista"
             type="date"
             flex="1"
             isFormMode={isFormMode}
           />
           <FormField
-            label="Motivo"
+            label="Motivo Visita"
             value={filiation?.motivo_visita_dentista}
-            name="motivo_visita_dentista"
-            variant="alt"
-            flex="1"
-            isFormMode={isFormMode}
-          />
-        </div>
-
-        {/* Última Visita Médico, Motivo */}
-        <div className="filiation__info__container">
-          <FormField
-            label="Última Visita al Médico"
-            value={filiation?.ultima_visita_medico}
-            name="ultima_visita_medico"
-            type="date"
-            flex="1"
-            isFormMode={isFormMode}
-          />
-          <FormField
-            label="Motivo"
-            value={filiation?.motivo_visita_medico}
-            name="motivo_visita_medico"
+            name="motivoVisitaDentista"
             variant="alt"
             flex="1"
             isFormMode={isFormMode}
@@ -193,9 +317,17 @@ export function Filiation() {
       </div>
 
       {isFormMode && (
-        <div className="filiation__form-actions">
-          <Button type="submit">Guardar cambios</Button>
-          <Button variant="secondary" type="button">
+        <div className="filiation__form-actions p-4 flex justify-end gap-4 bg-white mt-4 rounded-[var(--radius-lg)] shadow-md">
+          <Button type="submit" disabled={isSaving}>
+            {isSaving ? 'Procesando...' : 'Guardar Todo'}
+          </Button>
+
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={() => setViewMode()}
+            disabled={isSaving}
+          >
             Cancelar
           </Button>
         </div>
@@ -203,7 +335,13 @@ export function Filiation() {
     </div>
   );
 
-  return isFormMode ? <form onSubmit={handleSubmit}>{content}</form> : content;
+  return isFormMode ? (
+    <form onSubmit={handleSubmit} className="w-full">
+      {content}
+    </form>
+  ) : (
+    content
+  );
 }
 
 export default Filiation;
