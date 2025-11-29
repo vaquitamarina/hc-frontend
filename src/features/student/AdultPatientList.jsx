@@ -54,11 +54,17 @@ function AdultPatientsList({ studentId }) {
             ? 'soft'
             : 'default';
 
+        // Mostrar 'Sin asignar' si no hay datos de paciente
+        const nombre = patient.nombre ? patient.nombre : 'Sin asignar';
+        const fecha = patient.fecha_nacimiento
+          ? formatDate(patient.fecha_nacimiento)
+          : 'Sin asignar';
+
         return (
           <PatientCard
-            key={patient.id_paciente}
-            name={patient.nombre_completo}
-            date={formatDate(patient.ultima_modificacion)}
+            key={patient.id_historia}
+            name={nombre}
+            date={fecha}
             type={type}
             idHistory={patient.id_historia}
           />
