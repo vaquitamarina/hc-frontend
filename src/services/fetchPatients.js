@@ -1,6 +1,6 @@
 export const fetchAdultPatients = async (studentId) => {
   const response = await fetch(
-    `${import.meta.env.VITE_API_URL}/students/${studentId}/patients/adult`,
+    `${import.meta.env.VITE_API_URL}/hc/student/${studentId}/adult-historias`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -9,7 +9,6 @@ export const fetchAdultPatients = async (studentId) => {
   );
   if (!response.ok) {
     const errBody = await response.json().catch(() => null);
-    console.error('Auth error:', errBody);
     throw new Error(errBody?.message || `Error: ${response.status}`);
   }
   return response.json();
