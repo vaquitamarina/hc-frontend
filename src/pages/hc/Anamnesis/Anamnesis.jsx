@@ -4,15 +4,8 @@ import './Anamnesis.css';
 export function Anamnesis() {
   const data = [
     { title: 'Filiacion', path: `filiacion` },
-    {
-      title: 'Motivo de consulta',
-      path: ``,
-    },
-    {
-      title: 'Enfermedad actual',
-      path: ``,
-    },
-    { title: 'Antecedente', path: `` },
+    { title: 'Motivo de Consulta', path: `motivo-consulta` },
+    { title: 'Enfermedad Actual', path: `enfermedad-actual` },
   ];
 
   return (

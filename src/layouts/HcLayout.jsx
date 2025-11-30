@@ -1,13 +1,22 @@
-import { Outlet } from 'react-router';
+import { Outlet, useParams, useLocation, useSearchParams } from 'react-router';
 import Header from '@cmlayout/Header';
 import Sidebar from '@cmlayout/Sidebar';
-import { useParams } from 'react-router';
 import { CircleUserRound } from 'lucide-react';
 import { usePatientByHistory } from '@hooks/useHistoria';
 
 function HcLayout() {
   const { id } = useParams();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { data: patient } = usePatientByHistory(id);
+
+  // Determine whether this view was opened as a newly created draft
+  // The creator of a draft can either navigate with `?new=1` or pass
+  // `state: { createdDraft: true }` so we can show "Paciente Nuevo" only
+  // in that case. Otherwise, if there's no patient, show "Paciente No asignado".
+  const isNewDraft =
+    searchParams.get('new') === '1' ||
+    (location.state && location.state.createdDraft === true);
 
   const menuItems = [
     { path: `/historia/${id}/anamnesis`, label: 'Anamnesis' },
@@ -38,9 +47,11 @@ function HcLayout() {
                 />
               </div>
               <h2>
-                {patient?.nombre && patient?.apellido
-                  ? `${patient.nombre} ${patient.apellido}`
-                  : 'Paciente Nuevo'}
+                {patient?.nombre || patient?.apellido
+                  ? `${patient?.nombre ?? ''} ${patient?.apellido ?? ''}`.trim()
+                  : isNewDraft
+                    ? 'Paciente Nuevo'
+                    : 'Paciente No asignado'}
               </h2>
             </div>
 

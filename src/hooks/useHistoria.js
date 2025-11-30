@@ -3,7 +3,9 @@ import {
   fetchCreateDraft,
   fetchAssignPatient,
   fetchPatientByHistory,
+  registerHc,
 } from '@services/fetchHistoria';
+import { useHistoriaStore } from '@stores/historiaStore';
 
 /**
  * Hook para crear o obtener borrador de historia clínica
@@ -11,10 +13,14 @@ import {
  */
 export function useCreateDraft() {
   const queryClient = useQueryClient();
+  const setDraftHistoriaId = useHistoriaStore((s) => s.setDraftHistoriaId);
 
   return useMutation({
     mutationFn: fetchCreateDraft,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Guardar el id del borrador en el store para que la UI lo use
+      const id = data?.id_historia ?? data?.id ?? null;
+      if (id) setDraftHistoriaId(id);
       // Invalidar queries relacionadas si es necesario
       queryClient.invalidateQueries({ queryKey: ['historias'] });
     },
@@ -51,6 +57,43 @@ export function usePatientByHistory(historyId) {
     enabled: !!historyId, // Solo ejecutar si hay historyId
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    retry: 1, // Reintentar solo una vez en caso de error
+    retry: false, // No reintentar en 404
+    throwOnError: false, // No lanzar error en 404
+  });
+}
+
+/**
+ * Hook para crear una historia clínica
+ * Llama al servicio registerHc
+ */
+export function useCreateHistoriaClinica() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (studentId) => registerHc(studentId),
+    onSuccess: () => {
+      // Puedes invalidar queries relacionadas aquí si es necesario
+      queryClient.invalidateQueries({ queryKey: ['historias'] });
+      alert('Historia Clínica creada con éxito');
+    },
+    onError: (error) => {
+      alert(`Error al crear Historia Clínica: ${error.message}`);
+    },
+  });
+}
+
+/**
+ * Hook para registrar una historia clínica usando el endpoint /hc/register
+ */
+export function useRegisterHc() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (studentId) => registerHc(studentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['historias'] });
+      alert('Historia Clínica registrada con éxito');
+    },
+    onError: (error) => {
+      alert(`Error al registrar Historia Clínica: ${error.message}`);
+    },
   });
 }

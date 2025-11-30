@@ -8,7 +8,10 @@ export const fetchCreatePatient = async (patientData) => {
   if (!response.ok) {
     const errBody = await response.json().catch(() => null);
     console.error('Error al crear paciente:', errBody);
-    throw new Error(errBody?.error || `Error: ${response.status}`);
+    const err = new Error(errBody?.error || `Error: ${response.status}`);
+    err.status = response.status;
+    err.body = errBody;
+    throw err;
   }
   return response.json();
 };
@@ -26,7 +29,10 @@ export const fetchUpdatePatient = async ({ id, data }) => {
 
   if (!response.ok) {
     const errBody = await response.json().catch(() => null);
-    throw new Error(errBody?.error || `Error: ${response.status}`);
+    const err = new Error(errBody?.error || `Error: ${response.status}`);
+    err.status = response.status;
+    err.body = errBody;
+    throw err;
   }
 
   return response.json();

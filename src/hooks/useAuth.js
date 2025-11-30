@@ -7,6 +7,7 @@ export function useCurrentUser() {
     queryKey: ['currentUser'],
     queryFn: fetchAuth,
     retry: false,
+    throwOnError: false, // No lanzar error en 401
     staleTime: Infinity, // nunca se considera "stale"
     cacheTime: Infinity, // lo mantiene en caché todo el tiempo
     refetchOnWindowFocus: false,

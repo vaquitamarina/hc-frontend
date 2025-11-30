@@ -1,4 +1,5 @@
-export const fetchAdultPatients = async (studentId) => {
+// Servicio para obtener las historias clínicas asociadas a un estudiante
+export const fetchHCsByStudent = async (studentId) => {
   const response = await fetch(
     `${import.meta.env.VITE_API_URL}/hc/student/${studentId}/adult-historias`,
     {

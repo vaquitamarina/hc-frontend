@@ -1,0 +1,8 @@
+.enfermedad-actual {
+  /* container styles; main layout uses Tailwind but keep small defaults */
+  background: #ffffff;
+}
+
+.enfermedad-actual textarea {
+  background: #ffffff;
+}
