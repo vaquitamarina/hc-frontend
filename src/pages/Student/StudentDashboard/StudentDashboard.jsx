@@ -1,4 +1,4 @@
-import AdultPatientList from '@features/student/AdultPatientList';
+import HCList from '@features/student/HCList';
 import { useCurrentUser } from '@hooks/useAuth';
 import { useCreateDraft } from '@hooks/useHistoria';
 import Button from '@ui/Button';
@@ -29,7 +29,7 @@ export function StudentDashboard() {
           <h2>Adulto</h2>
           <Button onClick={handleAddHc}>Añadir</Button>
         </div>
-        <AdultPatientList studentId={data.id}></AdultPatientList>
+        <HCList studentId={data.id} />
       </div>
       <div className="linea-vertical"></div>
 
@@ -38,7 +38,7 @@ export function StudentDashboard() {
           <h2>Niño</h2>
           <Button onClick={handleAddHc}>Añadir</Button>
         </div>
-        <AdultPatientList studentId={data.id}></AdultPatientList>
+        <HCList studentId={data.id} />
       </div>
     </div>
   );

@@ -6,11 +6,16 @@ import StudentLayout from './layouts/StudentLayout.jsx';
 import Dashboard from './pages/Dashboard/Dashboard.jsx';
 import Anamnesis from './pages/hc/Anamnesis/Anamnesis.jsx';
 import Filiation from './pages/hc/Anamnesis/Filiacion/Filiacion.jsx';
+import Motivo_Consulta from './pages/hc/Anamnesis/Motivo_Consulta/Motivo_Consulta.jsx';
+import Enfermedad_Actual from './pages/hc/Anamnesis/Enfermedad_Actual/Enfermedad_Actual.jsx';
 import HcLayout from './layouts/HcLayout.jsx';
 import ExamenFisicoMenu from './pages/hc/ExamenFisico/ExamenFisicoMenu.jsx';
 import ExamenGeneral from './pages/hc/ExamenFisico/ExamenGeneral.jsx';
 import ExamenRegional from './pages/hc/ExamenFisico/ExamenRegional.jsx';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import AdminLayout from './layouts/AdminLayout.jsx';
+import AdminDashboard from './pages/Admin/AdminDashboard.jsx';
+import StudentDetailPage from './pages/Admin/StudentDetailPage.jsx';
 
 function App() {
   return (
@@ -27,12 +32,25 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
           </Route>
 
+          <Route element={<AdminLayout />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/student/:id" element={<StudentDetailPage />} />
+          </Route>
+
           <Route element={<HcLayout />}>
             {/* Rutas de Anamnesis */}
             <Route path="/historia/:id/anamnesis" element={<Anamnesis />} />
             <Route
               path="/historia/:id/anamnesis/filiacion"
               element={<Filiation />}
+            />
+            <Route
+              path="/historia/:id/anamnesis/motivo-consulta"
+              element={<Motivo_Consulta />}
+            />
+            <Route
+              path="/historia/:id/anamnesis/enfermedad-actual"
+              element={<Enfermedad_Actual />}
             />
 
             {/* NUEVAS RUTAS DE EXAMEN FÍSICO */}

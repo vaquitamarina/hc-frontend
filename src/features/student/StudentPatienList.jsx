@@ -1,4 +1,5 @@
 import { useStudents } from '../../hooks/useStudents';
+import { Link } from 'react-router';
 
 function StudentPatienList() {
   const { data: students, isLoading, isError, error } = useStudents();
@@ -72,6 +73,12 @@ function StudentPatienList() {
             className="rounded-lg p-4 bg-[var(--color-secondary-soft)] flex flex-col gap-2"
           >
             <div className="font-medium">{name}</div>
+            <Link
+              to={`/admin/student/${student.id_usuario}`}
+              className="text-sm text-blue-500 hover:underline"
+            >
+              Ver más
+            </Link>
             {code && <div className="text-sm text-[#666]">Código: {code}</div>}
             {email && <div className="text-sm text-[#666]">{email}</div>}
             {created && (

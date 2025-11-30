@@ -16,3 +16,22 @@ export const fetchStudents = async () => {
 
   return response.json();
 };
+
+export const fetchStudentById = async (id) => {
+  const response = await fetch(
+    `${import.meta.env.VITE_API_URL}/student-users/${id}`,
+    {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+    }
+  );
+
+  if (!response.ok) {
+    const errBody = await response.json().catch(() => null);
+    console.error('Error fetching student:', errBody);
+    throw new Error(errBody?.message || `Error: ${response.status}`);
+  }
+
+  return response.json();
+};

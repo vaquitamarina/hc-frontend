@@ -1,46 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchPatients } from '@services/fetchPatients.js';
-import { fetchFiliation, fetchUpdateFiliation } from '@services/fetchFiliation';
+import { fetchAdultPatients } from '@services/fetchPatients.js';
+// Removed filiation services — this hook file focuses only on patients
 import { fetchCreatePatient, fetchUpdatePatient } from '@services/fetchPatient';
 
-export const usePatients = (studentId) => {
+export function useAdultPatients(studentId) {
   return useQuery({
     queryKey: ['patients', 'adult', studentId],
-    queryFn: () => fetchPatients(studentId),
-    enabled: !!studentId, // Solo ejecutar la query si studentId existe
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-  });
-};
-
-export function useFiliation(historyId) {
-  return useQuery({
-    queryKey: ['filiation', historyId],
-    queryFn: () => fetchFiliation(historyId),
-    enabled: !!historyId, // Solo ejecutar la query si historyId existe
+    queryFn: () => fetchAdultPatients(studentId),
+    enabled: !!studentId,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
 }
 
-export function useMutateFiliation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: fetchUpdateFiliation,
-    onSuccess: (_, variables) => {
-      // Al guardar con éxito, invalidamos la cache para que se refresquen los datos
-      queryClient.invalidateQueries({
-        queryKey: ['filiation', variables.idHistory],
-      });
-      console.log('Filiación actualizada correctamente');
-    },
-    onError: (error) => {
-      console.error('Error al actualizar filiación:', error);
-      alert(`Error: ${error.message}`); // Feedback básico
-    },
-  });
-}
+// NOTE: filiation-related hooks were removed. If you still need filiation
+// behavior, reintroduce them in a dedicated hook file or restore imports.
 
 /**
  * Hook para crear un nuevo paciente
