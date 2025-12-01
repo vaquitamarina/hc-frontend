@@ -1,11 +1,12 @@
-// Este archivo ha sido eliminado. El listado de historias clínicas ahora se maneja con HCList.
 import { useHCsByStudent } from '@hooks/useHC';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router';
+import './HCList.css';
 
 function HCList({ studentId }) {
   const { data: hcs, isLoading, isError, error } = useHCsByStudent(studentId);
   const navigate = useNavigate();
+
   const formatDate = (isoDate) => {
     const date = new Date(isoDate);
     const day = String(date.getDate()).padStart(2, '0');
@@ -14,20 +15,36 @@ function HCList({ studentId }) {
     return `${day}/${month}/${year}`;
   };
 
+  const getPatientName = (hc) => {
+    if (hc.nombre && hc.apellido) {
+      return `${hc.nombre} ${hc.apellido}`;
+    }
+    return 'Sin asignar';
+  };
+
+  const getInitials = (hc) => {
+    const name = getPatientName(hc);
+    if (name === 'Sin asignar') return '?';
+    return name
+      .split(' ')
+      .slice(0, 2)
+      .map((word) => word[0])
+      .join('')
+      .toUpperCase();
+  };
+
   if (isLoading) {
     return (
-      <div className="w-full">
-        <p className="p-8 text-center rounded-lg bg-[#f5f5f5] text-[#666]">
-          Cargando historias clínicas...
-        </p>
+      <div className="hc-loading">
+        <p>Cargando historias clínicas...</p>
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="w-full">
-        <p className="p-8 text-center rounded-lg bg-[#ffebee] text-[#d32f2f]">
+      <div className="hc-error">
+        <p>
           Error al cargar historias clínicas:{' '}
           {error?.message || 'Error desconocido'}
         </p>
@@ -37,49 +54,40 @@ function HCList({ studentId }) {
 
   if (!hcs || hcs.length === 0) {
     return (
-      <div className="w-full">
-        <p className="p-8 text-center rounded-lg bg-[#f5f5f5] text-[#666]">
-          No hay historias clínicas disponibles
-        </p>
+      <div className="hc-empty">
+        <p>No hay historias clínicas disponibles</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-5">
-      {hcs.map((hc, index) => {
-        const row = Math.floor(index / 2);
-        const col = index % 2;
-        const isEvenRow = row % 2 === 0;
-        const type =
-          (isEvenRow && col === 0) || (!isEvenRow && col === 1)
-            ? 'soft'
-            : 'default';
-
-        return (
-          <div
-            key={hc.id_historia}
-            className={`border rounded-lg p-4 bg-white shadow type-${type} cursor-pointer hover:bg-blue-50 transition`}
-            onClick={() => navigate(`/historia/${hc.id_historia}/anamnesis`)}
-            onKeyDown={(e) =>
-              e.key === 'Enter' &&
-              navigate(`/historia/${hc.id_historia}/anamnesis`)
-            }
-            role="button"
-            tabIndex={0}
-            title="Ir al llenado de la historia clínica"
-          >
-            <div className="font-bold mb-2">HC-{hc.id_historia}</div>
-            <div>
-              <b>Paciente:</b> {hc.nombre_paciente || 'Sin asignar'}
+    <div className="hc-list">
+      {hcs.map((hc) => (
+        <div
+          key={hc.id_historia}
+          className={`patient-card ${!hc.nombre && !hc.apellido ? 'patient-card--unassigned' : ''}`}
+          onClick={() => navigate(`/historia/${hc.id_historia}/anamnesis`)}
+          onKeyDown={(e) =>
+            e.key === 'Enter' &&
+            navigate(`/historia/${hc.id_historia}/anamnesis`)
+          }
+          role="button"
+          tabIndex={0}
+          title="Ir al llenado de la historia clínica"
+        >
+          <div className="patient-card__header">
+            <div className="patient-card__avatar">{getInitials(hc)}</div>
+            <div className="patient-card__content">
+              <p className="patient-card__name">{getPatientName(hc)}</p>
+              <p className="patient-card__date">
+                {hc.fecha_registro
+                  ? formatDate(hc.fecha_registro)
+                  : 'Sin fecha'}
+              </p>
             </div>
-            <div>
-              <b>Fecha creación:</b> {formatDate(hc.fecha_creacion)}
-            </div>
-            {/* Puedes agregar más campos relevantes aquí */}
           </div>
-        );
-      })}
+        </div>
+      ))}
     </div>
   );
 }

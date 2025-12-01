@@ -47,18 +47,18 @@ function Motivo_Consulta() {
   if (isLoading) return <div>Cargando...</div>;
 
   return (
-    <div className="motivo-consulta flex flex-col gap-6">
+    <div className="motivo-consulta-container">
       {/* Header Section */}
-      <div className="bg-[var(--color-primary)] text-white py-4 px-8 rounded-[var(--radius-md)] flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Motivo de consulta</h2>
-        <div className="text-right">
-          <p className="text-sm">Historia Clínica Nº:</p>
-          <p className="text-lg font-bold">HC-{id}</p>
+      <div className="motivo-header">
+        <h2 className="motivo-header-title">Motivo de consulta</h2>
+        <div className="motivo-header-info">
+          <p className="motivo-header-label">Historia Clínica Nº:</p>
+          <p className="motivo-header-value">HC-{id}</p>
         </div>
       </div>
 
       {/* Formulario */}
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="motivo-form">
         <div className="flex flex-col gap-2">
           <label htmlFor="motivo" className="font-medium text-lg mb-2">
             Motivo de consulta

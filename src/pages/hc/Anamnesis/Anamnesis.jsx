@@ -6,6 +6,7 @@ export function Anamnesis() {
     { title: 'Filiacion', path: `filiacion` },
     { title: 'Motivo de Consulta', path: `motivo-consulta` },
     { title: 'Enfermedad Actual', path: `enfermedad-actual` },
+    { title: 'Antecedente Personal', path: `antecedente-personal` },
   ];
 
   return (

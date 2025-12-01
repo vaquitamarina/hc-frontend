@@ -1,0 +1,311 @@
+/* Container Principal */
+.antecedente-container {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  border-radius: 0;
+}
+
+.antecedente-title {
+  font-size: 1.875rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+}
+
+/* Header Section */
+.antecedente-header {
+  background-color: var(--color-primary, #1e3a8a);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: var(--radius-md, 0.375rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.antecedente-header-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.antecedente-header-info {
+  text-align: right;
+}
+
+.antecedente-header-label {
+  font-size: 0.875rem;
+}
+
+.antecedente-header-value {
+  font-size: 1.125rem;
+  font-weight: bold;
+}
+
+/* Formulario */
+.antecedente-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Secciones */
+.antecedente-section {
+  background-color: transparent;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: none;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.section-title-with-divider {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0.5rem 0;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Subsecciones */
+.subsection {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.subsection-title {
+  font-weight: 600;
+  color: #1e3a8a;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Labels y Inputs */
+.label-block {
+  display: block;
+  margin-top: 1rem;
+}
+
+.label-inline {
+  display: inline;
+  margin-left: 1rem;
+}
+
+.label-with-margin {
+  margin-left: 1rem;
+}
+
+.label-full-width {
+  display: block;
+  width: 100%;
+}
+
+.input-text {
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  margin-left: 0.5rem;
+}
+
+.input-checkbox {
+  margin-left: 0.5rem;
+  cursor: pointer;
+}
+
+.input-number {
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  margin-left: 0.5rem;
+  width: 5rem;
+}
+
+.input-full-width {
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  margin-left: 0.5rem;
+  width: 100%;
+}
+
+.textarea {
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  width: 100%;
+  margin-top: 0.5rem;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 1.5;
+}
+
+/* Radio buttons */
+.radio-group {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.radio-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.radio-option input {
+  cursor: pointer;
+}
+
+/* Checkboxes */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-left: 1rem;
+  margin-top: 0.5rem;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox-item input {
+  cursor: pointer;
+}
+
+/* Checkboxes inline */
+.checkbox-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 1rem;
+}
+
+.checkbox-inline input {
+  cursor: pointer;
+}
+
+/* Checkbox con contenido */
+.checkbox-flex {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox-flex input {
+  margin-right: 0.5rem;
+  cursor: pointer;
+}
+
+.checkbox-flex span {
+  flex-wrap: wrap;
+}
+
+/* Descripción */
+.description-text {
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Grid */
+.grid-2-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Divisor */
+.border-top {
+  border-top: 1px solid #d1d5db;
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+/* Consentimiento */
+.consent-text {
+  font-size: 0.875rem;
+  color: #374151;
+  margin-bottom: 1rem;
+}
+
+/* Botón */
+.button-submit {
+  background-color: #1e3a8a;
+  color: white;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.button-submit:hover {
+  background-color: #1e40af;
+}
+
+.button-submit:active {
+  background-color: #172554;
+}
+
+/* Spacing utilities */
+.mt-1 {
+  margin-top: 0.25rem;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.mt-6 {
+  margin-top: 1.5rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.ml-1 {
+  margin-left: 0.25rem;
+}
+
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
+.ml-4 {
+  margin-left: 1rem;
+}
+
+.space-y-2 > * + * {
+  margin-top: 0.5rem;
+}
+
+.space-y-3 > * + * {
+  margin-top: 0.75rem;
+}

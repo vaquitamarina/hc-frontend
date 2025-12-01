@@ -61,18 +61,18 @@ function Enfermedad_Actual() {
   if (isLoading) return <div>Cargando...</div>;
 
   return (
-    <div className="enfermedad-actual flex flex-col gap-6">
+    <div className="enfermedad-actual-container">
       {/* Header Section */}
-      <div className="bg-[var(--color-primary)] text-white py-4 px-8 rounded-[var(--radius-md)] flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Enfermedad actual</h2>
-        <div className="text-right">
-          <p className="text-sm">Historia Clínica Nº:</p>
-          <p className="text-lg font-bold">HC-{id}</p>
+      <div className="enfermedad-header">
+        <h2 className="enfermedad-header-title">Enfermedad actual</h2>
+        <div className="enfermedad-header-info">
+          <p className="enfermedad-header-label">Historia Clínica Nº:</p>
+          <p className="enfermedad-header-value">HC-{id}</p>
         </div>
       </div>
 
       {/* Formulario */}
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="enfermedad-form">
         {/* Síntoma principal */}
         <div className="flex flex-col gap-2">
           <label htmlFor="sintoma_principal" className="font-medium">

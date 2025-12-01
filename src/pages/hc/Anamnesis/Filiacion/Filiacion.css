@@ -1,0 +1,95 @@
+/* Container Principal */
+.filiacion-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Header Section */
+.filiacion-header {
+  background-color: var(--color-primary, #1e3a8a);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: var(--radius-md, 0.375rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.filiacion-header-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.filiacion-header-info {
+  text-align: right;
+}
+
+.filiacion-header-label {
+  font-size: 0.875rem;
+}
+
+.filiacion-header-value {
+  font-size: 1.125rem;
+  font-weight: bold;
+}
+
+/* Form */
+.filiacion-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Form Rows */
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.form-row-2 {
+  display: flex;
+  gap: 1rem;
+  flex: 1;
+}
+
+.form-row-3 {
+  display: flex;
+  gap: 1rem;
+  flex: 2;
+}
+
+.form-field-flex-1 {
+  flex: 1;
+}
+
+.form-field-flex-2 {
+  flex: 2;
+}
+
+.form-field-flex-3 {
+  flex: 3;
+}
+
+/* Action Buttons */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+/* Loading and Error States */
+.loading-message {
+  padding: 1rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.error-message {
+  padding: 1rem;
+  text-align: center;
+  color: #dc2626;
+  font-size: 0.875rem;
+}

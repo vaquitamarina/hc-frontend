@@ -1,8 +1,63 @@
+/* Container Principal */
+.enfermedad-actual-container {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  border-radius: 0;
+}
+
+/* Header Section */
+.enfermedad-header {
+  background-color: var(--color-primary, #1e3a8a);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: var(--radius-md, 0.375rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.enfermedad-header-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.enfermedad-header-info {
+  text-align: right;
+}
+
+.enfermedad-header-label {
+  font-size: 0.875rem;
+}
+
+.enfermedad-header-value {
+  font-size: 1.125rem;
+  font-weight: bold;
+}
+
+/* Form */
+.enfermedad-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Formulario */
 .enfermedad-actual {
-  /* container styles; main layout uses Tailwind but keep small defaults */
-  background: #ffffff;
+  background: transparent;
 }
 
 .enfermedad-actual textarea {
-  background: #ffffff;
+  background: transparent;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+}
+
+.enfermedad-actual input {
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
 }

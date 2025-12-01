@@ -1,7 +1,57 @@
+/* Container Principal */
+.motivo-consulta-container {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  border-radius: 0;
+}
+
+/* Header Section */
+.motivo-header {
+  background-color: var(--color-primary, #1e3a8a);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: var(--radius-md, 0.375rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.motivo-header-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.motivo-header-info {
+  text-align: right;
+}
+
+.motivo-header-label {
+  font-size: 0.875rem;
+}
+
+.motivo-header-value {
+  font-size: 1.125rem;
+  font-weight: bold;
+}
+
+/* Form */
+.motivo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Formulario */
 .motivo-consulta {
-  background: #ffffff;
+  background: transparent;
 }
 
 .motivo-consulta textarea {
-  background: #ffffff;
+  background: transparent;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
 }

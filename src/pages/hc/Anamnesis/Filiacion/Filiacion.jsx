@@ -9,6 +9,7 @@ import {
 } from '@hooks/useAnamnesis';
 import { usePatientByHistory, useAssignPatient } from '@hooks/useHistoria';
 import { useCreatePatient, useUpdatePatient } from '@hooks/usePatients';
+import './Filiacion.css';
 
 function Filiacion() {
   const { id } = useParams();
@@ -167,27 +168,26 @@ function Filiacion() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="filiacion-container">
       {/* Header Section */}
-      <div className="bg-[var(--color-primary)] text-white py-4 px-8 rounded-[var(--radius-md)] flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Filiacion</h2>
-        <div className="text-right">
-          <p className="text-sm">Historia Clínica Nº:</p>
-          <p className="text-lg font-bold">HC-{id}</p>
+      <div className="filiacion-header">
+        <h2 className="filiacion-header-title">Filiacion</h2>
+        <div className="filiacion-header-info">
+          <p className="filiacion-header-label">Historia Clínica Nº:</p>
+          <p className="filiacion-header-value">HC-{id}</p>
         </div>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="filiacion-form">
         {/* Nombres y Apellidos - Full width */}
-        <div className="flex gap-4">
+        <div className="form-row">
           <FormField
             label="Nombres"
             value={filiacionData.nombres || ''}
             name="nombres"
             type="text"
             isFormMode={true}
-            flex="1"
             onChange={handleChange}
           />
           <FormField
@@ -196,20 +196,18 @@ function Filiacion() {
             name="apellidos"
             type="text"
             isFormMode={true}
-            flex="1"
             onChange={handleChange}
           />
         </div>
 
         {/* Edad, Sexo, Raza */}
-        <div className="flex gap-4">
+        <div className="form-row">
           <FormField
             label="Edad"
             value={filiacionData.edad || ''}
             name="edad"
             type="number"
             isFormMode={true}
-            flex="1"
             onChange={handleChange}
           />
           <FormField
@@ -218,7 +216,6 @@ function Filiacion() {
             name="sexo"
             type="text"
             isFormMode={true}
-            flex="1"
             onChange={handleChange}
           />
           <FormField
@@ -227,33 +224,30 @@ function Filiacion() {
             name="raza"
             type="text"
             isFormMode={true}
-            flex="1"
             onChange={handleChange}
           />
         </div>
 
         {/* Fecha de nacimiento (2 campos) */}
-        <div className="flex gap-4">
+        <div className="form-row">
           <FormField
             label="Fecha de nacimiento"
             value={filiacionData.fecha_nacimiento || ''}
             name="fecha_nacimiento"
             type="date"
             isFormMode={true}
-            flex="1"
             onChange={handleChange}
           />
         </div>
 
         {/* Estado civil, Nombre del cónyuge */}
-        <div className="flex gap-4">
+        <div className="form-row">
           <FormField
             label="Estado civil"
             value={filiacionData.estado_civil || ''}
             name="estado_civil"
             type="text"
             isFormMode={true}
-            flex="1"
             onChange={handleChange}
           />
           <FormField
@@ -262,20 +256,18 @@ function Filiacion() {
             name="nombre_conyuge"
             type="text"
             isFormMode={true}
-            flex="1"
             onChange={handleChange}
           />
         </div>
 
         {/* Ocupación, Lugar de procedencia */}
-        <div className="flex gap-4">
+        <div className="form-row">
           <FormField
             label="Ocupacion"
             value={filiacionData.ocupacion || ''}
             name="ocupacion"
             type="text"
             isFormMode={true}
-            flex="1"
             onChange={handleChange}
           />
           <FormField
@@ -284,20 +276,18 @@ function Filiacion() {
             name="lugar_procedencia"
             type="text"
             isFormMode={true}
-            flex="1"
             onChange={handleChange}
           />
         </div>
 
         {/* Tiempo de residencia en Tacna, Grado de instrucción */}
-        <div className="flex gap-4">
+        <div className="form-row">
           <FormField
             label="Tiempo de residencia en Tacna"
             value={filiacionData.tiempo_residencia_tacna || ''}
             name="tiempo_residencia_tacna"
             type="text"
             isFormMode={true}
-            flex="1"
             onChange={handleChange}
           />
           <FormField
@@ -306,33 +296,30 @@ function Filiacion() {
             name="grado_instruccion"
             type="text"
             isFormMode={true}
-            flex="1"
             onChange={handleChange}
           />
         </div>
 
         {/* Dirección */}
-        <div className="flex gap-4">
+        <div className="form-row">
           <FormField
             label="Direccion"
             value={filiacionData.direccion || ''}
             name="direccion"
             type="text"
             isFormMode={true}
-            flex="2"
             onChange={handleChange}
           />
         </div>
 
         {/* Última visita dentista, Motivo */}
-        <div className="flex gap-4">
+        <div className="form-row">
           <FormField
             label="Ultima vez que visito a su dentista"
             value={filiacionData.ultima_visita_dentista || ''}
             name="ultima_visita_dentista"
             type="date"
             isFormMode={true}
-            flex="1"
             onChange={handleChange}
           />
           <FormField
@@ -341,20 +328,18 @@ function Filiacion() {
             name="motivo_visita_dentista"
             type="text"
             isFormMode={true}
-            flex="1"
             onChange={handleChange}
           />
         </div>
 
         {/* Última visita médico, Motivo */}
-        <div className="flex gap-4">
+        <div className="form-row">
           <FormField
             label="Ultima vez que visito a su medico"
             value={filiacionData.ultima_visita_medico || ''}
             name="ultima_visita_medico"
             type="date"
             isFormMode={true}
-            flex="1"
             onChange={handleChange}
           />
           <FormField
@@ -363,20 +348,18 @@ function Filiacion() {
             name="motivo_visita_medico"
             type="text"
             isFormMode={true}
-            flex="1"
             onChange={handleChange}
           />
         </div>
 
         {/* Contacto de emergencia y teléfono */}
-        <div className="flex gap-4">
+        <div className="form-row">
           <FormField
             label="En caso necesario comunicarse con (nombre y relación)"
             value={filiacionData.contacto_emergencia || ''}
             name="contacto_emergencia"
             type="text"
             isFormMode={true}
-            flex="2"
             onChange={handleChange}
           />
           <FormField
@@ -385,39 +368,36 @@ function Filiacion() {
             name="telefono_emergencia"
             type="tel"
             isFormMode={true}
-            flex="1"
             onChange={handleChange}
           />
         </div>
 
         {/* Persona que lo acompaña */}
-        <div className="flex gap-4">
+        <div className="form-row">
           <FormField
             label="Persona que lo acompaña (nombre y relación)"
             value={filiacionData.acompaniante || ''}
             name="acompaniante"
             type="text"
             isFormMode={true}
-            flex="3"
             onChange={handleChange}
           />
         </div>
 
         {/* Fecha de elaboración */}
-        <div className="flex gap-4">
+        <div className="form-row">
           <FormField
             label="Fecha de elaboración"
             value={filiacionData.fecha_elaboracion || ''}
             name="fecha_elaboracion"
             type="date"
             isFormMode={true}
-            flex="2"
             onChange={handleChange}
           />
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-4 mt-6">
+        <div className="form-actions">
           <Button type="submit" variant="primary">
             {data ? 'Actualizar' : 'Guardar'} filiación
           </Button>

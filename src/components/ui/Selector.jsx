@@ -109,28 +109,38 @@ const selectorOption = tv({
   },
 });
 
-const Selector = ({ options, onChange, defaultValue, disabled, className }) => {
+const Selector = ({
+  options,
+  onChange,
+  defaultValue,
+  value,
+  disabled,
+  className,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedValue, setSelectedValue] = useState(defaultValue);
+  const [selectedValue, setSelectedValue] = useState(value || defaultValue);
   const [selectedLabel, setSelectedLabel] = useState('');
   const selectorRef = useRef(null);
 
   useEffect(() => {
-    const initialOption = options.find(
-      (opt) => (typeof opt === 'object' ? opt.value : opt) === defaultValue
-    );
+    const currentValue = value !== undefined ? value : defaultValue;
+    const initialOption = options.find((opt) => {
+      const optValue = typeof opt === 'object' ? opt.value : opt;
+      // Comparación flexible: convertir ambos a string para comparar
+      return String(optValue) === String(currentValue);
+    });
     if (initialOption) {
-      const value =
+      const optValue =
         typeof initialOption === 'object' ? initialOption.value : initialOption;
       const label =
         typeof initialOption === 'object' ? initialOption.label : initialOption;
-      setSelectedValue(value);
+      setSelectedValue(optValue);
       setSelectedLabel(label);
     } else {
       setSelectedValue(null);
       setSelectedLabel('Select an option');
     }
-  }, [options, defaultValue]);
+  }, [options, defaultValue, value]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -193,16 +203,17 @@ const Selector = ({ options, onChange, defaultValue, disabled, className }) => {
 
         {isOpen && !disabled && (
           <ul className={selectorOptions()} role="listbox">
-            {options.map((option) => {
+            {options.map((option, index) => {
               const optionValue =
                 typeof option === 'object' ? option.value : option;
               const optionLabel =
                 typeof option === 'object' ? option.label : option;
-              const isSelected = optionValue === selectedValue;
+              // Comparación flexible: convertir ambos a string
+              const isSelected = String(optionValue) === String(selectedValue);
 
               return (
                 <li
-                  key={optionValue}
+                  key={`${optionValue}-${index}`}
                   className={selectorOption({ isSelected })}
                   onClick={() => handleSelect(option)}
                   onKeyDown={(e) =>
@@ -236,12 +247,14 @@ Selector.propTypes = {
   ).isRequired,
   onChange: PropTypes.func.isRequired,
   defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   disabled: PropTypes.bool,
   className: PropTypes.string,
 };
 
 Selector.defaultProps = {
   defaultValue: null,
+  value: undefined,
   disabled: false,
   className: '',
 };
