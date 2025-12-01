@@ -46,7 +46,6 @@ function Filiacion() {
         tiempo_residencia_tacna: data?.tiempo_residencia_tacna || '',
         direccion: data?.direccion || '',
         telefono_emergencia: data?.telefono_emergencia || '',
-        grado_instruccion: data?.grado_instruccion || '',
         ultima_visita_dentista:
           data?.ultima_visita_dentista?.split('T')[0] || '',
         motivo_visita_dentista: data?.motivo_visita_dentista || '',
@@ -110,7 +109,6 @@ function Filiacion() {
       lugar_procedencia: filiacionData.lugar_procedencia || null,
       tiempo_residencia_tacna: filiacionData.tiempo_residencia_tacna || null,
       direccion: filiacionData.direccion || null,
-      grado_instruccion: filiacionData.grado_instruccion || null,
       ultima_visita_dentista: filiacionData.ultima_visita_dentista || null,
       motivo_visita_dentista: filiacionData.motivo_visita_dentista || null,
       ultima_visita_medico: filiacionData.ultima_visita_medico || null,
@@ -289,21 +287,12 @@ function Filiacion() {
           />
         </div>
 
-        {/* Tiempo de residencia en Tacna, Grado de instrucción */}
+        {/* Tiempo de residencia en Tacna */}
         <div className="flex gap-4">
           <FormField
             label="Tiempo de residencia en Tacna"
             value={filiacionData.tiempo_residencia_tacna || ''}
             name="tiempo_residencia_tacna"
-            type="text"
-            isFormMode={true}
-            flex="1"
-            onChange={handleChange}
-          />
-          <FormField
-            label="Grado de instrucción"
-            value={filiacionData.grado_instruccion || ''}
-            name="grado_instruccion"
             type="text"
             isFormMode={true}
             flex="1"
