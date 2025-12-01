@@ -277,7 +277,8 @@ export const createFiliacion = async (filiacion) => {
     credentials: 'include',
   });
   if (!response.ok) {
-    throw new Error('No se pudo crear la filiación');
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'No se pudo crear la filiación');
   }
   return response.json();
 };
@@ -297,9 +298,9 @@ export const fetchFiliacion = async (idHistoria) => {
     }
     throw new Error('No se pudo obtener la filiación');
   }
-  return response.json();
+  const data = await response.json();
+  return data.data || data;
 };
-
 export const updateFiliacion = async ({ idHistoria, filiacion }) => {
   const response = await fetch(
     `${import.meta.env.VITE_API_URL}/hc/filiacion/historia/${idHistoria}`,
@@ -311,7 +312,8 @@ export const updateFiliacion = async ({ idHistoria, filiacion }) => {
     }
   );
   if (!response.ok) {
-    throw new Error('No se pudo guardar la filiación');
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'No se pudo guardar la filiación');
   }
   return response.json();
 };
