@@ -7,6 +7,51 @@
   border-radius: 0;
 }
 
+/* Variable global para color del borde */
+:root {
+  --input-border-color: #003b5c;
+}
+
+/* Estilos para checkboxes redondeados */
+/* Forzar tamaño uniforme para todos los checkboxes */
+input[type='checkbox'],
+.checkbox-item input,
+.checkbox-inline input,
+.checkbox-flex input {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  min-width: 1.5rem !important;
+  min-height: 1.5rem !important;
+  max-width: 1.5rem !important;
+  max-height: 1.5rem !important;
+}
+input[type='checkbox'] {
+  width: 1.5rem;
+  height: 1.5rem;
+  cursor: pointer;
+  accent-color: var(--input-border-color);
+  border-radius: 0.375rem;
+  border: 1px solid var(--input-border-color);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: white;
+  transition: all 0.2s ease;
+}
+
+input[type='checkbox']:hover {
+  box-shadow: 0 0 0 3px rgba(74, 141, 242, 0.1);
+  border-color: var(--input-border-color);
+}
+
+input[type='checkbox']:checked {
+  background-color: var(--input-border-color);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 11.94l6.72-6.72a.75.75 0 011.06 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100%;
+}
+
 .antecedente-title {
   font-size: 1.875rem;
   font-weight: bold;
@@ -112,10 +157,14 @@
 }
 
 .input-text {
-  border: 1px solid #d1d5db;
-  border-radius: 0.25rem;
-  padding: 0.5rem;
-  margin-left: 0.5rem;
+  border: 1px solid var(--input-border-color);
+  border-radius: 0.75rem;
+  padding: 0.5rem 1rem;
+  width: 100vw;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+  margin-top: 0.5rem;
 }
 
 .input-checkbox {
@@ -124,27 +173,30 @@
 }
 
 .input-number {
-  border: 1px solid #d1d5db;
-  border-radius: 0.25rem;
+  border: 1px solid var(--input-border-color);
+  border-radius: 0.75rem;
   padding: 0.5rem;
-  margin-left: 0.5rem;
   width: 5rem;
+  margin-bottom: 1rem;
+  margin-top: 0.5rem;
 }
 
 .input-full-width {
-  border: 1px solid #d1d5db;
-  border-radius: 0.25rem;
+  border: 1px solid var(--input-border-color);
+  border-radius: 0.75rem;
   padding: 0.5rem;
-  margin-left: 0.5rem;
   width: 100%;
+  margin-bottom: 1rem;
+  margin-top: 0.5rem;
 }
 
 .textarea {
-  border: 1px solid #d1d5db;
-  border-radius: 0.25rem;
+  border: 1px solid var(--input-border-color);
+  border-radius: 0.75rem;
   padding: 0.5rem;
   width: 100%;
   margin-top: 0.5rem;
+  margin-bottom: 1rem;
   font-family: inherit;
   font-size: inherit;
   line-height: 1.5;
@@ -174,7 +226,8 @@
   flex-direction: column;
   gap: 0.5rem;
   margin-left: 1rem;
-  margin-top: 0.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
 .checkbox-item {
@@ -189,10 +242,12 @@
 
 /* Checkboxes inline */
 .checkbox-inline {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-left: 1rem;
+  gap: 1.5rem;
+  margin-left: 0;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 .checkbox-inline input {
@@ -203,7 +258,9 @@
 .checkbox-flex {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1.5rem;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 .checkbox-flex input {
@@ -308,4 +365,65 @@
 
 .space-y-3 > * + * {
   margin-top: 0.75rem;
+}
+
+/* Estilos para la sección Fisiológicos */
+.fisiologicos-inline {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.fisiologicos-inline label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fisiologicos-otros {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.input-text-auto {
+  border: 1px solid var(--input-border-color);
+  border-radius: 0.75rem;
+  padding: 0.5rem 1rem;
+  width: 100%; /* Ocupa el espacio disponible */
+  box-sizing: border-box;
+}
+
+.form-inline-group-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.form-inline-group-block label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-inline-group-block input[type='text'],
+.form-inline-group-block input[type='checkbox'] {
+  margin-left: 0.5rem;
+}
+
+.form-inline-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.form-inline-group label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }

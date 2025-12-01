@@ -8,7 +8,7 @@ import Anamnesis from './pages/hc/Anamnesis/Anamnesis.jsx';
 import Filiation from './pages/hc/Anamnesis/Filiacion/Filiacion.jsx';
 import Motivo_Consulta from './pages/hc/Anamnesis/Motivo_Consulta/Motivo_Consulta.jsx';
 import Enfermedad_Actual from './pages/hc/Anamnesis/Enfermedad_Actual/Enfermedad_Actual.jsx';
-import AntecedentePersonal from './pages/hc/Anamnesis/Antecedente/Antecedente.jsx';
+import AntecedentePersonal from './pages/hc/Anamnesis/antecedente/antecedente.jsx';
 import HcLayout from './layouts/HcLayout.jsx';
 import ExamenFisicoMenu from './pages/hc/ExamenFisico/ExamenFisicoMenu.jsx';
 import ExamenGeneral from './pages/hc/ExamenFisico/ExamenGeneral.jsx';

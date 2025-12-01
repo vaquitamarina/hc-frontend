@@ -469,37 +469,37 @@ function AntecedentePersonal() {
 
           <div className="subsection">
             <h4 className="subsection-title">Fisiologicos :</h4>
-            <label className="label-block">
-              Mujeres en edad fértil: ¿Está embarazada?
-              <input
-                type="checkbox"
-                name="esta_embarazada"
-                checked={formPersonal.esta_embarazada}
-                onChange={handleChange}
-                className="input-checkbox"
-              />
-            </label>
-            <label className="label-with-margin" htmlFor="mac">
-              MAC
-            </label>
-            <input
-              id="mac"
-              type="checkbox"
-              name="mac"
-              checked={formPersonal.mac}
-              onChange={handleChange}
-              className="input-checkbox"
-            />
-            <label className="label-with-margin">
-              Otros
-              <input
-                type="text"
-                name="otros"
-                value={formPersonal.otros}
-                onChange={handleChange}
-                className="input-text"
-              />
-            </label>
+            <div className="fisiologicos-inline">
+              <label>
+                Mujeres en edad fértil: ¿Está embarazada?
+                <input
+                  type="checkbox"
+                  name="esta_embarazada"
+                  checked={formPersonal.esta_embarazada}
+                  onChange={handleChange}
+                />
+              </label>
+              <label>
+                MAC
+                <input
+                  type="checkbox"
+                  name="mac"
+                  checked={formPersonal.mac}
+                  onChange={handleChange}
+                />
+              </label>
+              <div className="fisiologicos-otros">
+                <label htmlFor="otros">Otros</label>
+                <input
+                  id="otros"
+                  type="text"
+                  name="otros"
+                  value={formPersonal.otros}
+                  onChange={handleChange}
+                  className="input-text-auto"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="subsection">
@@ -527,23 +527,17 @@ function AntecedentePersonal() {
           </div>
 
           <div className="subsection">
-            <label className="label-block">
-              Hepatitis B
-              <input
-                type="checkbox"
-                name="hepatitis_b"
-                checked={formPersonal.hepatitis_b}
-                onChange={handleChange}
-                className="input-checkbox"
-              />
-            </label>
-            <div
-              className="label-with-margin"
-              style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}
-            >
-              <label style={{ marginBottom: 0 }} htmlFor="grupo_sanguineo">
-                Grupo sanguíneo
+            <div className="form-inline-group">
+              <label>
+                Hepatitis B
+                <input
+                  type="checkbox"
+                  name="hepatitis_b"
+                  checked={formPersonal.hepatitis_b}
+                  onChange={handleChange}
+                />
               </label>
+              <label htmlFor="grupo_sanguineo_desc">Grupo sanguíneo</label>
               <BloodTypeSelectorComponent
                 value={formPersonal.grupo_sanguineo_desc}
                 onChange={(value) =>
@@ -551,234 +545,238 @@ function AntecedentePersonal() {
                     target: { name: 'grupo_sanguineo_desc', value },
                   })
                 }
+                id="grupo_sanguineo_desc"
               />
             </div>
-            <div className="mt-2">Hábitos nocivos:</div>
-            <label className="label-with-margin">
-              ¿Fuma?
-              <input
-                type="checkbox"
-                name="fuma"
-                checked={formPersonal.fuma}
-                onChange={handleChange}
-                className="input-checkbox"
-              />
-            </label>
-            <label className="label-with-margin">
-              Aproximadamente
-              <input
-                type="number"
-                name="cigarrillos_dia"
-                value={formPersonal.cigarrillos_dia}
-                onChange={handleChange}
-                className="input-number"
-              />
-              Cigarrillos al día.
-            </label>
-            <label className="label-with-margin">
-              ¿Toma té, café?
-              <input
-                type="checkbox"
-                name="toma_te"
-                checked={formPersonal.toma_te}
-                onChange={handleChange}
-                className="input-checkbox"
-              />
-            </label>
-            <label className="label-with-margin">
-              Aproximadamente
-              <input
-                type="number"
-                name="tazas_te_dia"
-                value={formPersonal.tazas_te_dia}
-                onChange={handleChange}
-                className="input-number"
-              />
-              Tazas al día.
-            </label>
+
+            <div className="mt-4">Hábitos nocivos:</div>
+            <div className="form-inline-group">
+              <label>
+                ¿Fuma?
+                <input
+                  type="checkbox"
+                  name="fuma"
+                  checked={formPersonal.fuma}
+                  onChange={handleChange}
+                />
+              </label>
+              <label>
+                Aproximadamente
+                <input
+                  type="number"
+                  name="cigarrillos_dia"
+                  value={formPersonal.cigarrillos_dia}
+                  onChange={handleChange}
+                  className="input-number"
+                />
+                Cigarrillos al día.
+              </label>
+              <label>
+                ¿Toma té, café?
+                <input
+                  type="checkbox"
+                  name="toma_te"
+                  checked={formPersonal.toma_te}
+                  onChange={handleChange}
+                />
+              </label>
+              <label>
+                Aproximadamente
+                <input
+                  type="number"
+                  name="tazas_te_dia"
+                  value={formPersonal.tazas_te_dia}
+                  onChange={handleChange}
+                  className="input-number"
+                />
+                Tazas al día.
+              </label>
+            </div>
           </div>
 
           <div className="subsection">
             <div className="mt-2">Bucales:</div>
-            <label className="label-with-margin">
-              ¿Aprieta sus dientes?
-              <input
-                type="checkbox"
-                name="aprieta_dientes"
-                checked={formPersonal.aprieta_dientes}
-                onChange={handleChange}
-                className="input-checkbox"
-              />
-            </label>
-            <label className="label-with-margin">
-              ¿En qué momento del día?
-              <input
-                type="text"
-                name="momento_aprieta"
-                value={formPersonal.momento_aprieta}
-                onChange={handleChange}
-                className="input-text"
-              />
-            </label>
-            <label className="label-with-margin">
-              ¿Rechina sus dientes durante la noche?
-              <input
-                type="checkbox"
-                name="rechina"
-                checked={formPersonal.rechina}
-                onChange={handleChange}
-                className="input-checkbox"
-              />
-            </label>
-            <label className="label-with-margin">
-              ¿Por la mañana le duele los músculos de la cara o el cuello?
-              <input
-                type="checkbox"
-                name="dolor_muscular"
-                checked={formPersonal.dolor_muscular}
-                onChange={handleChange}
-                className="input-checkbox"
-              />
-            </label>
-            <label className="label-with-margin">
-              ¿Se chupa el dedo?
-              <input
-                type="checkbox"
-                name="chupa_dedo"
-                checked={formPersonal.chupa_dedo}
-                onChange={handleChange}
-                className="input-checkbox"
-              />
-            </label>
-            <label className="label-with-margin">
-              ¿Muerde otros objetos?
-              <input
-                type="checkbox"
-                name="muerde_objetos"
-                checked={formPersonal.muerde_objetos}
-                onChange={handleChange}
-                className="input-checkbox"
-              />
-            </label>
-            <label className="label-with-margin">
-              ¿Se muerde el labio, lengua?
-              <input
-                type="checkbox"
-                name="muerde_labios"
-                checked={formPersonal.muerde_labios}
-                onChange={handleChange}
-                className="input-checkbox"
-              />
-            </label>
-            <label className="label-with-margin">
-              Otros
-              <input
-                type="text"
-                name="otros_habitos"
-                value={formPersonal.otros_habitos}
-                onChange={handleChange}
-                className="input-text"
-              />
-            </label>
+            <div className="form-inline-group">
+              <label>
+                ¿Aprieta sus dientes?
+                <input
+                  type="checkbox"
+                  name="aprieta_dientes"
+                  checked={formPersonal.aprieta_dientes}
+                  onChange={handleChange}
+                />
+              </label>
+              <label>
+                ¿En qué momento del día?
+                <input
+                  type="text"
+                  name="momento_aprieta"
+                  value={formPersonal.momento_aprieta}
+                  onChange={handleChange}
+                  className="input-text"
+                  style={{ width: '200px' }}
+                />
+              </label>
+              <label>
+                ¿Rechina sus dientes durante la noche?
+                <input
+                  type="checkbox"
+                  name="rechina"
+                  checked={formPersonal.rechina}
+                  onChange={handleChange}
+                />
+              </label>
+              <label>
+                ¿Por la mañana le duele los músculos de la cara o el cuello?
+                <input
+                  type="checkbox"
+                  name="dolor_muscular"
+                  checked={formPersonal.dolor_muscular}
+                  onChange={handleChange}
+                />
+              </label>
+              <label>
+                ¿Se chupa el dedo?
+                <input
+                  type="checkbox"
+                  name="chupa_dedo"
+                  checked={formPersonal.chupa_dedo}
+                  onChange={handleChange}
+                />
+              </label>
+              <label>
+                ¿Muerde otros objetos?
+                <input
+                  type="checkbox"
+                  name="muerde_objetos"
+                  checked={formPersonal.muerde_objetos}
+                  onChange={handleChange}
+                />
+              </label>
+              <label>
+                ¿Se muerde el labio, lengua?
+                <input
+                  type="checkbox"
+                  name="muerde_labios"
+                  checked={formPersonal.muerde_labios}
+                  onChange={handleChange}
+                />
+              </label>
+              <div className="fisiologicos-otros">
+                <label htmlFor="otros_habitos">Otros</label>
+                <input
+                  id="otros_habitos"
+                  type="text"
+                  name="otros_habitos"
+                  value={formPersonal.otros_habitos}
+                  onChange={handleChange}
+                  className="input-text-auto"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="subsection">
             <div className="mt-2">Hábitos de higiene bucal:</div>
-            <label className="label-with-margin">
-              ¿Con qué frecuencia se cepilla sus dientes?
-              <input
-                type="number"
-                name="frecuencia_cepillado"
-                value={formPersonal.frecuencia_cepillado}
-                onChange={handleChange}
-                className="input-number"
-              />
-              Veces al día.
-            </label>
+            <div className="form-inline-group">
+              <label>
+                ¿Con qué frecuencia se cepilla sus dientes?
+                <input
+                  type="number"
+                  name="frecuencia_cepillado"
+                  value={formPersonal.frecuencia_cepillado}
+                  onChange={handleChange}
+                  className="input-number"
+                />
+                Veces al día.
+              </label>
+            </div>
             <div className="mt-2">Marque los elementos que emplea:</div>
-            <label className="label-with-margin">
-              Cepillo:
-              <input
-                type="checkbox"
-                name="cepillo_duro"
-                checked={formPersonal.cepillo_duro}
-                onChange={handleChange}
-                className="input-checkbox"
-              />{' '}
-              Duro
-              <input
-                type="checkbox"
-                name="cepillo_mediano"
-                checked={formPersonal.cepillo_mediano}
-                onChange={handleChange}
-                className="input-checkbox"
-              />{' '}
-              Mediano
-              <input
-                type="checkbox"
-                name="cepillo_blando"
-                checked={formPersonal.cepillo_blando}
-                onChange={handleChange}
-                className="input-checkbox"
-              />{' '}
-              Blando
-              <input
-                type="checkbox"
-                name="cepillo_electrico"
-                checked={formPersonal.cepillo_electrico}
-                onChange={handleChange}
-                className="input-checkbox"
-              />{' '}
-              Eléctrico
-            </label>
-            <label className="label-with-margin">
-              Cepillo interproximal
-              <input
-                type="checkbox"
-                name="cepillo_interproximal"
-                checked={formPersonal.cepillo_interproximal}
-                onChange={handleChange}
-                className="input-checkbox"
-              />
-              (Tipo)
-              <input
-                type="text"
-                name="tipo_interproximal"
-                value={formPersonal.tipo_interproximal}
-                onChange={handleChange}
-                className="input-text"
-              />
-            </label>
-            <label className="label-with-margin">
-              Seda dental
-              <input
-                type="checkbox"
-                name="seda_dental"
-                checked={formPersonal.seda_dental}
-                onChange={handleChange}
-                className="input-checkbox"
-              />
-            </label>
-            <label className="label-with-margin">
-              Enjuague bucal
-              <input
-                type="checkbox"
-                name="enjuague_bucal"
-                checked={formPersonal.enjuague_bucal}
-                onChange={handleChange}
-                className="input-checkbox"
-              />
-            </label>
-            <label className="label-with-margin">
-              Otros
-              <input
-                type="text"
-                name="otros_elementos_higiene"
-                value={formPersonal.otros_elementos_higiene}
-                onChange={handleChange}
-                className="input-text"
-              />
-            </label>
+            <div className="form-inline-group">
+              <label>
+                Cepillo:
+                <input
+                  type="checkbox"
+                  name="cepillo_duro"
+                  checked={formPersonal.cepillo_duro}
+                  onChange={handleChange}
+                />{' '}
+                Duro
+                <input
+                  type="checkbox"
+                  name="cepillo_mediano"
+                  checked={formPersonal.cepillo_mediano}
+                  onChange={handleChange}
+                />{' '}
+                Mediano
+                <input
+                  type="checkbox"
+                  name="cepillo_blando"
+                  checked={formPersonal.cepillo_blando}
+                  onChange={handleChange}
+                />{' '}
+                Blando
+                <input
+                  type="checkbox"
+                  name="cepillo_electrico"
+                  checked={formPersonal.cepillo_electrico}
+                  onChange={handleChange}
+                />{' '}
+                Eléctrico
+              </label>
+            </div>
+            <div className="form-inline-group">
+              <div className="fisiologicos-otros">
+                <label>
+                  Cepillo interproximal
+                  <input
+                    type="checkbox"
+                    name="cepillo_interproximal"
+                    checked={formPersonal.cepillo_interproximal}
+                    onChange={handleChange}
+                  />
+                  (Tipo)
+                </label>
+                <input
+                  type="text"
+                  name="tipo_interproximal"
+                  value={formPersonal.tipo_interproximal}
+                  onChange={handleChange}
+                  className="input-text-auto"
+                />
+              </div>
+            </div>
+            <div className="form-inline-group">
+              <label>
+                Seda dental
+                <input
+                  type="checkbox"
+                  name="seda_dental"
+                  checked={formPersonal.seda_dental}
+                  onChange={handleChange}
+                />
+              </label>
+              <label>
+                Enjuague bucal
+                <input
+                  type="checkbox"
+                  name="enjuague_bucal"
+                  checked={formPersonal.enjuague_bucal}
+                  onChange={handleChange}
+                />
+              </label>
+              <div className="fisiologicos-otros">
+                <label htmlFor="otros_elementos_higiene">Otros</label>
+                <input
+                  id="otros_elementos_higiene"
+                  type="text"
+                  name="otros_elementos_higiene"
+                  value={formPersonal.otros_elementos_higiene}
+                  onChange={handleChange}
+                  className="input-text-auto"
+                />
+              </div>
+            </div>
           </div>
         </div>
         {/* ========== ANTECEDENTES MÉDICOS ========== */}
@@ -824,26 +822,29 @@ function AntecedentePersonal() {
           </div>
 
           <div className="subsection">
-            <label className="label-block">
-              ¿Esta bajo tratamiento medico?
-              <input
-                type="checkbox"
-                name="bajo_tratamiento"
-                checked={formMedico.bajo_tratamiento}
-                onChange={handleChange}
-                className="input-checkbox"
-              />
-            </label>
-            <label className="label-block mt-2">
-              ¿De que tipo?
-              <input
-                type="text"
-                name="tipo_tratamiento"
-                value={formMedico.tipo_tratamiento}
-                onChange={handleChange}
-                className="input-full-width"
-              />
-            </label>
+            <div className="form-inline-group-block">
+              <label>
+                ¿Esta bajo tratamiento medico?
+                <input
+                  type="checkbox"
+                  name="bajo_tratamiento"
+                  checked={formMedico.bajo_tratamiento}
+                  onChange={handleChange}
+                />
+              </label>
+            </div>
+            <div className="form-inline-group-block">
+              <label>
+                ¿De que tipo?
+                <input
+                  type="text"
+                  name="tipo_tratamiento"
+                  value={formMedico.tipo_tratamiento}
+                  onChange={handleChange}
+                  className="input-full-width"
+                />
+              </label>
+            </div>
           </div>
 
           <div className="subsection">
@@ -858,49 +859,57 @@ function AntecedentePersonal() {
                 rows={2}
               />
             </label>
-            <label className="label-block mt-2">
-              ¿Ha tenido traumatismo, accidentes?
-              <input
-                type="checkbox"
-                name="tuvo_traumatismos"
-                checked={formMedico.tuvo_traumatismos}
-                onChange={handleChange}
-                className="input-checkbox"
-              />
-            </label>
-            <label className="label-block mt-2">
-              ¿De que tipo?
-              <input
-                type="text"
-                name="tipo_traumatismos"
-                value={formMedico.tipo_traumatismos}
-                onChange={handleChange}
-                className="input-full-width"
-              />
-            </label>
+            <div className="form-inline-group-block">
+              <label>
+                ¿Ha tenido traumatismo, accidentes?
+                <input
+                  type="checkbox"
+                  name="tuvo_traumatismos"
+                  checked={formMedico.tuvo_traumatismos}
+                  onChange={handleChange}
+                />
+              </label>
+            </div>
+            <div className="form-inline-group-block">
+              <label>
+                ¿De que tipo?
+                <input
+                  type="text"
+                  name="tipo_traumatismos"
+                  value={formMedico.tipo_traumatismos}
+                  onChange={handleChange}
+                  className="input-full-width"
+                />
+              </label>
+            </div>
           </div>
 
           <div className="subsection">
-            <label className="label-block">
-              ¿Es alérgico a algún medicamento, anestésico o alimento? ¿Cuál es?
-              <input
-                type="text"
-                name="alergias"
-                value={formMedico.alergias}
-                onChange={handleChange}
-                className="input-full-width"
-              />
-            </label>
-            <label className="label-block mt-2">
-              Tiene algún medicamento prohibido o contraindicado? ¿Cual es?
-              <input
-                type="text"
-                name="medicamentos_contraindicados"
-                value={formMedico.medicamentos_contraindicados}
-                onChange={handleChange}
-                className="input-full-width"
-              />
-            </label>
+            <div className="form-inline-group-block">
+              <label>
+                ¿Es alérgico a algún medicamento, anestésico o alimento? ¿Cuál
+                es?
+                <input
+                  type="text"
+                  name="alergias"
+                  value={formMedico.alergias}
+                  onChange={handleChange}
+                  className="input-full-width"
+                />
+              </label>
+            </div>
+            <div className="form-inline-group-block">
+              <label>
+                Tiene algún medicamento prohibido o contraindicado? ¿Cual es?
+                <input
+                  type="text"
+                  name="medicamentos_contraindicados"
+                  value={formMedico.medicamentos_contraindicados}
+                  onChange={handleChange}
+                  className="input-full-width"
+                />
+              </label>
+            </div>
           </div>
 
           <div className="subsection">
@@ -1026,16 +1035,18 @@ function AntecedentePersonal() {
                 Afeccion neurologica o psiquica
               </label>
             </div>
-            <label className="label-block mt-2">
-              Especifique o indique otra que no haya sido mencionada:
-              <input
-                type="text"
-                name="otras_enf_patologicas"
-                value={formMedico.otras_enf_patologicas}
-                onChange={handleChange}
-                className="input-full-width"
-              />
-            </label>
+            <div className="form-inline-group-block">
+              <label>
+                Especifique o indique otra que no haya sido mencionada:
+                <input
+                  type="text"
+                  name="otras_enf_patologicas"
+                  value={formMedico.otras_enf_patologicas}
+                  onChange={handleChange}
+                  className="input-full-width"
+                />
+              </label>
+            </div>
           </div>
 
           <div className="subsection">
@@ -1080,8 +1091,8 @@ function AntecedentePersonal() {
 
           <div className="subsection">
             <h4 className="subsection-title">Voy al dentista:</h4>
-            <div className="checkbox-group">
-              <label className="checkbox-flex">
+            <div className="form-inline-group-block">
+              <label>
                 <input
                   type="checkbox"
                   name="motivo_dolor"
@@ -1092,8 +1103,9 @@ function AntecedentePersonal() {
                   Solo cuando tengo dolor u otro problema de importancia
                 </span>
               </label>
-
-              <label className="checkbox-flex">
+            </div>
+            <div className="form-inline-group-block">
+              <label>
                 <input
                   type="checkbox"
                   name="motivo_control"
@@ -1113,8 +1125,9 @@ function AntecedentePersonal() {
                 />
                 <span className="ml-1">meses</span>
               </label>
-
-              <label className="checkbox-flex">
+            </div>
+            <div className="form-inline-group-block">
+              <label>
                 <input
                   type="checkbox"
                   name="motivo_limpieza"
@@ -1139,8 +1152,8 @@ function AntecedentePersonal() {
             <h4 className="subsection-title">
               Con respecto a la atención dental:
             </h4>
-            <div className="checkbox-group">
-              <label className="checkbox-item">
+            <div className="form-inline-group-block">
+              <label>
                 <input
                   type="checkbox"
                   name="actitud_tranquilo"
@@ -1149,8 +1162,9 @@ function AntecedentePersonal() {
                 />
                 <span>Soy muy tranquilo(a)</span>
               </label>
-
-              <label className="checkbox-item">
+            </div>
+            <div className="form-inline-group-block">
+              <label>
                 <input
                   type="checkbox"
                   name="actitud_aprensivo"
@@ -1159,8 +1173,9 @@ function AntecedentePersonal() {
                 />
                 <span>Soy aprensivo y nervioso(a)</span>
               </label>
-
-              <label className="checkbox-item">
+            </div>
+            <div className="form-inline-group-block">
+              <label>
                 <input
                   type="checkbox"
                   name="actitud_panico"
@@ -1173,17 +1188,19 @@ function AntecedentePersonal() {
           </div>
 
           <div className="subsection">
-            <label className="label-block">
-              Lo que más me desagrada de la atención dental es:
-              <input
-                type="text"
-                name="desagrado_atencion"
-                value={formCumplimiento.desagrado_atencion}
-                onChange={handleChange}
-                className="input-full-width mt-2"
-                placeholder="Ej: el ruido, agujas, etc."
-              />
-            </label>
+            <div className="form-inline-group-block">
+              <label>
+                Lo que más me desagrada de la atención dental es:
+                <input
+                  type="text"
+                  name="desagrado_atencion"
+                  value={formCumplimiento.desagrado_atencion}
+                  onChange={handleChange}
+                  className="input-full-width mt-2"
+                  placeholder="Ej: el ruido, agujas, etc."
+                />
+              </label>
+            </div>
           </div>
 
           <div className="border-top">
