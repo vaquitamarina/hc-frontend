@@ -1,414 +1,1251 @@
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
-import FormField from '@ui/FormField/FormField';
-import Button from '@ui/Button';
 import {
-  useFiliacion,
-  useUpdateFiliacion,
-  useCreateFiliacion,
+  useAntecedentePersonal,
+  useCreateAntecedentePersonal,
+  useUpdateAntecedentePersonal,
+  useAntecedenteMedico,
+  useCreateAntecedenteMedico,
+  useUpdateAntecedenteMedico,
+  useAntecedenteFamiliar,
+  useCreateAntecedenteFamiliar,
+  useUpdateAntecedenteFamiliar,
+  useAntecedenteCumplimiento,
+  useCreateAntecedenteCumplimiento,
+  useUpdateAntecedenteCumplimiento,
 } from '@hooks/useAnamnesis';
-import { usePatientByHistory, useAssignPatient } from '@hooks/useHistoria';
-import { useCreatePatient, useUpdatePatient } from '@hooks/usePatients';
+import { useBloodType } from '@hooks/useCatalog';
+import Button from '@ui/Button';
+import './antecedente.css';
 
-function Filiacion() {
+const initialFormPersonal = {
+  esta_embarazada: false,
+  mac: false,
+  otros: '',
+  psicosocial: '',
+  vacunas: '',
+  hepatitis_b: false,
+  grupo_sanguineo_desc: '',
+  fuma: false,
+  cigarrillos_dia: '',
+  toma_te: false,
+  tazas_te_dia: '',
+  toma_alcohol: '',
+  frecuencia_alcohol: '',
+  aprieta_dientes: false,
+  momento_aprieta: '',
+  rechina: false,
+  dolor_muscular: false,
+  chupa_dedo: false,
+  muerde_objetos: false,
+  muerde_labios: false,
+  otros_habitos: '',
+  frecuencia_cepillado: '',
+  cepillo_duro: false,
+  cepillo_mediano: false,
+  cepillo_blando: false,
+  cepillo_electrico: false,
+  cepillo_interproximal: false,
+  tipo_interproximal: '',
+  seda_dental: false,
+  enjuague_bucal: false,
+  otros_elementos_higiene: '',
+};
+
+const initialFormMedico = {
+  salud_general: 'Regular',
+  bajo_tratamiento: false,
+  tipo_tratamiento: '',
+  hospitalizaciones: '',
+  tuvo_traumatismos: false,
+  tipo_traumatismos: '',
+  alergias: '',
+  medicamentos_contraindicados: '',
+  enf_hepatitis: false,
+  enf_alergia_cronica: false,
+  enf_corazon: false,
+  enf_fiebre_reumatica: false,
+  enf_anemia: false,
+  enf_asma: false,
+  enf_diabetes: false,
+  enf_epilepsia: false,
+  enf_coagulacion: false,
+  enf_tbc: false,
+  enf_hipertension: false,
+  enf_ulcera: false,
+  enf_neurologica: false,
+  otras_enf_patologicas: '',
+  odontologicos: '',
+};
+
+const initialFormFamiliar = {
+  descripcion: '',
+};
+
+const initialFormCumplimiento = {
+  motivo_dolor: false,
+  motivo_control: false,
+  frecuencia_control_meses: '',
+  motivo_limpieza: false,
+  frecuencia_limpieza_meses: '',
+  actitud_tranquilo: false,
+  actitud_aprensivo: false,
+  actitud_panico: false,
+  desagrado_atencion: '',
+  fecha_consentimiento: '',
+  firma_nombre: '',
+  historia_elaborada_por: '',
+};
+
+// Componente para seleccionar grupo sanguíneo usando select HTML nativo
+function BloodTypeSelectorComponent({ value, onChange }) {
+  const { data: bloodTypeData, isLoading, error } = useBloodType();
+
+  if (isLoading) return <div style={{ padding: '0.75rem' }}>Cargando...</div>;
+  if (error)
+    return (
+      <div style={{ padding: '0.75rem', color: 'red' }}>
+        Error cargando grupo sanguíneo
+      </div>
+    );
+
+  return (
+    <select
+      value={value || ''}
+      onChange={(e) => onChange(e.target.value)}
+      className="border-2 border-[var(--color-primary-soft)] rounded-md px-3 py-2 focus:outline-none focus:border-[var(--color-primary)]"
+    >
+      <option value="">Seleccione grupo sanguíneo</option>
+      {bloodTypeData?.data?.map((item) => (
+        <option
+          key={item.nombre || item.descripcion}
+          value={item.nombre || item.descripcion}
+        >
+          {item.nombre || item.descripcion}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function AntecedentePersonal() {
   const { id } = useParams();
-  const { data, isLoading, error } = useFiliacion(id);
-  const updateFiliacion = useUpdateFiliacion();
-  const createFiliacion = useCreateFiliacion();
-  const { data: patient } = usePatientByHistory(id);
-  const createPatient = useCreatePatient();
-  const assignPatient = useAssignPatient();
-  const updatePatient = useUpdatePatient();
-  const [filiacionData, setFiliacionData] = useState({});
+  const { data: dataPersonal, isLoading: loadingPersonal } =
+    useAntecedentePersonal(id);
+  const { data: dataMedico, isLoading: loadingMedico } =
+    useAntecedenteMedico(id);
+  const { data: dataFamiliar, isLoading: loadingFamiliar } =
+    useAntecedenteFamiliar(id);
+  const { data: dataCumplimiento, isLoading: loadingCumplimiento } =
+    useAntecedenteCumplimiento(id);
+
+  const createPersonal = useCreateAntecedentePersonal();
+  const updatePersonal = useUpdateAntecedentePersonal();
+  const createMedico = useCreateAntecedenteMedico();
+  const updateMedico = useUpdateAntecedenteMedico();
+  const createFamiliar = useCreateAntecedenteFamiliar();
+  const updateFamiliar = useUpdateAntecedenteFamiliar();
+  const createCumplimiento = useCreateAntecedenteCumplimiento();
+  const updateCumplimiento = useUpdateAntecedenteCumplimiento();
+
+  const [formPersonal, setFormPersonal] = useState(initialFormPersonal);
+  const [formMedico, setFormMedico] = useState(initialFormMedico);
+  const [formFamiliar, setFormFamiliar] = useState(initialFormFamiliar);
+  const [formCumplimiento, setFormCumplimiento] = useState(
+    initialFormCumplimiento
+  );
+  const [editModePersonal, setEditModePersonal] = useState(false);
+  const [editModeMedico, setEditModeMedico] = useState(false);
+  const [editModeFamiliar, setEditModeFamiliar] = useState(false);
+  const [editModeCumplimiento, setEditModeCumplimiento] = useState(false);
+
+  // Función para normalizar datos desde la BD
+  const normalizeDataFromDB = async (dbData, initialFormRef) => {
+    console.log('id_grupo_sanguineo value:', dbData.id_grupo_sanguineo);
+    const normalized = {};
+
+    // PRIMERO: Convertir id_grupo_sanguineo a nombre si existe
+    if (dbData.id_grupo_sanguineo) {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/catalogo/catalogo_grupo_sanguineo/${dbData.id_grupo_sanguineo}`,
+          {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Fetched blood type name:', data.nombre);
+          normalized['grupo_sanguineo_desc'] = data.nombre || '';
+        }
+      } catch (err) {
+        console.error('Error converting ID to blood type name:', err);
+      }
+    }
+
+    // SEGUNDO: Procesar todos los otros campos
+    Object.keys(initialFormRef).forEach((key) => {
+      // Skip id_grupo_sanguineo y grupo_sanguineo_desc ya que fueron procesados
+      if (key === 'id_grupo_sanguineo' || key === 'grupo_sanguineo_desc')
+        return;
+
+      const value = dbData[key];
+      const initialValue = initialFormRef[key];
+
+      // Si el valor inicial es booleano, convertir el valor de BD a booleano
+      if (typeof initialValue === 'boolean') {
+        // Maneja: true, false, 1, 0, "true", "false", "1", "0", null, undefined
+        if (value === null || value === undefined) {
+          normalized[key] = false;
+        } else if (typeof value === 'boolean') {
+          normalized[key] = value;
+        } else if (typeof value === 'number') {
+          normalized[key] = value !== 0;
+        } else if (typeof value === 'string') {
+          normalized[key] =
+            value.toLowerCase() === 'true' || value === '1' || value === 'yes';
+        } else {
+          normalized[key] = Boolean(value);
+        }
+      }
+      // Si el valor inicial es string, mantener como string (o vacío si null)
+      else if (typeof initialValue === 'string') {
+        if (value === null || value === undefined) {
+          normalized[key] = '';
+        }
+        // Convertir fechas ISO a formato yyyy-MM-dd
+        else if (
+          (key.includes('fecha') || key.includes('date')) &&
+          typeof value === 'string'
+        ) {
+          const date = new Date(value);
+          if (!isNaN(date.getTime())) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            normalized[key] = `${year}-${month}-${day}`;
+          } else {
+            normalized[key] = String(value);
+          }
+        } else {
+          normalized[key] = String(value);
+        }
+      }
+      // Para otros tipos, mantener el valor tal cual
+      else {
+        normalized[key] = value || initialValue;
+      }
+    });
+
+    console.log('Final normalized data:', normalized);
+    return normalized;
+  };
 
   useEffect(() => {
-    // Solo cargar datos si existen, ignorar null (404)
-    if (data || patient) {
-      setFiliacionData({
-        nombres: (data?.nombres ?? patient?.nombre) || '',
-        apellidos: (data?.apellidos ?? patient?.apellido) || '',
-        dni: (data?.dni ?? patient?.dni) || '',
-        fecha_nacimiento:
-          (data?.fecha_nacimiento ?? patient?.fecha_nacimiento)?.split(
-            'T'
-          )[0] || '',
-        sexo: (data?.sexo ?? patient?.sexo) || '',
-        telefono: (data?.telefono ?? patient?.telefono) || '',
-        email: (data?.email ?? patient?.email) || '',
-        // Campos exclusivos de filiación
-        edad: data?.edad || '',
-        raza: data?.raza || '',
-        lugar: data?.lugar || '',
-        estado_civil: data?.estado_civil || '',
-        nombre_conyuge: data?.nombre_conyuge || '',
-        ocupacion: data?.ocupacion || '',
-        lugar_procedencia: data?.lugar_procedencia || '',
-        tiempo_residencia_tacna: data?.tiempo_residencia_tacna || '',
-        direccion: data?.direccion || '',
-        telefono_emergencia: data?.telefono_emergencia || '',
-        ultima_visita_dentista:
-          data?.ultima_visita_dentista?.split('T')[0] || '',
-        motivo_visita_dentista: data?.motivo_visita_dentista || '',
-        ultima_visita_medico: data?.ultima_visita_medico?.split('T')[0] || '',
-        motivo_visita_medico: data?.motivo_visita_medico || '',
-        contacto_emergencia: data?.contacto_emergencia || '',
-        acompaniante: data?.acompaniante || '',
-        fecha_elaboracion: data?.fecha_elaboracion?.split('T')[0] || '',
-      });
+    if (dataPersonal) {
+      normalizeDataFromDB(dataPersonal, initialFormPersonal).then(
+        (normalizedData) => {
+          console.log(
+            'grupo_sanguineo_desc:',
+            normalizedData.grupo_sanguineo_desc
+          );
+          console.log('Normalized data:', normalizedData);
+          setFormPersonal({ ...initialFormPersonal, ...normalizedData });
+          setEditModePersonal(true);
+        }
+      );
+    } else {
+      setFormPersonal(initialFormPersonal);
+      setEditModePersonal(false);
     }
-    // No hacer nada si ambos son null (es la primera vez)
-  }, [data, patient]);
+  }, [dataPersonal]);
 
-  const handleChange = (eOrValue) => {
-    // Si viene de un input normal
-    if (eOrValue && eOrValue.target) {
-      const { name, value } = eOrValue.target;
-      setFiliacionData((prev) => ({ ...prev, [name]: value }));
-    } else if (
-      typeof eOrValue === 'object' &&
-      eOrValue !== null &&
-      'name' in eOrValue &&
-      'value' in eOrValue
-    ) {
-      // Si viene de un selector personalizado que pasa { name, value }
-      setFiliacionData((prev) => ({
+  useEffect(() => {
+    if (dataMedico) {
+      normalizeDataFromDB(dataMedico, initialFormMedico).then(
+        (normalizedData) => {
+          setFormMedico({ ...initialFormMedico, ...normalizedData });
+          setEditModeMedico(true);
+        }
+      );
+    } else {
+      setFormMedico(initialFormMedico);
+      setEditModeMedico(false);
+    }
+  }, [dataMedico]);
+
+  useEffect(() => {
+    if (dataFamiliar) {
+      normalizeDataFromDB(dataFamiliar, initialFormFamiliar).then(
+        (normalizedData) => {
+          setFormFamiliar({ ...initialFormFamiliar, ...normalizedData });
+          setEditModeFamiliar(true);
+        }
+      );
+    } else {
+      setFormFamiliar(initialFormFamiliar);
+      setEditModeFamiliar(false);
+    }
+  }, [dataFamiliar]);
+
+  useEffect(() => {
+    if (dataCumplimiento) {
+      normalizeDataFromDB(dataCumplimiento, initialFormCumplimiento).then(
+        (normalizedData) => {
+          setFormCumplimiento({
+            ...initialFormCumplimiento,
+            ...normalizedData,
+          });
+          setEditModeCumplimiento(true);
+        }
+      );
+    } else {
+      setFormCumplimiento(initialFormCumplimiento);
+      setEditModeCumplimiento(false);
+    }
+  }, [dataCumplimiento]);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    const newValue =
+      type === 'checkbox'
+        ? checked
+        : type === 'number'
+          ? value === ''
+            ? ''
+            : Number(value)
+          : value;
+
+    // Determina si pertenece a formulario personal, médico, familiar o cumplimiento
+    if (name in initialFormPersonal) {
+      setFormPersonal((prev) => ({
         ...prev,
-        [eOrValue.name]: eOrValue.value,
+        [name]: newValue,
+      }));
+    } else if (name in initialFormMedico) {
+      setFormMedico((prev) => ({
+        ...prev,
+        [name]: newValue,
+      }));
+    } else if (name in initialFormFamiliar) {
+      setFormFamiliar((prev) => ({
+        ...prev,
+        [name]: newValue,
+      }));
+    } else if (name in initialFormCumplimiento) {
+      setFormCumplimiento((prev) => ({
+        ...prev,
+        [name]: newValue,
       }));
     }
   };
 
-  const handleSubmit = async (e) => {
+  // Función para limpiar campos vacíos y convertirlos a null SOLO para envío
+  const cleanFormDataForSubmit = (data) => {
+    const cleaned = {};
+    Object.keys(data).forEach((key) => {
+      let value = data[key];
+      // Si es string vacío, undefined o NaN, convertir a null
+      if (
+        value === '' ||
+        value === undefined ||
+        (typeof value === 'number' && isNaN(value))
+      ) {
+        cleaned[key] = null;
+      }
+      // Convertir fechas yyyy-MM-dd a ISO format
+      else if (
+        (key.includes('fecha') || key.includes('date')) &&
+        typeof value === 'string' &&
+        value.match(/^\d{4}-\d{2}-\d{2}$/)
+      ) {
+        const date = new Date(value + 'T00:00:00Z');
+        cleaned[key] = date.toISOString();
+      } else {
+        cleaned[key] = value;
+      }
+    });
+    return cleaned;
+  };
+
+  const handleSubmitAll = async (e) => {
     e.preventDefault();
 
-    // Validación: nombre y apellido obligatorios para paciente
-    if (!filiacionData.nombres || !filiacionData.apellidos) {
-      alert(
-        'Por favor, ingresa nombre y apellido (obligatorios para crear paciente).'
-      );
+    if (!id) {
+      alert('Error: ID de historia no disponible.');
       return;
     }
-    // Validación: edad y sexo obligatorios para filiación
-    if (!filiacionData.edad || !filiacionData.sexo) {
-      alert(
-        'Por favor, ingresa edad y sexo (obligatorios para crear filiación).'
-      );
-      return;
-    }
-    // Convertir edad a número antes de enviar
-    const filiacionPayload = {
-      id_historia: id, // ¡CRÍTICO! Incluir id_historia
-      edad: filiacionData.edad ? Number(filiacionData.edad) : null,
-      sexo: filiacionData.sexo || null,
-      raza: filiacionData.raza || null,
-      fecha_nacimiento: filiacionData.fecha_nacimiento || null,
-      lugar: filiacionData.lugar || null,
-      estado_civil: filiacionData.estado_civil || null,
-      nombre_conyuge: filiacionData.nombre_conyuge || null,
-      ocupacion: filiacionData.ocupacion || null,
-      lugar_procedencia: filiacionData.lugar_procedencia || null,
-      tiempo_residencia_tacna: filiacionData.tiempo_residencia_tacna || null,
-      direccion: filiacionData.direccion || null,
-      ultima_visita_dentista: filiacionData.ultima_visita_dentista || null,
-      motivo_visita_dentista: filiacionData.motivo_visita_dentista || null,
-      ultima_visita_medico: filiacionData.ultima_visita_medico || null,
-      motivo_visita_medico: filiacionData.motivo_visita_medico || null,
-      contacto_emergencia: filiacionData.contacto_emergencia || null,
-      telefono_emergencia: filiacionData.telefono_emergencia || null,
-      acompaniante: filiacionData.acompaniante || null,
-      fecha_elaboracion: filiacionData.fecha_elaboracion || null,
-    };
 
     try {
-      let patientId = patient?.id_paciente;
-      // Si no hay paciente, crearlo y asociarlo
-      if (!patientId) {
-        const newPatient = await createPatient.mutateAsync({
-          nombre: filiacionData.nombres,
-          apellido: filiacionData.apellidos,
-        });
-        patientId = newPatient.id;
-        await assignPatient.mutateAsync({
-          idHistory: id,
-          idPatient: patientId,
-        });
+      // Ejecutar todas las operaciones en paralelo
+      const promises = [];
+
+      // Personal
+      const cleanedPersonal = cleanFormDataForSubmit(formPersonal);
+      if (editModePersonal) {
+        promises.push(
+          updatePersonal.mutateAsync({ idHistoria: id, data: cleanedPersonal })
+        );
       } else {
-        // Si el paciente ya existe, actualizar sus datos principales
-        await updatePatient.mutateAsync({
-          id: patientId,
-          data: {
-            nombre: filiacionData.nombres,
-            apellido: filiacionData.apellidos,
-          },
-        });
+        promises.push(
+          createPersonal.mutateAsync({ ...cleanedPersonal, id_historia: id })
+        );
       }
-      // Guardar filiación (PUT o POST según corresponda)
-      if (data) {
-        await updateFiliacion.mutateAsync({
-          idHistoria: id,
-          filiacion: filiacionPayload,
-        });
+
+      // Médico
+      const cleanedMedico = cleanFormDataForSubmit(formMedico);
+      if (editModeMedico) {
+        promises.push(
+          updateMedico.mutateAsync({ idHistoria: id, data: cleanedMedico })
+        );
       } else {
-        await createFiliacion.mutateAsync(filiacionPayload);
+        promises.push(
+          createMedico.mutateAsync({ ...cleanedMedico, id_historia: id })
+        );
       }
-      // feedback opcional
-    } catch {
-      // feedback de error
+
+      // Familiar
+      const cleanedFamiliar = cleanFormDataForSubmit(formFamiliar);
+      if (editModeFamiliar) {
+        promises.push(
+          updateFamiliar.mutateAsync({ idHistoria: id, data: cleanedFamiliar })
+        );
+      } else {
+        promises.push(
+          createFamiliar.mutateAsync({ ...cleanedFamiliar, id_historia: id })
+        );
+      }
+
+      // Cumplimiento
+      const cleanedCumplimiento = cleanFormDataForSubmit(formCumplimiento);
+      if (editModeCumplimiento) {
+        promises.push(
+          updateCumplimiento.mutateAsync({
+            idHistoria: id,
+            data: cleanedCumplimiento,
+          })
+        );
+      } else {
+        promises.push(
+          createCumplimiento.mutateAsync({
+            ...cleanedCumplimiento,
+            id_historia: id,
+          })
+        );
+      }
+
+      await Promise.all(promises);
+      alert('Todos los antecedentes se guardaron correctamente.');
+    } catch (error) {
+      alert('Error al guardar los antecedentes: ' + error.message);
     }
   };
 
-  if (isLoading) return <div>Cargando...</div>;
-
-  // Si hay error distinto a 404, mostrarlo
-  if (error && error.message && !error.message.includes('No se pudo obtener')) {
-    return <div>Error: {error.message}</div>;
-  }
+  if (
+    loadingPersonal ||
+    loadingMedico ||
+    loadingFamiliar ||
+    loadingCumplimiento
+  )
+    return <div>Cargando...</div>;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="antecedente-container">
       {/* Header Section */}
-      <div className="bg-[var(--color-primary)] text-white py-4 px-8 rounded-[var(--radius-md)] flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Filiacion</h2>
-        <div className="text-right">
-          <p className="text-sm">Historia Clínica Nº:</p>
-          <p className="text-lg font-bold">HC-{id}</p>
+      <div className="antecedente-header">
+        <h2 className="antecedente-header-title">Antecedentes</h2>
+        <div className="antecedente-header-info">
+          <p className="antecedente-header-label">Historia Clínica Nº:</p>
+          <p className="antecedente-header-value">HC-{id}</p>
         </div>
       </div>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {/* Nombres y Apellidos - Full width */}
-        <div className="flex gap-4">
-          <FormField
-            label="Nombres"
-            value={filiacionData.nombres || ''}
-            name="nombres"
-            type="text"
-            isFormMode={true}
-            flex="1"
-            onChange={handleChange}
-          />
-          <FormField
-            label="Apellidos"
-            value={filiacionData.apellidos || ''}
-            name="apellidos"
-            type="text"
-            isFormMode={true}
-            flex="1"
-            onChange={handleChange}
-          />
-        </div>
+      <form onSubmit={handleSubmitAll} className="antecedente-form">
+        {/* ========== ANTECEDENTES PERSONALES Y MÉDICOS ========== */}
+        <div className="antecedente-section">
+          <h3 className="section-title">Antecedentes Personales</h3>
 
-        {/* Edad, Sexo, Raza */}
-        <div className="flex gap-4">
-          <FormField
-            label="Edad"
-            value={filiacionData.edad || ''}
-            name="edad"
-            type="number"
-            isFormMode={true}
-            flex="1"
-            onChange={handleChange}
-          />
-          <FormField
-            label="Sexo"
-            value={filiacionData.sexo || ''}
-            name="sexo"
-            type="text"
-            isFormMode={true}
-            flex="1"
-            onChange={handleChange}
-          />
-          <FormField
-            label="Raza"
-            value={filiacionData.raza || ''}
-            name="raza"
-            type="text"
-            isFormMode={true}
-            flex="1"
-            onChange={handleChange}
-          />
-        </div>
+          <div className="subsection">
+            <h4 className="subsection-title">Fisiologicos :</h4>
+            <label className="label-block">
+              Mujeres en edad fértil: ¿Está embarazada?
+              <input
+                type="checkbox"
+                name="esta_embarazada"
+                checked={formPersonal.esta_embarazada}
+                onChange={handleChange}
+                className="input-checkbox"
+              />
+            </label>
+            <label className="label-with-margin" htmlFor="mac">
+              MAC
+            </label>
+            <input
+              id="mac"
+              type="checkbox"
+              name="mac"
+              checked={formPersonal.mac}
+              onChange={handleChange}
+              className="input-checkbox"
+            />
+            <label className="label-with-margin">
+              Otros
+              <input
+                type="text"
+                name="otros"
+                value={formPersonal.otros}
+                onChange={handleChange}
+                className="input-text"
+              />
+            </label>
+          </div>
 
-        {/* Fecha de nacimiento (2 campos) */}
-        <div className="flex gap-4">
-          <FormField
-            label="Fecha de nacimiento"
-            value={filiacionData.fecha_nacimiento || ''}
-            name="fecha_nacimiento"
-            type="date"
-            isFormMode={true}
-            flex="1"
-            onChange={handleChange}
-          />
-        </div>
+          <div className="subsection">
+            <h4 className="subsection-title">Generales :</h4>
+            <label className="label-block">
+              Psicosociales:
+              <textarea
+                name="psicosocial"
+                value={formPersonal.psicosocial}
+                onChange={handleChange}
+                className="textarea"
+                rows={2}
+              />
+            </label>
+            <label className="label-block mt-2">
+              Inmunizaciones y vacunas mujeres 15-19:
+              <input
+                type="text"
+                name="vacunas"
+                value={formPersonal.vacunas}
+                onChange={handleChange}
+                className="input-text"
+              />
+            </label>
+          </div>
 
-        {/* Estado civil, Nombre del cónyuge */}
-        <div className="flex gap-4">
-          <FormField
-            label="Estado civil"
-            value={filiacionData.estado_civil || ''}
-            name="estado_civil"
-            type="text"
-            isFormMode={true}
-            flex="1"
-            onChange={handleChange}
-          />
-          <FormField
-            label="Nombre del conyuge"
-            value={filiacionData.nombre_conyuge || ''}
-            name="nombre_conyuge"
-            type="text"
-            isFormMode={true}
-            flex="1"
-            onChange={handleChange}
-          />
-        </div>
+          <div className="subsection">
+            <label className="label-block">
+              Hepatitis B
+              <input
+                type="checkbox"
+                name="hepatitis_b"
+                checked={formPersonal.hepatitis_b}
+                onChange={handleChange}
+                className="input-checkbox"
+              />
+            </label>
+            <div
+              className="label-with-margin"
+              style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}
+            >
+              <label style={{ marginBottom: 0 }} htmlFor="grupo_sanguineo">
+                Grupo sanguíneo
+              </label>
+              <BloodTypeSelectorComponent
+                value={formPersonal.grupo_sanguineo_desc}
+                onChange={(value) =>
+                  handleChange({
+                    target: { name: 'grupo_sanguineo_desc', value },
+                  })
+                }
+              />
+            </div>
+            <div className="mt-2">Hábitos nocivos:</div>
+            <label className="label-with-margin">
+              ¿Fuma?
+              <input
+                type="checkbox"
+                name="fuma"
+                checked={formPersonal.fuma}
+                onChange={handleChange}
+                className="input-checkbox"
+              />
+            </label>
+            <label className="label-with-margin">
+              Aproximadamente
+              <input
+                type="number"
+                name="cigarrillos_dia"
+                value={formPersonal.cigarrillos_dia}
+                onChange={handleChange}
+                className="input-number"
+              />
+              Cigarrillos al día.
+            </label>
+            <label className="label-with-margin">
+              ¿Toma té, café?
+              <input
+                type="checkbox"
+                name="toma_te"
+                checked={formPersonal.toma_te}
+                onChange={handleChange}
+                className="input-checkbox"
+              />
+            </label>
+            <label className="label-with-margin">
+              Aproximadamente
+              <input
+                type="number"
+                name="tazas_te_dia"
+                value={formPersonal.tazas_te_dia}
+                onChange={handleChange}
+                className="input-number"
+              />
+              Tazas al día.
+            </label>
+          </div>
 
-        {/* Ocupación, Lugar de procedencia */}
-        <div className="flex gap-4">
-          <FormField
-            label="Ocupacion"
-            value={filiacionData.ocupacion || ''}
-            name="ocupacion"
-            type="text"
-            isFormMode={true}
-            flex="1"
-            onChange={handleChange}
-          />
-          <FormField
-            label="Lugar de procedencia"
-            value={filiacionData.lugar_procedencia || ''}
-            name="lugar_procedencia"
-            type="text"
-            isFormMode={true}
-            flex="1"
-            onChange={handleChange}
-          />
-        </div>
+          <div className="subsection">
+            <div className="mt-2">Bucales:</div>
+            <label className="label-with-margin">
+              ¿Aprieta sus dientes?
+              <input
+                type="checkbox"
+                name="aprieta_dientes"
+                checked={formPersonal.aprieta_dientes}
+                onChange={handleChange}
+                className="input-checkbox"
+              />
+            </label>
+            <label className="label-with-margin">
+              ¿En qué momento del día?
+              <input
+                type="text"
+                name="momento_aprieta"
+                value={formPersonal.momento_aprieta}
+                onChange={handleChange}
+                className="input-text"
+              />
+            </label>
+            <label className="label-with-margin">
+              ¿Rechina sus dientes durante la noche?
+              <input
+                type="checkbox"
+                name="rechina"
+                checked={formPersonal.rechina}
+                onChange={handleChange}
+                className="input-checkbox"
+              />
+            </label>
+            <label className="label-with-margin">
+              ¿Por la mañana le duele los músculos de la cara o el cuello?
+              <input
+                type="checkbox"
+                name="dolor_muscular"
+                checked={formPersonal.dolor_muscular}
+                onChange={handleChange}
+                className="input-checkbox"
+              />
+            </label>
+            <label className="label-with-margin">
+              ¿Se chupa el dedo?
+              <input
+                type="checkbox"
+                name="chupa_dedo"
+                checked={formPersonal.chupa_dedo}
+                onChange={handleChange}
+                className="input-checkbox"
+              />
+            </label>
+            <label className="label-with-margin">
+              ¿Muerde otros objetos?
+              <input
+                type="checkbox"
+                name="muerde_objetos"
+                checked={formPersonal.muerde_objetos}
+                onChange={handleChange}
+                className="input-checkbox"
+              />
+            </label>
+            <label className="label-with-margin">
+              ¿Se muerde el labio, lengua?
+              <input
+                type="checkbox"
+                name="muerde_labios"
+                checked={formPersonal.muerde_labios}
+                onChange={handleChange}
+                className="input-checkbox"
+              />
+            </label>
+            <label className="label-with-margin">
+              Otros
+              <input
+                type="text"
+                name="otros_habitos"
+                value={formPersonal.otros_habitos}
+                onChange={handleChange}
+                className="input-text"
+              />
+            </label>
+          </div>
 
-        {/* Tiempo de residencia en Tacna */}
-        <div className="flex gap-4">
-          <FormField
-            label="Tiempo de residencia en Tacna"
-            value={filiacionData.tiempo_residencia_tacna || ''}
-            name="tiempo_residencia_tacna"
-            type="text"
-            isFormMode={true}
-            flex="1"
-            onChange={handleChange}
-          />
+          <div className="subsection">
+            <div className="mt-2">Hábitos de higiene bucal:</div>
+            <label className="label-with-margin">
+              ¿Con qué frecuencia se cepilla sus dientes?
+              <input
+                type="number"
+                name="frecuencia_cepillado"
+                value={formPersonal.frecuencia_cepillado}
+                onChange={handleChange}
+                className="input-number"
+              />
+              Veces al día.
+            </label>
+            <div className="mt-2">Marque los elementos que emplea:</div>
+            <label className="label-with-margin">
+              Cepillo:
+              <input
+                type="checkbox"
+                name="cepillo_duro"
+                checked={formPersonal.cepillo_duro}
+                onChange={handleChange}
+                className="input-checkbox"
+              />{' '}
+              Duro
+              <input
+                type="checkbox"
+                name="cepillo_mediano"
+                checked={formPersonal.cepillo_mediano}
+                onChange={handleChange}
+                className="input-checkbox"
+              />{' '}
+              Mediano
+              <input
+                type="checkbox"
+                name="cepillo_blando"
+                checked={formPersonal.cepillo_blando}
+                onChange={handleChange}
+                className="input-checkbox"
+              />{' '}
+              Blando
+              <input
+                type="checkbox"
+                name="cepillo_electrico"
+                checked={formPersonal.cepillo_electrico}
+                onChange={handleChange}
+                className="input-checkbox"
+              />{' '}
+              Eléctrico
+            </label>
+            <label className="label-with-margin">
+              Cepillo interproximal
+              <input
+                type="checkbox"
+                name="cepillo_interproximal"
+                checked={formPersonal.cepillo_interproximal}
+                onChange={handleChange}
+                className="input-checkbox"
+              />
+              (Tipo)
+              <input
+                type="text"
+                name="tipo_interproximal"
+                value={formPersonal.tipo_interproximal}
+                onChange={handleChange}
+                className="input-text"
+              />
+            </label>
+            <label className="label-with-margin">
+              Seda dental
+              <input
+                type="checkbox"
+                name="seda_dental"
+                checked={formPersonal.seda_dental}
+                onChange={handleChange}
+                className="input-checkbox"
+              />
+            </label>
+            <label className="label-with-margin">
+              Enjuague bucal
+              <input
+                type="checkbox"
+                name="enjuague_bucal"
+                checked={formPersonal.enjuague_bucal}
+                onChange={handleChange}
+                className="input-checkbox"
+              />
+            </label>
+            <label className="label-with-margin">
+              Otros
+              <input
+                type="text"
+                name="otros_elementos_higiene"
+                value={formPersonal.otros_elementos_higiene}
+                onChange={handleChange}
+                className="input-text"
+              />
+            </label>
+          </div>
         </div>
+        {/* ========== ANTECEDENTES MÉDICOS ========== */}
+        <div className="antecedente-section">
+          <h3 className="section-title">Antecedentes Médicos</h3>
 
-        {/* Dirección */}
-        <div className="flex gap-4">
-          <FormField
-            label="Direccion"
-            value={filiacionData.direccion || ''}
-            name="direccion"
-            type="text"
-            isFormMode={true}
-            flex="2"
-            onChange={handleChange}
-          />
+          <div className="subsection">
+            <h4 className="subsection-title">
+              ¿Cuál es la estimación de su salud general?
+            </h4>
+            <div className="radio-group">
+              <label className="radio-option">
+                <input
+                  type="radio"
+                  name="salud_general"
+                  value="Buena"
+                  checked={formMedico.salud_general === 'Buena'}
+                  onChange={handleChange}
+                />{' '}
+                Buena
+              </label>
+              <label className="radio-option">
+                <input
+                  type="radio"
+                  name="salud_general"
+                  value="Regular"
+                  checked={formMedico.salud_general === 'Regular'}
+                  onChange={handleChange}
+                />{' '}
+                Regular
+              </label>
+              <label className="radio-option">
+                <input
+                  type="radio"
+                  name="salud_general"
+                  value="Mala"
+                  checked={formMedico.salud_general === 'Mala'}
+                  onChange={handleChange}
+                />{' '}
+                Mala
+              </label>
+            </div>
+          </div>
+
+          <div className="subsection">
+            <label className="label-block">
+              ¿Esta bajo tratamiento medico?
+              <input
+                type="checkbox"
+                name="bajo_tratamiento"
+                checked={formMedico.bajo_tratamiento}
+                onChange={handleChange}
+                className="input-checkbox"
+              />
+            </label>
+            <label className="label-block mt-2">
+              ¿De que tipo?
+              <input
+                type="text"
+                name="tipo_tratamiento"
+                value={formMedico.tipo_tratamiento}
+                onChange={handleChange}
+                className="input-full-width"
+              />
+            </label>
+          </div>
+
+          <div className="subsection">
+            <label className="label-block">
+              ¿Estuvo hospitalizado, ha tenido operaciones? (Tipo,
+              complicaciones)
+              <textarea
+                name="hospitalizaciones"
+                value={formMedico.hospitalizaciones}
+                onChange={handleChange}
+                className="textarea"
+                rows={2}
+              />
+            </label>
+            <label className="label-block mt-2">
+              ¿Ha tenido traumatismo, accidentes?
+              <input
+                type="checkbox"
+                name="tuvo_traumatismos"
+                checked={formMedico.tuvo_traumatismos}
+                onChange={handleChange}
+                className="input-checkbox"
+              />
+            </label>
+            <label className="label-block mt-2">
+              ¿De que tipo?
+              <input
+                type="text"
+                name="tipo_traumatismos"
+                value={formMedico.tipo_traumatismos}
+                onChange={handleChange}
+                className="input-full-width"
+              />
+            </label>
+          </div>
+
+          <div className="subsection">
+            <label className="label-block">
+              ¿Es alérgico a algún medicamento, anestésico o alimento? ¿Cuál es?
+              <input
+                type="text"
+                name="alergias"
+                value={formMedico.alergias}
+                onChange={handleChange}
+                className="input-full-width"
+              />
+            </label>
+            <label className="label-block mt-2">
+              Tiene algún medicamento prohibido o contraindicado? ¿Cual es?
+              <input
+                type="text"
+                name="medicamentos_contraindicados"
+                value={formMedico.medicamentos_contraindicados}
+                onChange={handleChange}
+                className="input-full-width"
+              />
+            </label>
+          </div>
+
+          <div className="subsection">
+            <h4 className="subsection-title mb-2">
+              Ha tenido alguna de las siguientes enfermedades:
+            </h4>
+            <div className="checkbox-group">
+              <label className="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="enf_hepatitis"
+                  checked={formMedico.enf_hepatitis}
+                  onChange={handleChange}
+                />{' '}
+                Hepatitis
+              </label>
+              <label className="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="enf_alergia_cronica"
+                  checked={formMedico.enf_alergia_cronica}
+                  onChange={handleChange}
+                />{' '}
+                Alergia
+              </label>
+              <label className="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="enf_corazon"
+                  checked={formMedico.enf_corazon}
+                  onChange={handleChange}
+                />{' '}
+                Algun tipo de enf. al corazon
+              </label>
+              <label className="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="enf_fiebre_reumatica"
+                  checked={formMedico.enf_fiebre_reumatica}
+                  onChange={handleChange}
+                />{' '}
+                Fiebre Reumática
+              </label>
+              <label className="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="enf_anemia"
+                  checked={formMedico.enf_anemia}
+                  onChange={handleChange}
+                />{' '}
+                Anemia
+              </label>
+              <label className="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="enf_asma"
+                  checked={formMedico.enf_asma}
+                  onChange={handleChange}
+                />{' '}
+                Asma
+              </label>
+              <label className="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="enf_diabetes"
+                  checked={formMedico.enf_diabetes}
+                  onChange={handleChange}
+                />{' '}
+                Diabetes
+              </label>
+              <label className="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="enf_epilepsia"
+                  checked={formMedico.enf_epilepsia}
+                  onChange={handleChange}
+                />{' '}
+                Epilepsia
+              </label>
+              <label className="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="enf_coagulacion"
+                  checked={formMedico.enf_coagulacion}
+                  onChange={handleChange}
+                />{' '}
+                Problemas de coagulacion o cicatrizacion
+              </label>
+              <label className="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="enf_tbc"
+                  checked={formMedico.enf_tbc}
+                  onChange={handleChange}
+                />{' '}
+                TBC
+              </label>
+              <label className="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="enf_hipertension"
+                  checked={formMedico.enf_hipertension}
+                  onChange={handleChange}
+                />{' '}
+                Hipertension
+              </label>
+              <label className="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="enf_ulcera"
+                  checked={formMedico.enf_ulcera}
+                  onChange={handleChange}
+                />{' '}
+                Ulcera estomacal duodenal
+              </label>
+              <label className="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="enf_neurologica"
+                  checked={formMedico.enf_neurologica}
+                  onChange={handleChange}
+                />{' '}
+                Afeccion neurologica o psiquica
+              </label>
+            </div>
+            <label className="label-block mt-2">
+              Especifique o indique otra que no haya sido mencionada:
+              <input
+                type="text"
+                name="otras_enf_patologicas"
+                value={formMedico.otras_enf_patologicas}
+                onChange={handleChange}
+                className="input-full-width"
+              />
+            </label>
+          </div>
+
+          <div className="subsection">
+            <label className="label-block" htmlFor="odontologicos">
+              Antecedentes Odontologicos:
+            </label>
+            <textarea
+              id="odontologicos"
+              name="odontologicos"
+              value={formMedico.odontologicos}
+              onChange={handleChange}
+              className="textarea"
+              rows={2}
+            />
+          </div>
         </div>
+        {/* ========== ANTECEDENTES FAMILIARES ========== */}
+        <div className="antecedente-section">
+          <h3 className="section-title">Antecedentes Familiares</h3>
 
-        {/* Última visita dentista, Motivo */}
-        <div className="flex gap-4">
-          <FormField
-            label="Ultima vez que visito a su dentista"
-            value={filiacionData.ultima_visita_dentista || ''}
-            name="ultima_visita_dentista"
-            type="date"
-            isFormMode={true}
-            flex="1"
+          <label className="label-block" htmlFor="descripcion">
+            Antecedentes Familiares:
+            <div className="description-text">
+              (Vivos, sanos, fallecidos, motivo, si alguno ha parecido diabetes,
+              cáncer, infarto, alergias o problemas de coagulación, quién?
+              Antecedentes Enf.periodontal? y/o desdentamiento prematuro).
+            </div>
+          </label>
+          <textarea
+            id="descripcion"
+            name="descripcion"
+            value={formFamiliar.descripcion}
             onChange={handleChange}
+            className="textarea"
+            rows={4}
+            placeholder="Ingrese los antecedentes familiares relevantes..."
           />
-          <FormField
-            label="¿Motivo?"
-            value={filiacionData.motivo_visita_dentista || ''}
-            name="motivo_visita_dentista"
-            type="text"
-            isFormMode={true}
-            flex="1"
-            onChange={handleChange}
-          />
+        </div>{' '}
+        {/* ========== ANTECEDENTE CUMPLIMIENTO Y CONSENTIMIENTO ========== */}
+        <div className="antecedente-section">
+          <h3 className="section-title">Motivación y Consentimiento</h3>
+
+          <div className="subsection">
+            <h4 className="subsection-title">Voy al dentista:</h4>
+            <div className="checkbox-group">
+              <label className="checkbox-flex">
+                <input
+                  type="checkbox"
+                  name="motivo_dolor"
+                  checked={formCumplimiento.motivo_dolor}
+                  onChange={handleChange}
+                />
+                <span>
+                  Solo cuando tengo dolor u otro problema de importancia
+                </span>
+              </label>
+
+              <label className="checkbox-flex">
+                <input
+                  type="checkbox"
+                  name="motivo_control"
+                  checked={formCumplimiento.motivo_control}
+                  onChange={handleChange}
+                />
+                <span>
+                  Regularmente en el año, por control y prevención. En promedio
+                </span>
+                <input
+                  type="number"
+                  name="frecuencia_control_meses"
+                  value={formCumplimiento.frecuencia_control_meses}
+                  onChange={handleChange}
+                  className="input-number"
+                  placeholder="meses"
+                />
+                <span className="ml-1">meses</span>
+              </label>
+
+              <label className="checkbox-flex">
+                <input
+                  type="checkbox"
+                  name="motivo_limpieza"
+                  checked={formCumplimiento.motivo_limpieza}
+                  onChange={handleChange}
+                />
+                <span>Solo para hacerme limpiezas. En promedio</span>
+                <input
+                  type="number"
+                  name="frecuencia_limpieza_meses"
+                  value={formCumplimiento.frecuencia_limpieza_meses}
+                  onChange={handleChange}
+                  className="input-number"
+                  placeholder="meses"
+                />
+                <span className="ml-1">meses</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="subsection">
+            <h4 className="subsection-title">
+              Con respecto a la atención dental:
+            </h4>
+            <div className="checkbox-group">
+              <label className="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="actitud_tranquilo"
+                  checked={formCumplimiento.actitud_tranquilo}
+                  onChange={handleChange}
+                />
+                <span>Soy muy tranquilo(a)</span>
+              </label>
+
+              <label className="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="actitud_aprensivo"
+                  checked={formCumplimiento.actitud_aprensivo}
+                  onChange={handleChange}
+                />
+                <span>Soy aprensivo y nervioso(a)</span>
+              </label>
+
+              <label className="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="actitud_panico"
+                  checked={formCumplimiento.actitud_panico}
+                  onChange={handleChange}
+                />
+                <span>Le tengo pánico</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="subsection">
+            <label className="label-block">
+              Lo que más me desagrada de la atención dental es:
+              <input
+                type="text"
+                name="desagrado_atencion"
+                value={formCumplimiento.desagrado_atencion}
+                onChange={handleChange}
+                className="input-full-width mt-2"
+                placeholder="Ej: el ruido, agujas, etc."
+              />
+            </label>
+          </div>
+
+          <div className="border-top">
+            <p className="consent-text">
+              Por este medio certifico haber contestado de la manera más precisa
+              posible y veraz y doy mi consentimiento para ser examinado(a) o
+              ser atendido(a) de urgencia si la situación así lo amerite.
+            </p>
+
+            <div className="grid-2-cols">
+              <label>
+                Fecha:
+                <input
+                  type="date"
+                  name="fecha_consentimiento"
+                  value={formCumplimiento.fecha_consentimiento}
+                  onChange={handleChange}
+                  className="input-full-width"
+                />
+              </label>
+              <label>
+                Firma y Nombre:
+                <input
+                  type="text"
+                  name="firma_nombre"
+                  value={formCumplimiento.firma_nombre}
+                  onChange={handleChange}
+                  className="input-full-width"
+                  placeholder="Nombre completo y/o firma"
+                />
+              </label>
+            </div>
+
+            <label className="label-block mt-4">
+              Historia clínica elaborada por Alumno:
+              <input
+                type="text"
+                name="historia_elaborada_por"
+                value={formCumplimiento.historia_elaborada_por}
+                onChange={handleChange}
+                className="input-full-width"
+                placeholder="Nombre del alumno"
+              />
+            </label>
+          </div>
         </div>
-
-        {/* Última visita médico, Motivo */}
-        <div className="flex gap-4">
-          <FormField
-            label="Ultima vez que visito a su medico"
-            value={filiacionData.ultima_visita_medico || ''}
-            name="ultima_visita_medico"
-            type="date"
-            isFormMode={true}
-            flex="1"
-            onChange={handleChange}
-          />
-          <FormField
-            label="¿Motivo?"
-            value={filiacionData.motivo_visita_medico || ''}
-            name="motivo_visita_medico"
-            type="text"
-            isFormMode={true}
-            flex="1"
-            onChange={handleChange}
-          />
-        </div>
-
-        {/* Contacto de emergencia y teléfono */}
-        <div className="flex gap-4">
-          <FormField
-            label="En caso necesario comunicarse con (nombre y relación)"
-            value={filiacionData.contacto_emergencia || ''}
-            name="contacto_emergencia"
-            type="text"
-            isFormMode={true}
-            flex="2"
-            onChange={handleChange}
-          />
-          <FormField
-            label="Teléfono"
-            value={filiacionData.telefono_emergencia || ''}
-            name="telefono_emergencia"
-            type="tel"
-            isFormMode={true}
-            flex="1"
-            onChange={handleChange}
-          />
-        </div>
-
-        {/* Persona que lo acompaña */}
-        <div className="flex gap-4">
-          <FormField
-            label="Persona que lo acompaña (nombre y relación)"
-            value={filiacionData.acompaniante || ''}
-            name="acompaniante"
-            type="text"
-            isFormMode={true}
-            flex="3"
-            onChange={handleChange}
-          />
-        </div>
-
-        {/* Fecha de elaboración */}
-        <div className="flex gap-4">
-          <FormField
-            label="Fecha de elaboración"
-            value={filiacionData.fecha_elaboracion || ''}
-            name="fecha_elaboracion"
-            type="date"
-            isFormMode={true}
-            flex="2"
-            onChange={handleChange}
-          />
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-end gap-4 mt-6">
-          <Button type="submit" variant="primary">
-            {data ? 'Actualizar' : 'Guardar'} filiación
+        {/* BOTÓN ÚNICO */}
+        <div
+          className="antecedente-section"
+          style={{ display: 'flex', justifyContent: 'flex-end' }}
+        >
+          <Button
+            type="submit"
+            className="button-submit"
+            style={{ width: 'auto', paddingLeft: '2rem', paddingRight: '2rem' }}
+          >
+            {editModePersonal ||
+            editModeMedico ||
+            editModeFamiliar ||
+            editModeCumplimiento
+              ? 'Actualizar'
+              : 'Guardar'}
           </Button>
         </div>
       </form>
@@ -416,4 +1253,4 @@ function Filiacion() {
   );
 }
 
-export default Filiacion;
+export default AntecedentePersonal;
