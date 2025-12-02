@@ -14,6 +14,13 @@ export default function OdontogramaToolsPanel() {
 
   const defectTypes = ['O', 'PE', 'Fluorosis'];
 
+  const pdcTypes = [ // Nuevas opciones de PDC
+    { id: 'SUP_PERM', label: 'Superior Permanentes' },
+    { id: 'SUP_DECID', label: 'Superior Deciduos' },
+    { id: 'INF_PERM', label: 'Inferior Permanentes' },
+    { id: 'INF_DECID', label: 'Inferior Deciduos' },
+  ];
+
   const [coronaMenuOpen, setCoronaMenuOpen] = useState(false);
   const [coronaTempMenuOpen, setCoronaTempMenuOpen] = useState(false);
   const [defectMenuOpen, setDefectMenuOpen] = useState(false);
@@ -22,6 +29,8 @@ export default function OdontogramaToolsPanel() {
 
   const [activeTool, setActiveTool] = useState(null);
   const [activeToolName, setActiveToolName] = useState(null);
+
+  const [pdcMenuOpen, setPDCMenuOpen] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -595,6 +604,67 @@ export default function OdontogramaToolsPanel() {
     }
   };
 
+  const onPulpotomia = () => {
+    const tooth = askTooth('Diente para Pulpotomía (ej: 1.6):');
+    if (!tooth) return;
+    try{
+      const color = askColor('blue');
+      const ok = setInputForTooth(tooth,'PP', color);
+      if (!ok) {
+        alert(`No se encontró el diente ${tooth} ni su recuadro de texto asociado.`);
+      }
+      odontogramaTools.addPulpotomy(tooth, color);
+    //const svg = document.querySelector('svg.odo');
+    } catch (err) {
+      console.error('Error aplicando:', err);
+      alert('Ocurrió un error al intentar anotar. Revisa la consola.');
+    }
+  };
+
+  const onTransposicion = () => {
+  //const color = askColor('red'); // Pide el color (normalmente rojo)
+    // Llama a la nueva función interactiva
+    odontogramaTools.addTransposition('blue');
+  };
+
+  const onPPF = () => {
+    const color = askColor('blue');
+    odontogramaTools.addPPF(color); 
+  };
+
+  const onSelectPDC = (typeId, color) => {
+    setPDCMenuOpen(false); // Cierra el menú
+    let arcada;
+
+    if (typeId === 'SUP_PERM' || typeId === 'SUP_DECID') {
+      arcada = 'superior';
+    } else { // INF_PERM o INF_DECID
+      arcada = 'inferior';
+    }
+    
+    try {
+      const ok = odontogramaTools.addPDC(arcada, color, typeId);
+      if (!ok) {
+        alert('No se pudo dibujar la Prótesis Completa. Revisa si los molares terminales están presentes.');
+      }
+    } catch (e) {
+      console.error('Error aplicando PDC:', e);
+      alert('Ocurrió un error al intentar aplicar la Prótesis Completa. Revisa la consola.');
+    }
+  };
+
+  const onPDCButton = () => {
+    setPDCMenuOpen((s) => !s);
+  };
+
+  const onProtesisDental = ()=>{
+    const color = askColor('blue');
+    odontogramaTools.addDentalProsthesis(color);
+    alert('Modo "PPR": Haz click en el diente pilar inicial y luego en el diente pilar final.\nPresiona ESC para cancelar.');
+
+  }
+
+
   // render
   
   //LESION
@@ -904,8 +974,47 @@ export default function OdontogramaToolsPanel() {
         <button className="px-3 py-2 bg-teal-500 text-white rounded" onClick={onMobilidad}>
            19. MOVILIDAD PATOLÓGIA
         </button>
+        <button className="px-3 py-2 bg-teal-700 text-white rounded" onClick={onPulpotomia}>
+           20. Pulpotomía
+        </button>
+        <button className="px-3 py-2 bg-teal-600 text-white rounded" onClick={onTransposicion}>
+           21. Transposición dentaria
+        </button>
+        <button className="px-3 py-2 bg-teal-700 text-white rounded" onClick={onPPF}>
+           22. Prótesis Dental Parcial Fija (PPF)
+        </button>
+        <div className="relative">
+        <button className="px-3 py-2 bg-teal-500 text-white rounded" onClick={onPDCButton}>
+          23. Prótesis Dental Completa (PDC)
+        </button>
+        {pdcMenuOpen && (
+          <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-10 p-2">
+            {pdcTypes.map((type) => (
+              <div key={type.id} className="p-1">
+                <p className="text-sm font-bold mb-1">{type.label}</p>
+                <div className="flex gap-2">
+                  {colors.map((color) => (
+                    <button
+                      key={color}
+                      className={`text-xs px-2 py-1 rounded border ${
+                        color === 'blue' ? 'bg-blue-500 text-white' : 'bg-red-500 text-white'
+                      }`}
+                      onClick={() => onSelectPDC(type.id, color)}
+                    >
+                      {color.charAt(0).toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        </div>
+        <button className="px-3 py-2 bg-teal-600 text-white rounded" onClick={onProtesisDental}>
+           24. Protesis dental parcial removible (PPR)
+        </button>
 
-        <button className="px-3 py-2 bg-gray-500 text-white rounded" onClick={onClear}>
+        <button className="px-3 py-2 bg-teal-500 text-white rounded" onClick={onClear}>
            Limpiar
         </button>
       </div>
