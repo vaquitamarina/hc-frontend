@@ -329,6 +329,36 @@ function findToothGroupFromEvent(target) {
   return null;
 }
 
+function ensureArrowMarker(svg, color, idPrefix) {
+  const markerId = `${idPrefix}-arrow-head-${color}`;
+  let marker = svg.querySelector(`#${markerId}`);
+
+  if (!marker) {
+    const defs =
+      svg.querySelector('defs') ||
+      document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    if (!svg.querySelector('defs')) svg.insertBefore(defs, svg.firstChild);
+
+    marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+    marker.setAttribute('id', markerId);
+    marker.setAttribute('viewBox', '0 0 8 8'); // Cambiado de 10x10 a 8x8
+    marker.setAttribute('refX', '7'); // Ajustado para que la punta toque el final
+    marker.setAttribute('refY', '4'); // Centro
+    marker.setAttribute('markerUnits', 'strokeWidth');
+    marker.setAttribute('markerWidth', '5'); // Ligeramente más pequeño
+    marker.setAttribute('markerHeight', '5'); // Ligeramente más pequeño
+    marker.setAttribute('orient', 'auto-start-reverse');
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    // M 0 0 (Mover a la esquina) L 8 4 (Línea a la punta) L 0 8 (Línea a la otra esquina)
+    path.setAttribute('d', 'M 0 0 L 8 4 L 0 8 z');
+    path.setAttribute('fill', color);
+    marker.appendChild(path);
+
+    defs.appendChild(marker);
+  }
+}
+
 function isValidArcade(name1, name2) {
   if (!name1 || !name2) return false;
   // El cuadrante es el primer dígito del nombre del diente (ej: '1.6' -> 1)
@@ -2452,6 +2482,7 @@ export function addTransposition(color = 'blue') {
       const endB_X = startP.x;
 
       drawArrow(startB_X, endB_X, 'B');
+      ensureArrowMarker(svg, color, 'transposition');
 
       cleanup();
     }

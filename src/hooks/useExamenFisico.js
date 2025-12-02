@@ -4,6 +4,10 @@ import {
   updateGeneralExam,
   fetchRegionalExam,
   updateRegionalExam,
+  fetchExamBoca,
+  updateExamBoca,
+  fetchHigieneOral,
+  updateHigieneOral,
 } from '@services/fetchExamenFisico';
 
 export function useGeneralExam(historyId) {
@@ -43,6 +47,48 @@ export function useMutateRegionalExam() {
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries({
         queryKey: ['examen-regional', vars.idHistory],
+      });
+    },
+  });
+}
+
+export function useExamBoca(historyId) {
+  return useQuery({
+    queryKey: ['examen-boca', historyId],
+    queryFn: () => fetchExamBoca(historyId),
+    enabled: !!historyId,
+    refetchOnWindowFocus: false,
+  });
+}
+
+export function useMutateExamBoca() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: updateExamBoca,
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({
+        queryKey: ['examen-boca', vars.idHistory],
+      });
+    },
+  });
+}
+
+export function useHigieneOral(historyId) {
+  return useQuery({
+    queryKey: ['higiene-oral', historyId],
+    queryFn: () => fetchHigieneOral(historyId),
+    enabled: !!historyId,
+    refetchOnWindowFocus: false,
+  });
+}
+
+export function useMutateHigieneOral() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: updateHigieneOral,
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({
+        queryKey: ['higiene-oral', vars.idHistory],
       });
     },
   });

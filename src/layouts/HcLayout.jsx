@@ -23,10 +23,19 @@ function HcLayout() {
   const menuItems = [
     { path: `/historia/${id}/anamnesis`, label: 'Anamnesis' },
     { path: `/historia/${id}/examen-fisico`, label: 'Examen Fisico' },
-    { path: `/dashboard`, label: 'Diagnosticos presuntivos' },
-    { path: '/dashboard', label: 'Derivado a clinicas' },
-    { path: '/dashboard', label: 'Diagnostico en clinicas' },
-    { path: '/dashboard', label: 'Evoluciones' },
+    {
+      path: `/historia/${id}/diagnostico-presuntivo`,
+      label: 'Diagnósticos presuntivos',
+    },
+    {
+      path: `/historia/${id}/derivacion-clinicas`,
+      label: 'Derivado a clinicas',
+    },
+    {
+      path: `/historia/${id}/diagnostico-clinicas`,
+      label: 'Diagnostico en clinicas',
+    },
+    { path: `/historia/${id}/evolucion`, label: 'Evoluciones' }, // Futuro
   ];
 
   const showDashboardButton =

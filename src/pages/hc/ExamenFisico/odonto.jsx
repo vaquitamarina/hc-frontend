@@ -1,5 +1,6 @@
 // src/pages/hc/ExamenFisico/odonto.jsx
 
+import React, { useEffect } from 'react';
 import OdontogramaToolsPanel from './odotools';
 
 /**
@@ -8,6 +9,22 @@ import OdontogramaToolsPanel from './odotools';
  */
 
 export default function Odontograma() {
+  useEffect(() => {
+    // Intentamos cargar el script visorOdonto.js desde la raíz pública (si lo usas)
+    const script = document.createElement('script');
+    script.src = '/visorOdonto.js';
+    script.async = false;
+    document.body.appendChild(script);
+
+    return () => {
+      try {
+        document.body.removeChild(script);
+      } catch {
+        /* ignore error */
+      }
+    };
+  }, []);
+
   return (
     <div
       className="flex gap-4 p-4"
