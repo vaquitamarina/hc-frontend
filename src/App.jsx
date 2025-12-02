@@ -13,6 +13,12 @@ import HcLayout from './layouts/HcLayout.jsx';
 import ExamenFisicoMenu from './pages/hc/ExamenFisico/ExamenFisicoMenu.jsx';
 import ExamenGeneral from './pages/hc/ExamenFisico/ExamenGeneral.jsx';
 import ExamenRegional from './pages/hc/ExamenFisico/ExamenRegional.jsx';
+import ExamenBoca from './pages/hc/ExamenFisico/ExamenBoca.jsx';
+import ExamenHigiene from './pages/hc/ExamenFisico/ExamenHigiene.jsx';
+import DiagnosticoPresuntivo from './pages/hc/Diagnostico/DiagnosticoPresuntivo.jsx';
+import DerivacionClinicas from './pages/hc/Diagnostico/DerivacionClinicas.jsx';
+import DiagnosticoClinicas from './pages/hc/Diagnostico/DiagnosticoClinicas.jsx';
+import Evolucion from './pages/hc/Evolucion/Evolucion.jsx';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import AdminLayout from './layouts/AdminLayout.jsx';
 import AdminDashboard from './pages/Admin/AdminDashboard.jsx';
@@ -73,9 +79,30 @@ function App() {
               element={<ExamenRegional />}
             />
             <Route
+              path="/historia/:id/examen-fisico/boca"
+              element={<ExamenBoca />}
+            />
+            <Route
+              path="/historia/:id/examen-fisico/higiene"
+              element={<ExamenHigiene />}
+            />
+            <Route
               path="/historia/:id/examen-fisico/odonto"
               element={<Odonto />}
             />
+            <Route
+              path="/historia/:id/diagnostico-presuntivo"
+              element={<DiagnosticoPresuntivo />}
+            />
+            <Route
+              path="/historia/:id/derivacion-clinicas"
+              element={<DerivacionClinicas />}
+            />
+            <Route
+              path="/historia/:id/diagnostico-clinicas"
+              element={<DiagnosticoClinicas />}
+            />
+            <Route path="/historia/:id/evolucion" element={<Evolucion />} />
           </Route>
         </Route>
       </Routes>
