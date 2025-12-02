@@ -20,14 +20,15 @@ function ensureOverlay(svg) {
 function transformPointWithCTM(svg, ctm, x, y) {
   if (!ctm) return { x, y };
   const pt = svg.createSVGPoint();
-  pt.x = x; pt.y = y;
+  pt.x = x;
+  pt.y = y;
   const p = pt.matrixTransform(ctm);
   return { x: p.x, y: p.y };
 }
 
 function parsePointsAttr(pointsAttr) {
   if (!pointsAttr) return [];
-  const nums = pointsAttr.match(/-?(?:\d+|\d*\.\d+)(?:e[+\-]?\d+)?/gi);
+  const nums = pointsAttr.match(/-?(?:\d+|\d*\.\d+)(?:e[+-]?\d+)?/gi);
   if (!nums) return [];
   const arr = nums.map((n) => parseFloat(n));
   const points = [];
@@ -54,7 +55,12 @@ function elementToSvgPoints(el, svg, samplePathSegments = 24) {
       const y = parseFloat(el.getAttribute('y') || 0);
       const w = parseFloat(el.getAttribute('width') || 0);
       const h = parseFloat(el.getAttribute('height') || 0);
-      const corners = [[x, y],[x + w, y],[x + w, y + h],[x, y + h]];
+      const corners = [
+        [x, y],
+        [x + w, y],
+        [x + w, y + h],
+        [x, y + h],
+      ];
       for (const [cx, cy] of corners) {
         const p = transformPointWithCTM(svg, ctm, cx, cy);
         pts.push([p.x, p.y]);
@@ -64,8 +70,14 @@ function elementToSvgPoints(el, svg, samplePathSegments = 24) {
     if (tag === 'circle' || tag === 'ellipse') {
       const cx = parseFloat(el.getAttribute('cx') || 0);
       const cy = parseFloat(el.getAttribute('cy') || 0);
-      const rx = tag === 'circle' ? parseFloat(el.getAttribute('r') || 0) : parseFloat(el.getAttribute('rx') || 0);
-      const ry = tag === 'circle' ? parseFloat(el.getAttribute('r') || 0) : parseFloat(el.getAttribute('ry') || 0);
+      const rx =
+        tag === 'circle'
+          ? parseFloat(el.getAttribute('r') || 0)
+          : parseFloat(el.getAttribute('rx') || 0);
+      const ry =
+        tag === 'circle'
+          ? parseFloat(el.getAttribute('r') || 0)
+          : parseFloat(el.getAttribute('ry') || 0);
       const steps = 12;
       for (let i = 0; i < steps; i++) {
         const a = (i / steps) * Math.PI * 2;
@@ -77,7 +89,10 @@ function elementToSvgPoints(el, svg, samplePathSegments = 24) {
       return pts;
     }
     if (tag === 'path') {
-      if (typeof el.getTotalLength === 'function' && typeof el.getPointAtLength === 'function') {
+      if (
+        typeof el.getTotalLength === 'function' &&
+        typeof el.getPointAtLength === 'function'
+      ) {
         const len = el.getTotalLength();
         const segments = Math.max(8, samplePathSegments);
         for (let i = 0; i <= segments; i++) {
@@ -88,7 +103,12 @@ function elementToSvgPoints(el, svg, samplePathSegments = 24) {
         }
       } else {
         const b = el.getBBox();
-        const corners = [[b.x, b.y],[b.x + b.width, b.y],[b.x + b.width, b.y + b.height],[b.x, b.y + b.height]];
+        const corners = [
+          [b.x, b.y],
+          [b.x + b.width, b.y],
+          [b.x + b.width, b.y + b.height],
+          [b.x, b.y + b.height],
+        ];
         for (const [cx, cy] of corners) {
           const p = transformPointWithCTM(svg, ctm, cx, cy);
           pts.push([p.x, p.y]);
@@ -97,40 +117,60 @@ function elementToSvgPoints(el, svg, samplePathSegments = 24) {
       return pts;
     }
     const b = el.getBBox();
-    const corners = [[b.x, b.y],[b.x + b.width, b.y],[b.x + b.width, b.y + b.height],[b.x, b.y + b.height]];
+    const corners = [
+      [b.x, b.y],
+      [b.x + b.width, b.y],
+      [b.x + b.width, b.y + b.height],
+      [b.x, b.y + b.height],
+    ];
     for (const [cx, cy] of corners) {
       const p = transformPointWithCTM(svg, ctm, cx, cy);
       pts.push([p.x, p.y]);
     }
     return pts;
-  } catch (err) {
+  } catch {
     return pts;
   }
 }
 
 function convexHull(points) {
   if (!points || points.length === 0) return [];
-  const pts = points.map((p) => ({ x: p[0], y: p[1] })).sort((a,b) => (a.x === b.x ? a.y - b.y : a.x - b.x));
-  const cross = (o,a,b) => (a.x - o.x)*(b.y - o.y) - (a.y - o.y)*(b.x - o.x);
+  const pts = points
+    .map((p) => ({ x: p[0], y: p[1] }))
+    .sort((a, b) => (a.x === b.x ? a.y - b.y : a.x - b.x));
+  const cross = (o, a, b) =>
+    (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
   const lower = [];
   for (const p of pts) {
-    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop();
+    while (
+      lower.length >= 2 &&
+      cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0
+    )
+      lower.pop();
     lower.push(p);
   }
   const upper = [];
   for (let i = pts.length - 1; i >= 0; i--) {
     const p = pts[i];
-    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop();
+    while (
+      upper.length >= 2 &&
+      cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0
+    )
+      upper.pop();
     upper.push(p);
   }
-  lower.pop(); upper.pop();
+  lower.pop();
+  upper.pop();
   const hull = lower.concat(upper);
   return hull.map((p) => [p.x, p.y]);
 }
 
 function computePointsFromParts(node, svg, partNames) {
   if (!node || !svg) return [];
-  const selector = (partNames && partNames.length) ? partNames.map((n) => `[data-name="${n}"]`).join(',') : 'polygon,rect,path,polyline,ellipse,circle';
+  const selector =
+    partNames && partNames.length
+      ? partNames.map((n) => `[data-name="${n}"]`).join(',')
+      : 'polygon,rect,path,polyline,ellipse,circle';
   const parts = Array.from(node.querySelectorAll(selector));
   const allPoints = [];
   for (const part of parts) {
@@ -143,12 +183,16 @@ function computePointsFromParts(node, svg, partNames) {
   if (uses.length === 0) return [];
   for (const useEl of uses) {
     try {
-      const href = useEl.getAttribute('href') || useEl.getAttribute('xlink:href');
+      const href =
+        useEl.getAttribute('href') || useEl.getAttribute('xlink:href');
       if (!href) continue;
       const refId = href.replace(/^#/, '');
       const ref = svg.getElementById(refId);
       if (!ref) continue;
-      const wrapper = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      const wrapper = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'g'
+      );
       try {
         const parentCTM = node.getCTM ? node.getCTM() : null;
         const useCTM = useEl.getCTM ? useEl.getCTM() : null;
@@ -156,23 +200,33 @@ function computePointsFromParts(node, svg, partNames) {
         if (parentCTM && typeof parentCTM.inverse === 'function' && useCTM) {
           try {
             const invParent = parentCTM.inverse();
-            if (typeof invParent.multiply === 'function') localMatrix = invParent.multiply(useCTM);
-            else if (typeof useCTM.multiply === 'function') localMatrix = useCTM.multiply(invParent);
+            if (typeof invParent.multiply === 'function')
+              localMatrix = invParent.multiply(useCTM);
+            else if (typeof useCTM.multiply === 'function')
+              localMatrix = useCTM.multiply(invParent);
             else localMatrix = useCTM;
-          } catch (err) {
+          } catch {
             localMatrix = useCTM;
           }
         } else localMatrix = null;
         if (localMatrix && typeof localMatrix.a === 'number') {
-          wrapper.setAttribute('transform', `matrix(${localMatrix.a} ${localMatrix.b} ${localMatrix.c} ${localMatrix.d} ${localMatrix.e} ${localMatrix.f})`);
+          wrapper.setAttribute(
+            'transform',
+            `matrix(${localMatrix.a} ${localMatrix.b} ${localMatrix.c} ${localMatrix.d} ${localMatrix.e} ${localMatrix.f})`
+          );
         } else {
           const tx = useEl.getAttribute('x') || '0';
           const ty = useEl.getAttribute('y') || '0';
           const tattr = useEl.getAttribute('transform') || '';
-          const trans = (tx !== '0' || ty !== '0') ? `translate(${tx},${ty}) ${tattr}`.trim() : tattr;
+          const trans =
+            tx !== '0' || ty !== '0'
+              ? `translate(${tx},${ty}) ${tattr}`.trim()
+              : tattr;
           if (trans) wrapper.setAttribute('transform', trans);
         }
-      } catch (err) {}
+      } catch {
+        /* ignore error */
+      }
       const clone = ref.cloneNode(true);
       wrapper.appendChild(clone);
       node.appendChild(wrapper);
@@ -181,8 +235,12 @@ function computePointsFromParts(node, svg, partNames) {
         const pts = elementToSvgPoints(pEl, svg, 32);
         for (const p of pts) allPoints.push(p);
       }
-      try { wrapper.remove(); } catch (e) { if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper); }
-    } catch (e) {
+      try {
+        wrapper.remove();
+      } catch {
+        if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+      }
+    } catch {
       continue;
     }
   }
@@ -205,19 +263,39 @@ function getToothBBox(svg, toothDataName) {
       const maxX = Math.max(...xs);
       const minY = Math.min(...ys);
       const maxY = Math.max(...ys);
-      return { bbox: { x: minX, y: minY, width: maxX - minX, height: maxY - minY }, node: el };
+      return {
+        bbox: { x: minX, y: minY, width: maxX - minX, height: maxY - minY },
+        node: el,
+      };
     }
     const local = el.getBBox();
     const ctm = el.getCTM();
-    if (!ctm) return { bbox: { x: local.x, y: local.y, width: local.width, height: local.height }, node: el };
+    if (!ctm)
+      return {
+        bbox: {
+          x: local.x,
+          y: local.y,
+          width: local.width,
+          height: local.height,
+        },
+        node: el,
+      };
     const p1 = transformPointWithCTM(getSvg(), ctm, local.x, local.y);
-    const p2 = transformPointWithCTM(getSvg(), ctm, local.x + local.width, local.y + local.height);
+    const p2 = transformPointWithCTM(
+      getSvg(),
+      ctm,
+      local.x + local.width,
+      local.y + local.height
+    );
     const minX = Math.min(p1.x, p2.x);
     const minY = Math.min(p1.y, p2.y);
     const maxX = Math.max(p1.x, p2.x);
     const maxY = Math.max(p1.y, p2.y);
-    return { bbox: { x: minX, y: minY, width: maxX - minX, height: maxY - minY }, node: el };
-  } catch (e) {
+    return {
+      bbox: { x: minX, y: minY, width: maxX - minX, height: maxY - minY },
+      node: el,
+    };
+  } catch {
     return null;
   }
 }
@@ -226,13 +304,22 @@ function centerOfTooth(svg, toothDataName) {
   const info = getToothBBox(svg, toothDataName);
   if (!info) return null;
   const { bbox, node } = info;
-  return { x: bbox.x + bbox.width / 2, y: bbox.y + bbox.height / 2, node, bbox };
+  return {
+    x: bbox.x + bbox.width / 2,
+    y: bbox.y + bbox.height / 2,
+    node,
+    bbox,
+  };
 }
 
 function findToothGroupFromEvent(target) {
   let element = target;
   // Sube por el DOM hasta encontrar un elemento con data-name o llegar al SVG principal
-  while (element && element.nodeName !== 'svg' && element.getAttribute('data-name') === null) {
+  while (
+    element &&
+    element.nodeName !== 'svg' &&
+    element.getAttribute('data-name') === null
+  ) {
     element = element.parentNode;
   }
   // Si encontramos el grupo (tiene data-name), lo devolvemos
@@ -243,37 +330,37 @@ function findToothGroupFromEvent(target) {
 }
 
 function isValidArcade(name1, name2) {
-    if (!name1 || !name2) return false;
-    // El cuadrante es el primer dígito del nombre del diente (ej: '1.6' -> 1)
-    const q1 = parseInt(name1.charAt(0));
-    const q2 = parseInt(name2.charAt(0));
+  if (!name1 || !name2) return false;
+  // El cuadrante es el primer dígito del nombre del diente (ej: '1.6' -> 1)
+  const q1 = parseInt(name1.charAt(0));
+  const q2 = parseInt(name2.charAt(0));
 
-    // Dientes superiores: 1,2,5 y 6 Dientes inferiores: 3, 4, 7 y 8.
-    const isUpper1 = q1 === 1 || q1 === 2;
-    const isUpper2 = q2 === 1 || q2 === 2;
+  // Dientes superiores: 1,2,5 y 6 Dientes inferiores: 3, 4, 7 y 8.
+  const isUpper1 = q1 === 1 || q1 === 2;
+  const isUpper2 = q2 === 1 || q2 === 2;
 
-    const isUpper3 = q1 === 5 || q1 === 6;
-    const isUpper4 = q2 === 5 || q2 === 6;
+  const isUpper3 = q1 === 5 || q1 === 6;
+  const isUpper4 = q2 === 5 || q2 === 6;
 
-    const isLower1 = q1 === 7 || q1 === 8;
-    const isLower2 = q2 === 7 || q2 === 8;
+  const isLower1 = q1 === 7 || q1 === 8;
+  const isLower2 = q2 === 7 || q2 === 8;
 
-    const isLower3 = q1 === 3 || q1 === 4;
-    const isLower4 = q2 === 3 || q2 === 4;
+  const isLower3 = q1 === 3 || q1 === 4;
+  const isLower4 = q2 === 3 || q2 === 4;
 
-    // Opción 1: Ambos son Superior dientes fijos
-    if (isUpper1 && isUpper2) return true;
-    
-    // Opción 2: Ambos son Superior dientes temporales
-    if (isUpper3 && isUpper4) return true;
-    
-    // Opción 3: Ambos son Inferior dientes temporales
-    if (isLower1 && isLower2) return true;
+  // Opción 1: Ambos son Superior dientes fijos
+  if (isUpper1 && isUpper2) return true;
 
-    // Opción 4: Ambos son Inferior dientes fijos
-    if (isLower3 && isLower4) return true;
+  // Opción 2: Ambos son Superior dientes temporales
+  if (isUpper3 && isUpper4) return true;
 
-    return false; 
+  // Opción 3: Ambos son Inferior dientes temporales
+  if (isLower1 && isLower2) return true;
+
+  // Opción 4: Ambos son Inferior dientes fijos
+  if (isLower3 && isLower4) return true;
+
+  return false;
 }
 
 export function clearAnnotations() {
@@ -290,22 +377,40 @@ export function clearAnnotations() {
 }
 
 function computeFixedMargin(w, h) {
-  return Math.max(1, Math.min(70, Math.min(w, h) * 0.70));
+  return Math.max(1, Math.min(70, Math.min(w, h) * 0.7));
 }
 
-
 // addCrown: draw border/hull and optionally write crown code into nearest input
-export function addCrown(toothDataName, crownType = 'CM', variant = 'BE', color = 'blue', includedParts = null) {
-  const svg = getSvg(); if (!svg) return false;
-  const group = getToothGroup(svg, toothDataName); if (!group) return false;
+export function addCrown(
+  toothDataName,
+  crownType = 'CM',
+  color = 'blue',
+  includedParts = null
+) {
+  const svg = getSvg();
+  if (!svg) return false;
+  const group = getToothGroup(svg, toothDataName);
+  if (!group) return false;
 
   const defaultParts = [
-    'raiz-izq','raiz-der','base','cingulo',
-    'fosas','fosa1','fosa2','fosa3',
-    'surcos','surco1','surco2','surco3',
-    'paredes','lado-izq','lado-der'
+    'raiz-izq',
+    'raiz-der',
+    'base',
+    'cingulo',
+    'fosas',
+    'fosa1',
+    'fosa2',
+    'fosa3',
+    'surcos',
+    'surco1',
+    'surco2',
+    'surco3',
+    'paredes',
+    'lado-izq',
+    'lado-der',
   ];
-  const partsToUse = (includedParts && includedParts.length) ? includedParts : defaultParts;
+  const partsToUse =
+    includedParts && includedParts.length ? includedParts : defaultParts;
 
   const points = computePointsFromParts(group, svg, partsToUse);
   const overlay = ensureOverlay(svg);
@@ -321,43 +426,102 @@ export function addCrown(toothDataName, crownType = 'CM', variant = 'BE', color 
       const w = Math.max(0, maxX - minX);
       const h = Math.max(0, maxY - minY);
       const margin = computeFixedMargin(w, h);
-      const rx = minX - margin, ry = minY - margin, rw = w + margin * 2, rh = h + margin * 2;
-      const border = document.createElementNS('http://www.w3.org/2000/svg','rect');
-      border.setAttribute('x', rx); border.setAttribute('y', ry); border.setAttribute('width', rw); border.setAttribute('height', rh);
-      border.setAttribute('fill','none'); border.setAttribute('stroke', color); border.setAttribute('stroke-width','3'); border.setAttribute('class','annotation crown-border parts-bbox');
+      const rx = minX - margin,
+        ry = minY - margin,
+        rw = w + margin * 2,
+        rh = h + margin * 2;
+      const border = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'rect'
+      );
+      border.setAttribute('x', rx);
+      border.setAttribute('y', ry);
+      border.setAttribute('width', rw);
+      border.setAttribute('height', rh);
+      border.setAttribute('fill', 'none');
+      border.setAttribute('stroke', color);
+      border.setAttribute('stroke-width', '3');
+      border.setAttribute('class', 'annotation crown-border parts-bbox');
       overlay.appendChild(border);
-      border.setAttribute('data-id', `crown-parts-bbox-${toothDataName}-${Date.now()}`);
+      border.setAttribute(
+        'data-id',
+        `crown-parts-bbox-${toothDataName}-${Date.now()}`
+      );
     } else {
-      const info = getToothBBox(svg, toothDataName); if (!info) return false;
+      const info = getToothBBox(svg, toothDataName);
+      if (!info) return false;
       const bbox = info.bbox;
       const margin = computeFixedMargin(bbox.width, bbox.height);
-      const rx = bbox.x - margin, ry = bbox.y - margin, rw = bbox.width + margin * 2, rh = bbox.height + margin * 2;
-      const border = document.createElementNS('http://www.w3.org/2000/svg','rect');
-      border.setAttribute('x', rx); border.setAttribute('y', ry); border.setAttribute('width', rw); border.setAttribute('height', rh);
-      border.setAttribute('fill','none'); border.setAttribute('stroke', color); border.setAttribute('stroke-width','3'); border.setAttribute('class','annotation crown-border fallback');
+      const rx = bbox.x - margin,
+        ry = bbox.y - margin,
+        rw = bbox.width + margin * 2,
+        rh = bbox.height + margin * 2;
+      const border = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'rect'
+      );
+      border.setAttribute('x', rx);
+      border.setAttribute('y', ry);
+      border.setAttribute('width', rw);
+      border.setAttribute('height', rh);
+      border.setAttribute('fill', 'none');
+      border.setAttribute('stroke', color);
+      border.setAttribute('stroke-width', '3');
+      border.setAttribute('class', 'annotation crown-border fallback');
       overlay.appendChild(border);
-      border.setAttribute('data-id', `crown-border-${toothDataName}-${Date.now()}`);
+      border.setAttribute(
+        'data-id',
+        `crown-border-${toothDataName}-${Date.now()}`
+      );
     }
   } else {
     if (points && points.length >= 3) {
       const hull = convexHull(points);
       if (hull && hull.length >= 3) {
-        const polyEl = document.createElementNS('http://www.w3.org/2000/svg','polygon');
-        polyEl.setAttribute('points', hull.map((p) => `${p[0]},${p[1]}`).join(' '));
-        polyEl.setAttribute('fill','none'); polyEl.setAttribute('stroke', color); polyEl.setAttribute('stroke-width','2'); polyEl.setAttribute('class','annotation crown-border hull');
+        const polyEl = document.createElementNS(
+          'http://www.w3.org/2000/svg',
+          'polygon'
+        );
+        polyEl.setAttribute(
+          'points',
+          hull.map((p) => `${p[0]},${p[1]}`).join(' ')
+        );
+        polyEl.setAttribute('fill', 'none');
+        polyEl.setAttribute('stroke', color);
+        polyEl.setAttribute('stroke-width', '2');
+        polyEl.setAttribute('class', 'annotation crown-border hull');
         overlay.appendChild(polyEl);
-        polyEl.setAttribute('data-id', `crown-hull-${toothDataName}-${Date.now()}`);
+        polyEl.setAttribute(
+          'data-id',
+          `crown-hull-${toothDataName}-${Date.now()}`
+        );
       }
     } else {
-      const info = getToothBBox(svg, toothDataName); if (!info) return false;
+      const info = getToothBBox(svg, toothDataName);
+      if (!info) return false;
       const bbox = info.bbox;
       const margin = computeFixedMargin(bbox.width, bbox.height);
-      const rx = bbox.x - margin, ry = bbox.y - margin, rw = bbox.width + margin * 2, rh = bbox.height + margin * 2;
-      const border = document.createElementNS('http://www.w3.org/2000/svg','rect');
-      border.setAttribute('x', rx); border.setAttribute('y', ry); border.setAttribute('width', rw); border.setAttribute('height', rh);
-      border.setAttribute('fill','none'); border.setAttribute('stroke', color); border.setAttribute('stroke-width','3'); border.setAttribute('class','annotation crown-border fallback');
+      const rx = bbox.x - margin,
+        ry = bbox.y - margin,
+        rw = bbox.width + margin * 2,
+        rh = bbox.height + margin * 2;
+      const border = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'rect'
+      );
+      border.setAttribute('x', rx);
+      border.setAttribute('y', ry);
+      border.setAttribute('width', rw);
+      border.setAttribute('height', rh);
+      border.setAttribute('fill', 'none');
+      border.setAttribute('stroke', color);
+      border.setAttribute('stroke-width', '3');
+      border.setAttribute('class', 'annotation crown-border fallback');
       overlay.appendChild(border);
-      border.setAttribute('data-id', `crown-border-${toothDataName}-${Date.now()}`);
+      border.setAttribute(
+        'data-id',
+        `crown-border-${toothDataName}-${Date.now()}`
+      );
     }
   }
 
@@ -369,29 +533,45 @@ export function addCrown(toothDataName, crownType = 'CM', variant = 'BE', color 
       const cx = bbox.x + bbox.width / 2;
       const cy = bbox.y + bbox.height / 2;
       const inputs = Array.from(svg.querySelectorAll('foreignObject'));
-      let best = null; let bestDist = Infinity;
+      let best = null;
+      let bestDist = Infinity;
       function foCenterInSvg(fo) {
         try {
           const foBox = fo.getBBox();
           const foCTM = fo.getCTM ? fo.getCTM() : null;
           if (foCTM) {
-            const pt = svg.createSVGPoint(); pt.x = foBox.x + foBox.width / 2; pt.y = foBox.y + foBox.height / 2;
+            const pt = svg.createSVGPoint();
+            pt.x = foBox.x + foBox.width / 2;
+            pt.y = foBox.y + foBox.height / 2;
             return pt.matrixTransform(foCTM);
           }
-          return { x: foBox.x + foBox.width / 2, y: foBox.y + foBox.height / 2 };
-        } catch (e) {
+          return {
+            x: foBox.x + foBox.width / 2,
+            y: foBox.y + foBox.height / 2,
+          };
+        } catch {
           try {
             const rect = fo.getBoundingClientRect();
-            const pt = svg.createSVGPoint(); pt.x = rect.left + rect.width / 2; pt.y = rect.top + rect.height / 2;
-            const screenCTM = svg.getScreenCTM(); if (!screenCTM) return null;
-            const inv = screenCTM.inverse(); return pt.matrixTransform(inv);
-          } catch (err) { return null; }
+            const pt = svg.createSVGPoint();
+            pt.x = rect.left + rect.width / 2;
+            pt.y = rect.top + rect.height / 2;
+            const screenCTM = svg.getScreenCTM();
+            if (!screenCTM) return null;
+            const inv = screenCTM.inverse();
+            return pt.matrixTransform(inv);
+          } catch {
+            return null;
+          }
         }
       }
       for (const fo of inputs) {
-        const c = foCenterInSvg(fo); if (!c) continue;
+        const c = foCenterInSvg(fo);
+        if (!c) continue;
         const d = Math.hypot(c.x - cx, c.y - cy);
-        if (d < bestDist) { bestDist = d; best = fo; }
+        if (d < bestDist) {
+          bestDist = d;
+          best = fo;
+        }
       }
       if (best) {
         const input = best.querySelector('input, textarea');
@@ -401,7 +581,9 @@ export function addCrown(toothDataName, crownType = 'CM', variant = 'BE', color 
         }
       }
     }
-  } catch (e) { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 
   return true;
 }
@@ -414,7 +596,12 @@ export function startCoronaMode(crownType = 'CM', color = 'blue') {
   function findToothGroupFromEvent(target) {
     let el = target;
     while (el && el !== svg) {
-      if (el.classList && el.classList.contains('tooth-group') && el.getAttribute('data-name')) return el;
+      if (
+        el.classList &&
+        el.classList.contains('tooth-group') &&
+        el.getAttribute('data-name')
+      )
+        return el;
       el = el.parentNode;
     }
     return null;
@@ -432,11 +619,21 @@ export function startCoronaMode(crownType = 'CM', color = 'blue') {
     }
   }
 
-  function onKey(e) { if (e.key === 'Escape') cleanup(); }
+  function onKey(e) {
+    if (e.key === 'Escape') cleanup();
+  }
 
   function cleanup() {
-    try { svg.removeEventListener('click', onClick); } catch (e) {}
-    try { window.removeEventListener('keydown', onKey); } catch (e) {}
+    try {
+      svg.removeEventListener('click', onClick);
+    } catch {
+      /* ignore error */
+    }
+    try {
+      window.removeEventListener('keydown', onKey);
+    } catch {
+      /* ignore error */
+    }
   }
 
   svg.addEventListener('click', onClick);
@@ -446,7 +643,15 @@ export function startCoronaMode(crownType = 'CM', color = 'blue') {
 }
 
 // small helper to create "hand drawn" polyline points with slight jitter along perpendicular
-function makeScribblePolylinePoints(x1, y1, x2, y2, segments = 6, jitter = 1.2, perpendicularOffset = 0) {
+function makeScribblePolylinePoints(
+  x1,
+  y1,
+  x2,
+  y2,
+  segments = 6,
+  jitter = 1.2,
+  perpendicularOffset = 0
+) {
   const pts = [];
   const vx = x2 - x1;
   const vy = y2 - y1;
@@ -457,7 +662,8 @@ function makeScribblePolylinePoints(x1, y1, x2, y2, segments = 6, jitter = 1.2, 
     const t = i / segments;
     const cx = x1 + vx * t;
     const cy = y1 + vy * t;
-    const jitterAmt = (Math.sin(i * 2.3) * 0.5 + (Math.random() - 0.5) * 0.6) * jitter;
+    const jitterAmt =
+      (Math.sin(i * 2.3) * 0.5 + (Math.random() - 0.5) * 0.6) * jitter;
     const ox = px * (perpendicularOffset + jitterAmt);
     const oy = py * (perpendicularOffset + jitterAmt);
     pts.push(`${cx + ox},${cy + oy}`);
@@ -466,18 +672,39 @@ function makeScribblePolylinePoints(x1, y1, x2, y2, segments = 6, jitter = 1.2, 
 }
 
 // addDiastemaAtPoint: draws a stylized X (scribble) centered at (x,y)
-export function addDiastemaAtPoint(svg, x, y, color = 'blue', sizeX = 18, sizeY = 44, strokeWidth = 1) {
+export function addDiastemaAtPoint(
+  svg,
+  x,
+  y,
+  color = 'blue',
+  sizeX = 18,
+  sizeY = 44,
+  strokeWidth = 1
+) {
   try {
     const overlay = ensureOverlay(svg);
     const idBase = `diastema-${Date.now()}`;
     const created = [];
 
-    const ax1 = x - sizeX, ay1 = y - sizeY;
-    const ax2 = x + sizeX, ay2 = y + sizeY;
+    const ax1 = x - sizeX,
+      ay1 = y - sizeY;
+    const ax2 = x + sizeX,
+      ay2 = y + sizeY;
     const offsetsA = [-1.5, 0, 1.5];
     for (let i = 0; i < offsetsA.length; i++) {
-      const pts = makeScribblePolylinePoints(ax1, ay1, ax2, ay2, 6, 1.0, offsetsA[i]);
-      const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      const pts = makeScribblePolylinePoints(
+        ax1,
+        ay1,
+        ax2,
+        ay2,
+        6,
+        1.0,
+        offsetsA[i]
+      );
+      const poly = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'polyline'
+      );
       poly.setAttribute('points', pts);
       poly.setAttribute('fill', 'none');
       poly.setAttribute('stroke', color);
@@ -490,12 +717,25 @@ export function addDiastemaAtPoint(svg, x, y, color = 'blue', sizeX = 18, sizeY 
       created.push(poly);
     }
 
-    const bx1 = x + sizeX, by1 = y - sizeY;
-    const bx2 = x - sizeX, by2 = y + sizeY;
+    const bx1 = x + sizeX,
+      by1 = y - sizeY;
+    const bx2 = x - sizeX,
+      by2 = y + sizeY;
     const offsetsB = [1.5, 0, -1.5];
     for (let i = 0; i < offsetsB.length; i++) {
-      const pts = makeScribblePolylinePoints(bx1, by1, bx2, by2, 6, 1.0, offsetsB[i]);
-      const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      const pts = makeScribblePolylinePoints(
+        bx1,
+        by1,
+        bx2,
+        by2,
+        6,
+        1.0,
+        offsetsB[i]
+      );
+      const poly = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'polyline'
+      );
       poly.setAttribute('points', pts);
       poly.setAttribute('fill', 'none');
       poly.setAttribute('stroke', color);
@@ -520,7 +760,13 @@ export function addDiastemaAtPoint(svg, x, y, color = 'blue', sizeX = 18, sizeY 
   - dibuja UNA X al primer click y se detiene automáticamente
   - onDone({ cancelled, x, y }) se llama al terminar
 */
-export function startDiastemaMode(color = 'blue', sizeX = 18, sizeY = 44, strokeWidth = 1, onDone) {
+export function startDiastemaMode(
+  color = 'blue',
+  sizeX = 18,
+  sizeY = 44,
+  strokeWidth = 1,
+  onDone
+) {
   const svg = getSvg();
   if (!svg) return { stop() {} };
 
@@ -529,19 +775,28 @@ export function startDiastemaMode(color = 'blue', sizeX = 18, sizeY = 44, stroke
   function clientToSvgPoint(cx, cy) {
     try {
       const pt = svg.createSVGPoint();
-      pt.x = cx; pt.y = cy;
+      pt.x = cx;
+      pt.y = cy;
       const screenCTM = svg.getScreenCTM();
       if (!screenCTM) return { x: cx, y: cy };
       return pt.matrixTransform(screenCTM.inverse());
-    } catch (err) {
+    } catch {
       return { x: cx, y: cy };
     }
   }
 
   function cleanup() {
     if (!active) return;
-    try { svg.removeEventListener('click', onClick); } catch (e) {}
-    try { window.removeEventListener('keydown', onKey); } catch (e) {}
+    try {
+      svg.removeEventListener('click', onClick);
+    } catch {
+      /* ignore error */
+    }
+    try {
+      window.removeEventListener('keydown', onKey);
+    } catch {
+      /* ignore error */
+    }
     active = false;
   }
 
@@ -558,7 +813,8 @@ export function startDiastemaMode(color = 'blue', sizeX = 18, sizeY = 44, stroke
       const p = clientToSvgPoint(e.clientX, e.clientY);
       addDiastemaAtPoint(svg, p.x, p.y, color, sizeX, sizeY, strokeWidth);
       cleanup();
-      if (typeof onDone === 'function') onDone({ cancelled: false, x: p.x, y: p.y });
+      if (typeof onDone === 'function')
+        onDone({ cancelled: false, x: p.x, y: p.y });
     } catch (err) {
       console.error('diastema onClick error', err);
     }
@@ -575,52 +831,179 @@ export function startDiastemaMode(color = 'blue', sizeX = 18, sizeY = 44, stroke
 
 // startFixedOrthoMode and startRemovableOrthoMode are kept (simple implementations)
 export function startFixedOrthoMode(color = 'blue') {
-  const svg = getSvg(); if (!svg) return { stop() {} };
+  const svg = getSvg();
+  if (!svg) return { stop() {} };
   const overlay = ensureOverlay(svg);
-  const pts = []; const markers = [];
-  function clientToSvgPoint(cx, cy) { const pt = svg.createSVGPoint(); pt.x = cx; pt.y = cy; const ctm = svg.getScreenCTM(); if (!ctm) return { x: cx, y: cy }; return pt.matrixTransform(ctm.inverse()); }
-  function onClick(e) { if (!svg.contains(e.target)) return; const p = clientToSvgPoint(e.clientX, e.clientY); const c = document.createElementNS('http://www.w3.org/2000/svg','circle'); c.setAttribute('cx',p.x); c.setAttribute('cy',p.y); c.setAttribute('r','4'); c.setAttribute('fill','red'); overlay.appendChild(c); markers.push(c); pts.push(p); if (pts.length===2) { const l=document.createElementNS('http://www.w3.org/2000/svg','line'); l.setAttribute('x1',pts[0].x); l.setAttribute('y1',pts[0].y); l.setAttribute('x2',pts[1].x); l.setAttribute('y2',pts[1].y); l.setAttribute('stroke',color); l.setAttribute('stroke-width','4'); overlay.appendChild(l); cleanup(); } }
-  function onKey(e) { if (e.key === 'Escape') cleanup(); }
-  function cleanup() { svg.removeEventListener('click', onClick); window.removeEventListener('keydown', onKey); markers.forEach(m=>m.remove()); }
-  svg.addEventListener('click', onClick); window.addEventListener('keydown', onKey);
+  const pts = [];
+  const markers = [];
+  function clientToSvgPoint(cx, cy) {
+    const pt = svg.createSVGPoint();
+    pt.x = cx;
+    pt.y = cy;
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return { x: cx, y: cy };
+    return pt.matrixTransform(ctm.inverse());
+  }
+  function onClick(e) {
+    if (!svg.contains(e.target)) return;
+    const p = clientToSvgPoint(e.clientX, e.clientY);
+    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.setAttribute('cx', p.x);
+    c.setAttribute('cy', p.y);
+    c.setAttribute('r', '4');
+    c.setAttribute('fill', 'red');
+    overlay.appendChild(c);
+    markers.push(c);
+    pts.push(p);
+    if (pts.length === 2) {
+      const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      l.setAttribute('x1', pts[0].x);
+      l.setAttribute('y1', pts[0].y);
+      l.setAttribute('x2', pts[1].x);
+      l.setAttribute('y2', pts[1].y);
+      l.setAttribute('stroke', color);
+      l.setAttribute('stroke-width', '4');
+      overlay.appendChild(l);
+      cleanup();
+    }
+  }
+  function onKey(e) {
+    if (e.key === 'Escape') cleanup();
+  }
+  function cleanup() {
+    svg.removeEventListener('click', onClick);
+    window.removeEventListener('keydown', onKey);
+    markers.forEach((m) => m.remove());
+  }
+  svg.addEventListener('click', onClick);
+  window.addEventListener('keydown', onKey);
   return { stop: cleanup };
 }
 
-export function startRemovableOrthoMode(color = 'blue', steps = 10, amplitude = 10) {
-  const svg = getSvg(); if (!svg) return { stop() {} };
+export function startRemovableOrthoMode(
+  color = 'blue',
+  steps = 10,
+  amplitude = 10
+) {
+  const svg = getSvg();
+  if (!svg) return { stop() {} };
   const overlay = ensureOverlay(svg);
-  const points = []; const markers = [];
-  function clientToSvgPoint(cx, cy) { const pt = svg.createSVGPoint(); pt.x = cx; pt.y = cy; const ctm = svg.getScreenCTM(); if (!ctm) return { x: cx, y: cy }; return pt.matrixTransform(ctm.inverse()); }
-  function onClick(e) { if (!svg.contains(e.target)) return; const p = clientToSvgPoint(e.clientX, e.clientY); const c = document.createElementNS('http://www.w3.org/2000/svg','circle'); c.setAttribute('cx',p.x); c.setAttribute('cy',p.y); c.setAttribute('r','4'); c.setAttribute('fill','red'); overlay.appendChild(c); markers.push(c); points.push(p); if (points.length===2) { const p1=points[0], p2=points[1]; const vx=p2.x-p1.x, vy=p2.y-p1.y, len=Math.hypot(vx,vy)||1, nx=-vy/len, ny=vx/len; const ptsArr=[]; for (let i=0;i<=steps;i++){ const t=i/steps; const xi=p1.x+vx*t; const yi=p1.y+vy*t; const off=(i%2===0)?amplitude:-amplitude; ptsArr.push(`${xi+nx*off},${yi+ny*off}`); } const poly=document.createElementNS('http://www.w3.org/2000/svg','polyline'); poly.setAttribute('points', ptsArr.join(' ')); poly.setAttribute('stroke', color); poly.setAttribute('stroke-width','3'); poly.setAttribute('fill','none'); overlay.appendChild(poly); cleanup(); } }
-  function onKey(e) { if (e.key === 'Escape') cleanup(); }
-  function cleanup() { svg.removeEventListener('click', onClick); window.removeEventListener('keydown', onKey); markers.forEach(m=>m.remove()); }
-  svg.addEventListener('click', onClick); window.addEventListener('keydown', onKey);
+  const points = [];
+  const markers = [];
+  function clientToSvgPoint(cx, cy) {
+    const pt = svg.createSVGPoint();
+    pt.x = cx;
+    pt.y = cy;
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return { x: cx, y: cy };
+    return pt.matrixTransform(ctm.inverse());
+  }
+  function onClick(e) {
+    if (!svg.contains(e.target)) return;
+    const p = clientToSvgPoint(e.clientX, e.clientY);
+    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.setAttribute('cx', p.x);
+    c.setAttribute('cy', p.y);
+    c.setAttribute('r', '4');
+    c.setAttribute('fill', 'red');
+    overlay.appendChild(c);
+    markers.push(c);
+    points.push(p);
+    if (points.length === 2) {
+      const p1 = points[0],
+        p2 = points[1];
+      const vx = p2.x - p1.x,
+        vy = p2.y - p1.y,
+        len = Math.hypot(vx, vy) || 1,
+        nx = -vy / len,
+        ny = vx / len;
+      const ptsArr = [];
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const xi = p1.x + vx * t;
+        const yi = p1.y + vy * t;
+        const off = i % 2 === 0 ? amplitude : -amplitude;
+        ptsArr.push(`${xi + nx * off},${yi + ny * off}`);
+      }
+      const poly = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'polyline'
+      );
+      poly.setAttribute('points', ptsArr.join(' '));
+      poly.setAttribute('stroke', color);
+      poly.setAttribute('stroke-width', '3');
+      poly.setAttribute('fill', 'none');
+      overlay.appendChild(poly);
+      cleanup();
+    }
+  }
+  function onKey(e) {
+    if (e.key === 'Escape') cleanup();
+  }
+  function cleanup() {
+    svg.removeEventListener('click', onClick);
+    window.removeEventListener('keydown', onKey);
+    markers.forEach((m) => m.remove());
+  }
+  svg.addEventListener('click', onClick);
+  window.addEventListener('keydown', onKey);
   return { stop: cleanup };
 }
 
-export function addRemovableOrtho(startTooth, endTooth, color = 'blue', steps = 8, amplitude = 8) {
-  const svg = getSvg(); if (!svg) return false;
-  const s = centerOfTooth(svg, startTooth); const e = centerOfTooth(svg, endTooth); if (!s || !e) return false;
+export function addRemovableOrtho(
+  startTooth,
+  endTooth,
+  color = 'blue',
+  steps = 8,
+  amplitude = 8
+) {
+  const svg = getSvg();
+  if (!svg) return false;
+  const s = centerOfTooth(svg, startTooth);
+  const e = centerOfTooth(svg, endTooth);
+  if (!s || !e) return false;
   const overlay = ensureOverlay(svg);
-  const vx = e.x - s.x, vy = e.y - s.y, len = Math.hypot(vx, vy) || 1, nx = -vy / len, ny = vx / len;
+  const vx = e.x - s.x,
+    vy = e.y - s.y,
+    len = Math.hypot(vx, vy) || 1,
+    nx = -vy / len,
+    ny = vx / len;
   const pts = [];
   for (let i = 0; i <= steps; i++) {
-    const t = i / steps; const xi = s.x + vx * t; const yi = s.y + vy * t; const off = (i % 2 === 0) ? amplitude : -amplitude;
+    const t = i / steps;
+    const xi = s.x + vx * t;
+    const yi = s.y + vy * t;
+    const off = i % 2 === 0 ? amplitude : -amplitude;
     pts.push(`${xi + nx * off},${yi + ny * off}`);
   }
-  const poly = document.createElementNS('http://www.w3.org/2000/svg','polyline'); poly.setAttribute('points', pts.join(' ')); poly.setAttribute('stroke', color); poly.setAttribute('stroke-width','3'); poly.setAttribute('fill','none'); overlay.appendChild(poly);
+  const poly = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'polyline'
+  );
+  poly.setAttribute('points', pts.join(' '));
+  poly.setAttribute('stroke', color);
+  poly.setAttribute('stroke-width', '3');
+  poly.setAttribute('fill', 'none');
+  overlay.appendChild(poly);
   return true;
 }
 
 export function highlightToothBox(toothDataName, color = 'red') {
-  const svg = getSvg(); if (!svg) return false;
-  const info = getToothBBox(svg, toothDataName); if (!info) return false;
+  const svg = getSvg();
+  if (!svg) return false;
+  const info = getToothBBox(svg, toothDataName);
+  if (!info) return false;
   const { bbox } = info;
   const overlay = ensureOverlay(svg);
-  const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
-  rect.setAttribute('x', bbox.x - 2); rect.setAttribute('y', bbox.y - 2);
-  rect.setAttribute('width', bbox.width + 4); rect.setAttribute('height', bbox.height + 4);
-  rect.setAttribute('fill', 'none'); rect.setAttribute('stroke', color); rect.setAttribute('stroke-width', '2'); rect.setAttribute('class', 'annotation highlight-box');
+  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  rect.setAttribute('x', bbox.x - 2);
+  rect.setAttribute('y', bbox.y - 2);
+  rect.setAttribute('width', bbox.width + 4);
+  rect.setAttribute('height', bbox.height + 4);
+  rect.setAttribute('fill', 'none');
+  rect.setAttribute('stroke', color);
+  rect.setAttribute('stroke-width', '2');
+  rect.setAttribute('class', 'annotation highlight-box');
   overlay.appendChild(rect);
   rect.setAttribute('data-id', `box-${toothDataName}-${Date.now()}`);
   return true;
@@ -637,31 +1020,43 @@ export function addDefect(toothDataName, defectText = 'O', color = 'red') {
     if (!svg) return false;
     const info = getToothBBox(svg, toothDataName);
     if (!info) return false;
-    const { bbox, node } = info;
+    const { bbox } = info;
     const overlay = ensureOverlay(svg);
 
     // safe placement values
     const cx = bbox.x + bbox.width / 2;
     const cy = bbox.y + bbox.height / 2;
     const markerOffsetX = Math.max(4, bbox.width * 0.18);
-    const markerR = Math.max(3, Math.min(8, Math.min(bbox.width, bbox.height) * 0.06));
+    const markerR = Math.max(
+      3,
+      Math.min(8, Math.min(bbox.width, bbox.height) * 0.06)
+    );
 
     // place small circle marker slightly to the right of center
-    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    const circle = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'circle'
+    );
     circle.setAttribute('cx', cx + markerOffsetX);
     circle.setAttribute('cy', cy);
     circle.setAttribute('r', String(markerR));
     circle.setAttribute('fill', color);
     circle.setAttribute('class', 'annotation defect-marker');
-    circle.setAttribute('data-id', `defect-marker-${toothDataName}-${Date.now()}`);
+    circle.setAttribute(
+      'data-id',
+      `defect-marker-${toothDataName}-${Date.now()}`
+    );
     overlay.appendChild(circle);
 
     // small text label (defectText)
     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     text.setAttribute('x', cx + markerOffsetX + markerR + 4);
-    text.setAttribute('y', cy + (markerR / 2));
+    text.setAttribute('y', cy + markerR / 2);
     text.setAttribute('fill', color);
-    text.setAttribute('font-size', String(Math.max(10, Math.min(14, markerR * 2))));
+    text.setAttribute(
+      'font-size',
+      String(Math.max(10, Math.min(14, markerR * 2)))
+    );
     text.setAttribute('class', 'annotation defect-label');
     text.setAttribute('data-id', `defect-label-${toothDataName}-${Date.now()}`);
     text.textContent = defectText;
@@ -687,7 +1082,10 @@ export function addFosasFisurasProfundas(toothDataName, color = 'blue') {
     const info = getToothBBox(svg, toothDataName);
     if (!info) return false;
     const { bbox } = info;
-    const toothCenter = { x: bbox.x + bbox.width / 2, y: bbox.y + bbox.height / 2 };
+    const toothCenter = {
+      x: bbox.x + bbox.width / 2,
+      y: bbox.y + bbox.height / 2,
+    };
 
     // Helper: compute foreignObject bounding box in SVG coords (best-effort)
     function foreignObjectBBoxInSvg(fo) {
@@ -695,8 +1093,12 @@ export function addFosasFisurasProfundas(toothDataName, color = 'blue') {
         const foBox = fo.getBBox();
         const foCTM = fo.getCTM ? fo.getCTM() : null;
         if (foCTM) {
-          const pt1 = svg.createSVGPoint(); pt1.x = foBox.x; pt1.y = foBox.y;
-          const pt2 = svg.createSVGPoint(); pt2.x = foBox.x + foBox.width; pt2.y = foBox.y + foBox.height;
+          const pt1 = svg.createSVGPoint();
+          pt1.x = foBox.x;
+          pt1.y = foBox.y;
+          const pt2 = svg.createSVGPoint();
+          pt2.x = foBox.x + foBox.width;
+          pt2.y = foBox.y + foBox.height;
           const t1 = pt1.matrixTransform(foCTM);
           const t2 = pt2.matrixTransform(foCTM);
           const minX = Math.min(t1.x, t2.x);
@@ -705,15 +1107,21 @@ export function addFosasFisurasProfundas(toothDataName, color = 'blue') {
           const maxY = Math.max(t1.y, t2.y);
           return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
         }
-      } catch (e) { /* fallback below */ }
+      } catch {
+        /* fallback below */
+      }
 
       try {
         const rect = fo.getBoundingClientRect();
         const screenCTM = svg.getScreenCTM();
         if (!screenCTM) return null;
         const inv = screenCTM.inverse();
-        const pTL = svg.createSVGPoint(); pTL.x = rect.left; pTL.y = rect.top;
-        const pBR = svg.createSVGPoint(); pBR.x = rect.right; pBR.y = rect.bottom;
+        const pTL = svg.createSVGPoint();
+        pTL.x = rect.left;
+        pTL.y = rect.top;
+        const pBR = svg.createSVGPoint();
+        pBR.x = rect.right;
+        pBR.y = rect.bottom;
         const tTL = pTL.matrixTransform(inv);
         const tBR = pBR.matrixTransform(inv);
         const minX = Math.min(tTL.x, tBR.x);
@@ -721,7 +1129,7 @@ export function addFosasFisurasProfundas(toothDataName, color = 'blue') {
         const maxX = Math.max(tTL.x, tBR.x);
         const maxY = Math.max(tTL.y, tBR.y);
         return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
-      } catch (err) {
+      } catch {
         return null;
       }
     }
@@ -750,12 +1158,21 @@ export function addFosasFisurasProfundas(toothDataName, color = 'blue') {
         bestOverlap = overlap;
         bestFo = fo;
       }
-      const foCenter = { x: foBox.x + foBox.width / 2, y: foBox.y + foBox.height / 2 };
-      const dist = Math.hypot(foCenter.x - toothCenter.x, foCenter.y - toothCenter.y);
-      if (dist < bestDist) { bestDist = dist; bestByDist = fo; }
+      const foCenter = {
+        x: foBox.x + foBox.width / 2,
+        y: foBox.y + foBox.height / 2,
+      };
+      const dist = Math.hypot(
+        foCenter.x - toothCenter.x,
+        foCenter.y - toothCenter.y
+      );
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestByDist = fo;
+      }
     }
 
-    const chosenFo = bestOverlap > 0 ? bestFo : (bestByDist || bestFo);
+    const chosenFo = bestOverlap > 0 ? bestFo : bestByDist || bestFo;
 
     if (chosenFo) {
       const input = chosenFo.querySelector('input, textarea');
@@ -769,7 +1186,10 @@ export function addFosasFisurasProfundas(toothDataName, color = 'blue') {
     // draw a visible "FFP" label on the overlay near the center of the tooth
     const overlay = ensureOverlay(svg);
     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    const fontSize = Math.max(10, Math.min(20, Math.floor(Math.min(bbox.width, bbox.height) * 0.18)));
+    const fontSize = Math.max(
+      10,
+      Math.min(20, Math.floor(Math.min(bbox.width, bbox.height) * 0.18))
+    );
     text.setAttribute('x', String(toothCenter.x));
     // nudge slightly downward so text is visually centered
     text.setAttribute('y', String(toothCenter.y + Math.max(3, fontSize / 3)));
@@ -802,7 +1222,10 @@ export function addImplant(toothDataName, color = 'red') {
     const info = getToothBBox(svg, toothDataName);
     if (!info) return false;
     const { bbox } = info;
-    const toothCenter = { x: bbox.x + bbox.width / 2, y: bbox.y + bbox.height / 2 };
+    const toothCenter = {
+      x: bbox.x + bbox.width / 2,
+      y: bbox.y + bbox.height / 2,
+    };
 
     // Helper: compute foreignObject bounding box in SVG coords (best-effort)
     function foreignObjectBBoxInSvg(fo) {
@@ -810,8 +1233,12 @@ export function addImplant(toothDataName, color = 'red') {
         const foBox = fo.getBBox();
         const foCTM = fo.getCTM ? fo.getCTM() : null;
         if (foCTM) {
-          const pt1 = svg.createSVGPoint(); pt1.x = foBox.x; pt1.y = foBox.y;
-          const pt2 = svg.createSVGPoint(); pt2.x = foBox.x + foBox.width; pt2.y = foBox.y + foBox.height;
+          const pt1 = svg.createSVGPoint();
+          pt1.x = foBox.x;
+          pt1.y = foBox.y;
+          const pt2 = svg.createSVGPoint();
+          pt2.x = foBox.x + foBox.width;
+          pt2.y = foBox.y + foBox.height;
           const t1 = pt1.matrixTransform(foCTM);
           const t2 = pt2.matrixTransform(foCTM);
           const minX = Math.min(t1.x, t2.x);
@@ -820,15 +1247,21 @@ export function addImplant(toothDataName, color = 'red') {
           const maxY = Math.max(t1.y, t2.y);
           return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
         }
-      } catch (e) { /* fallback below */ }
+      } catch {
+        /* fallback below */
+      }
 
       try {
         const rect = fo.getBoundingClientRect();
         const screenCTM = svg.getScreenCTM();
         if (!screenCTM) return null;
         const inv = screenCTM.inverse();
-        const pTL = svg.createSVGPoint(); pTL.x = rect.left; pTL.y = rect.top;
-        const pBR = svg.createSVGPoint(); pBR.x = rect.right; pBR.y = rect.bottom;
+        const pTL = svg.createSVGPoint();
+        pTL.x = rect.left;
+        pTL.y = rect.top;
+        const pBR = svg.createSVGPoint();
+        pBR.x = rect.right;
+        pBR.y = rect.bottom;
         const tTL = pTL.matrixTransform(inv);
         const tBR = pBR.matrixTransform(inv);
         const minX = Math.min(tTL.x, tBR.x);
@@ -836,7 +1269,7 @@ export function addImplant(toothDataName, color = 'red') {
         const maxX = Math.max(tTL.x, tBR.x);
         const maxY = Math.max(tTL.y, tBR.y);
         return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
-      } catch (err) {
+      } catch {
         return null;
       }
     }
@@ -865,12 +1298,21 @@ export function addImplant(toothDataName, color = 'red') {
         bestOverlap = overlap;
         bestFo = fo;
       }
-      const foCenter = { x: foBox.x + foBox.width / 2, y: foBox.y + foBox.height / 2 };
-      const dist = Math.hypot(foCenter.x - toothCenter.x, foCenter.y - toothCenter.y);
-      if (dist < bestDist) { bestDist = dist; bestByDist = fo; }
+      const foCenter = {
+        x: foBox.x + foBox.width / 2,
+        y: foBox.y + foBox.height / 2,
+      };
+      const dist = Math.hypot(
+        foCenter.x - toothCenter.x,
+        foCenter.y - toothCenter.y
+      );
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestByDist = fo;
+      }
     }
 
-    const chosenFo = bestOverlap > 0 ? bestFo : (bestByDist || bestFo);
+    const chosenFo = bestOverlap > 0 ? bestFo : bestByDist || bestFo;
 
     if (chosenFo) {
       const input = chosenFo.querySelector('input, textarea');
@@ -884,7 +1326,10 @@ export function addImplant(toothDataName, color = 'red') {
     // draw a visible "IMP" label on the overlay near the center of the tooth
     const overlay = ensureOverlay(svg);
     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    const fontSize = Math.max(10, Math.min(20, Math.floor(Math.min(bbox.width, bbox.height) * 0.18)));
+    const fontSize = Math.max(
+      10,
+      Math.min(20, Math.floor(Math.min(bbox.width, bbox.height) * 0.18))
+    );
     text.setAttribute('x', String(toothCenter.x));
     // nudge slightly downward so text is visually centered
     text.setAttribute('y', String(toothCenter.y + Math.max(3, fontSize / 3)));
@@ -909,7 +1354,13 @@ export function addImplant(toothDataName, color = 'red') {
    - addEdentulousLineBetween(startTooth, endTooth, color, strokeWidth)
    - dibuja línea recta entre centros de dos dientes y la agrega al overlay
    ------------------------------------------------------------------ */
-export function addEdentulousLineBetween(startTooth, endTooth, color = 'black', strokeWidth = 3, options = {}) {
+export function addEdentulousLineBetween(
+  startTooth,
+  endTooth,
+  color = 'black',
+  strokeWidth = 3,
+  options = {}
+) {
   try {
     const svg = getSvg();
     if (!svg) return false;
@@ -917,7 +1368,11 @@ export function addEdentulousLineBetween(startTooth, endTooth, color = 'black', 
     const s = centerOfTooth(svg, startTooth);
     const e = centerOfTooth(svg, endTooth);
     if (!s || !e) {
-      console.warn('addEdentulousLineBetween: no se pudo obtener centro de diente', startTooth, endTooth);
+      console.warn(
+        'addEdentulousLineBetween: no se pudo obtener centro de diente',
+        startTooth,
+        endTooth
+      );
       return false;
     }
 
@@ -926,14 +1381,15 @@ export function addEdentulousLineBetween(startTooth, endTooth, color = 'black', 
     // Presets automáticos basados en el par de dientes (funciona si llamas desde panel sin options)
     const pairKey = `${startTooth}->${endTooth}`;
     const autoPresets = {
-      '1.8->2.8': { downward: 22, extraStart: 32, extraEnd: 32 },   // edéntulo superior (bajar la línea)
+      '1.8->2.8': { downward: 22, extraStart: 32, extraEnd: 32 }, // edéntulo superior (bajar la línea)
       '2.8->1.8': { downward: 15, extraStart: 15, extraEnd: 15 },
-      '4.8->3.8': { downward: -22, extraStart: 32, extraEnd: 32 },  // edéntulo inferior (subir la línea)
+      '4.8->3.8': { downward: -22, extraStart: 32, extraEnd: 32 }, // edéntulo inferior (subir la línea)
       '3.8->4.8': { downward: -10, extraStart: 12, extraEnd: 12 },
     };
 
     // If a preset string was provided in options, map it to values
-    const presetName = typeof options.preset === 'string' ? options.preset.toLowerCase() : null;
+    const presetName =
+      typeof options.preset === 'string' ? options.preset.toLowerCase() : null;
     let presetVals = {};
     if (presetName === 'superior') {
       presetVals = { downward: 10, extraStart: 10, extraEnd: 10 };
@@ -944,14 +1400,26 @@ export function addEdentulousLineBetween(startTooth, endTooth, color = 'black', 
     }
 
     // Valores finales: options explicit override preset values; otherwise use preset or defaults
-    const downward = typeof options.downward === 'number' ? options.downward
-                     : (typeof presetVals.downward === 'number' ? presetVals.downward : 0);
+    const downward =
+      typeof options.downward === 'number'
+        ? options.downward
+        : typeof presetVals.downward === 'number'
+          ? presetVals.downward
+          : 0;
 
-    const extraStart = typeof options.extraStart === 'number' ? options.extraStart
-                      : (typeof presetVals.extraStart === 'number' ? presetVals.extraStart : 0);
+    const extraStart =
+      typeof options.extraStart === 'number'
+        ? options.extraStart
+        : typeof presetVals.extraStart === 'number'
+          ? presetVals.extraStart
+          : 0;
 
-    const extraEnd = typeof options.extraEnd === 'number' ? options.extraEnd
-                    : (typeof presetVals.extraEnd === 'number' ? presetVals.extraEnd : 0);
+    const extraEnd =
+      typeof options.extraEnd === 'number'
+        ? options.extraEnd
+        : typeof presetVals.extraEnd === 'number'
+          ? presetVals.extraEnd
+          : 0;
 
     // vector from start to end
     const vx = e.x - s.x;
@@ -981,13 +1449,28 @@ export function addEdentulousLineBetween(startTooth, endTooth, color = 'black', 
     line.setAttribute('stroke-width', String(strokeWidth));
     line.setAttribute('stroke-linecap', 'round');
     line.setAttribute('class', 'annotation edentulous-line');
-    line.setAttribute('data-id', `edentulous-${startTooth}-${endTooth}-${Date.now()}`);
+    line.setAttribute(
+      'data-id',
+      `edentulous-${startTooth}-${endTooth}-${Date.now()}`
+    );
     overlay.appendChild(line);
 
     // Devuelve información útil para debugging o manipulación posterior
     return {
       line,
-      params: { startTooth, endTooth, color, strokeWidth, downward, extraStart, extraEnd, x1, y1, x2, y2 }
+      params: {
+        startTooth,
+        endTooth,
+        color,
+        strokeWidth,
+        downward,
+        extraStart,
+        extraEnd,
+        x1,
+        y1,
+        x2,
+        y2,
+      },
     };
   } catch (err) {
     console.error('addEdentulousLineBetween error', err);
@@ -1020,7 +1503,8 @@ export function addGerminacion(toothDataName, color = 'blue') {
 
     // 1) intentar encontrar el <text class="tooth-name"> con el contenido exacto
     const texts = Array.from(svg.querySelectorAll('text.tooth-name'));
-    let textEl = texts.find(t => (t.textContent || '').trim() === name) || null;
+    let textEl =
+      texts.find((t) => (t.textContent || '').trim() === name) || null;
 
     // 2) intentar encontrar el <g.tooth-group data-name="..."> (por si no hay <text>)
     const toothGroup = svg.querySelector(`g.tooth-group[data-name="${name}"]`);
@@ -1065,7 +1549,9 @@ export function addGerminacion(toothDataName, color = 'blue') {
       const cy = bbox.y + bbox.height / 2;
       centerSvgPoint = toSvgPoint(toothGroup, cx, cy);
     } else {
-      console.warn(`addGerminacion: no se encontró text ni tooth-group para "${name}"`);
+      console.warn(
+        `addGerminacion: no se encontró text ni tooth-group para "${name}"`
+      );
       return false;
     }
 
@@ -1076,7 +1562,7 @@ export function addGerminacion(toothDataName, color = 'blue') {
 
     // borrar germinación previa para este diente (evita duplicados)
     const existing = overlay.querySelectorAll(`[data-id^="germin-${name}-"]`);
-    existing.forEach(e => e.remove());
+    existing.forEach((e) => e.remove());
 
     // Calcular radio: proporcional al tamaño del diente si existe bbox, sino valor por defecto
     let r = 20;
@@ -1091,26 +1577,32 @@ export function addGerminacion(toothDataName, color = 'blue') {
           // aproximar escala por la magnitud de a (m11) y d (m22)
           scaleApprox = (Math.abs(groupCTM.a) + Math.abs(groupCTM.d)) / 2 || 1;
         }
-        r = Math.max(5, Math.min(20, Math.floor((minSide * 0.20) * scaleApprox)));
+        r = Math.max(5, Math.min(20, Math.floor(minSide * 0.2 * scaleApprox)));
       } else if (textEl) {
         const tb = textEl.getBBox();
-        r = Math.max(5, Math.min(20, Math.floor(Math.max(tb.width, tb.height) * 0.9)));
+        r = Math.max(
+          5,
+          Math.min(20, Math.floor(Math.max(tb.width, tb.height) * 0.9))
+        );
       }
-    } catch (e) {
+    } catch {
       // ignore bbox problems, usar r por defecto
     }
 
     // crear círculo en coordenadas del SVG (overlay comparte el mismo sistema)
-    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    const circle = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'circle'
+    );
     circle.setAttribute('cx', String(centerSvgPoint.x + offsetX));
     circle.setAttribute('cy', String(centerSvgPoint.y + offsetY));
     circle.setAttribute('r', String(r));
 
     // estilo del círculo (sin relleno, con borde)
-    circle.setAttribute('fill', 'none');       // SIN FONDO
-    circle.setAttribute('stroke', color);      // COLOR DEL BORDE (blue)
-    circle.setAttribute('stroke-width', '2');  // GROSOR DEL BORDE
-    circle.setAttribute('opacity', '1');       // OPACIDAD TOTAL
+    circle.setAttribute('fill', 'none'); // SIN FONDO
+    circle.setAttribute('stroke', color); // COLOR DEL BORDE (blue)
+    circle.setAttribute('stroke-width', '2'); // GROSOR DEL BORDE
+    circle.setAttribute('opacity', '1'); // OPACIDAD TOTAL
 
     circle.setAttribute('class', 'annotation germination-circle');
     circle.setAttribute('data-id', `germin-${name}-${Date.now()}`);
@@ -1124,7 +1616,6 @@ export function addGerminacion(toothDataName, color = 'blue') {
     return false;
   }
 }
-
 
 // FUSIÓN ---------------------------------------------------
 
@@ -1146,15 +1637,16 @@ export function addFusion(toothName, color = 'blue') {
     const num = parseFloat(name);
     if (isNaN(num)) return false;
 
-    const left  = (num - 0.1).toFixed(1);
+    const left = (num - 0.1).toFixed(1);
     const right = (num + 0.1).toFixed(1);
 
     const exists = (n) =>
       svg.querySelector(`g.tooth-group[data-name="${n}"]`) ||
-      Array.from(svg.querySelectorAll('text.tooth-name'))
-        .find(t => (t.textContent || '').trim() === n);
+      Array.from(svg.querySelectorAll('text.tooth-name')).find(
+        (t) => (t.textContent || '').trim() === n
+      );
 
-    const validLeft  = exists(left);
+    const validLeft = exists(left);
     const validRight = exists(right);
 
     if (!validLeft && !validRight) {
@@ -1169,38 +1661,36 @@ export function addFusion(toothName, color = 'blue') {
     const hasFusionCircle = (d) =>
       overlay.querySelector(`.fusion-circle[data-tooth="${d}"]`);
 
-    const leftBusy  = validLeft  && hasFusionCircle(left);
+    const leftBusy = validLeft && hasFusionCircle(left);
     const rightBusy = validRight && hasFusionCircle(right);
 
     let neighbor = null;
 
     // SI SOLO UNO EXISTE → usamos ese
-    if (validLeft && !validRight)      neighbor = left;
+    if (validLeft && !validRight) neighbor = left;
     else if (!validLeft && validRight) neighbor = right;
-
     // SI AMBOS EXISTEN
     else if (validLeft && validRight) {
-
       // ⚠️ SI UNO ESTÁ OCUPADO → usar el OTRO automáticamente
       if (leftBusy && !rightBusy) {
         neighbor = right;
       } else if (!leftBusy && rightBusy) {
         neighbor = left;
-      } 
-      
+      }
+
       // ⚠️ SI AMBOS ESTÁN OCUPADOS
       else if (leftBusy && rightBusy) {
         alert(`Los dientes ${left} y ${right} ya tienen círculos de fusión.`);
         return false;
-      } 
-      
+      }
+
       // ⚠️ SI NINGUNO ESTÁ OCUPADO → PREGUNTAR
       else {
         const choice = prompt(
           `El diente ${name} puede fusionar con:\n` +
-          `1) ${left}\n` +
-          `2) ${right}\n\n` +
-          `Escribe el número del diente que deseas usar:`
+            `1) ${left}\n` +
+            `2) ${right}\n\n` +
+            `Escribe el número del diente que deseas usar:`
         );
 
         if (!choice) return false;
@@ -1224,17 +1714,20 @@ export function addFusion(toothName, color = 'blue') {
     // ===============================================
 
     for (const d of teethToMark) {
-
       // eliminar círculos viejos del MISMO diente
-      const previous = overlay.querySelectorAll(`.fusion-circle[data-tooth="${d}"]`);
-      previous.forEach(p => p.remove());
+      const previous = overlay.querySelectorAll(
+        `.fusion-circle[data-tooth="${d}"]`
+      );
+      previous.forEach((p) => p.remove());
 
-      const textEl = Array.from(svg.querySelectorAll('text.tooth-name'))
-        .find(t => (t.textContent || '').trim() === d);
+      const textEl = Array.from(svg.querySelectorAll('text.tooth-name')).find(
+        (t) => (t.textContent || '').trim() === d
+      );
 
       const toothGroup = svg.querySelector(`g.tooth-group[data-name="${d}"]`);
 
-      let cx = 0, cy = 0;
+      let cx = 0,
+        cy = 0;
 
       if (textEl) {
         const x = parseFloat(textEl.getAttribute('x'));
@@ -1251,7 +1744,10 @@ export function addFusion(toothName, color = 'blue') {
         cy = bbox.y + bbox.height / 2;
       }
 
-      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+      const circle = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'ellipse'
+      );
       circle.setAttribute('cx', cx);
       circle.setAttribute('cy', cy);
       circle.setAttribute('rx', '40');
@@ -1267,16 +1763,19 @@ export function addFusion(toothName, color = 'blue') {
     }
 
     return true;
-
   } catch (err) {
     console.error('addFusion error', err);
     return false;
   }
 }
 
-// GIROVERSIÓN 
+// GIROVERSIÓN
 
-export function addGiroversion(toothDataName, direction = 'right', color = 'blue') {
+export function addGiroversion(
+  toothDataName,
+  direction = 'right',
+  color = 'blue'
+) {
   try {
     const svg = getSvg();
     if (!svg) return false;
@@ -1287,9 +1786,13 @@ export function addGiroversion(toothDataName, direction = 'right', color = 'blue
     const overlay = ensureOverlay(svg);
 
     // Verificar si ya existe giroversión en este diente
-    const exists = overlay.querySelector(`[data-id^="giro-${toothDataName.replace(/\W/g, '_')}"]`);
+    const exists = overlay.querySelector(
+      `[data-id^="giro-${toothDataName.replace(/\W/g, '_')}"]`
+    );
     if (exists) {
-      alert(`Este diente (${toothDataName}) ya tiene un tratamiento de giroversión aplicado.`);
+      alert(
+        `Este diente (${toothDataName}) ya tiene un tratamiento de giroversión aplicado.`
+      );
       return false;
     }
 
@@ -1317,7 +1820,9 @@ export function addGiroversion(toothDataName, direction = 'right', color = 'blue
     if (direction === 'left') {
       xStart = cx - halfW;
       xEnd = cx + halfW;
-      const tmp = xStart; xStart = xEnd; xEnd = tmp;
+      const tmp = xStart;
+      xStart = xEnd;
+      xEnd = tmp;
     } else {
       xStart = cx - halfW;
       xEnd = cx + halfW;
@@ -1331,7 +1836,7 @@ export function addGiroversion(toothDataName, direction = 'right', color = 'blue
     const curveAmount = Math.max(12, Math.floor(bbox.height * 0.28));
 
     // si es diente 8,7,4,3 → curva invertida
-    const ctrlY = arrowUp ? (y - curveAmount) : (y + curveAmount);
+    const ctrlY = arrowUp ? y - curveAmount : y + curveAmount;
     // -----------------------------
 
     const idBase = `giro-${toothDataName.replace(/\W/g, '_')}-${Date.now()}`;
@@ -1342,7 +1847,10 @@ export function addGiroversion(toothDataName, direction = 'right', color = 'blue
     path.setAttribute('d', d);
     path.setAttribute('fill', 'none');
     path.setAttribute('stroke', color);
-    path.setAttribute('stroke-width', String(Math.max(2, Math.floor(bbox.height * 0.03))));
+    path.setAttribute(
+      'stroke-width',
+      String(Math.max(2, Math.floor(bbox.height * 0.03)))
+    );
     path.setAttribute('stroke-linecap', 'round');
     path.setAttribute('stroke-linejoin', 'round');
     path.setAttribute('class', 'annotation giroversion-path');
@@ -1350,13 +1858,16 @@ export function addGiroversion(toothDataName, direction = 'right', color = 'blue
     overlay.appendChild(path);
 
     // ARROW HEAD
-    const dx = (xEnd - ctrlX);
-    const dy = (y - ctrlY);
+    const dx = xEnd - ctrlX;
+    const dy = y - ctrlY;
     const ang = Math.atan2(dy, dx);
 
-    const size = Math.max(6, Math.min(14, Math.floor(Math.min(bbox.width, bbox.height) * 0.18)));
+    const size = Math.max(
+      6,
+      Math.min(14, Math.floor(Math.min(bbox.width, bbox.height) * 0.18))
+    );
     const headLength = size * 1.5;
-    const headWidth  = Math.max(10, Math.floor(size * 2));
+    const headWidth = Math.max(10, Math.floor(size * 2));
 
     const tipX = xEnd;
     const tipY = y;
@@ -1374,7 +1885,10 @@ export function addGiroversion(toothDataName, direction = 'right', color = 'blue
 
     const points = `${tipX},${tipY} ${leftX},${leftY} ${rightX},${rightY}`;
 
-    const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    const poly = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'polygon'
+    );
     poly.setAttribute('points', points);
     poly.setAttribute('fill', color);
     poly.setAttribute('opacity', '1');
@@ -1383,8 +1897,11 @@ export function addGiroversion(toothDataName, direction = 'right', color = 'blue
     overlay.appendChild(poly);
 
     // DECOR
-    const decorR = Math.max(1, Math.floor(size * 0.20));
-    const decor = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    const decorR = Math.max(1, Math.floor(size * 0.2));
+    const decor = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'circle'
+    );
     const decorX = ctrlX;
     const decorY = y + Math.max(2, Math.floor(size * 0.5));
     decor.setAttribute('cx', String(decorX));
@@ -1397,51 +1914,54 @@ export function addGiroversion(toothDataName, direction = 'right', color = 'blue
     overlay.appendChild(decor);
 
     return true;
-
   } catch (err) {
     console.error('addGiroversion error', err);
     return false;
   }
 }
 
-
 export function addPulpotomy(toothDataName, color = 'red') {
   const svg = getSvg();
   if (!svg) return false;
 
   const toothCenter = centerOfTooth(svg, toothDataName);
-  if (!toothCenter){
+  if (!toothCenter) {
     console.warn(`No se encontró el centro para el diente ${toothDataName}.`);
     return false;
-  } 
+  }
   const overlay = ensureOverlay(svg);
 
   const displacement = 20;
-    
+
   let adjustedP;
   const quadrant = parseInt(toothDataName.charAt(0));
-  
-  if (quadrant === 1 || quadrant === 2 || quadrant === 5 || quadrant === 6) {
-        adjustedP = { x: toothCenter.x, y: toothCenter.y +displacement };
-    } else if (quadrant === 3 || quadrant === 4 || quadrant === 7 || quadrant === 8) {
-        adjustedP = { x: toothCenter.x, y: toothCenter.y - displacement };
-    }
 
-  const circ = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  circ.setAttribute("cx",adjustedP.x);
-  circ.setAttribute("cy",adjustedP.y);
-  circ.setAttribute("r", '10');
-  circ.setAttribute("fill", color);
-  circ.setAttribute("opacity", "0.75");
-  circ.setAttribute("class", "annotation pulpotomia-mark");
-  circ.setAttribute("data-id", `pulpotomia-${toothDataName}-${Date.now()}`);
+  if (quadrant === 1 || quadrant === 2 || quadrant === 5 || quadrant === 6) {
+    adjustedP = { x: toothCenter.x, y: toothCenter.y + displacement };
+  } else if (
+    quadrant === 3 ||
+    quadrant === 4 ||
+    quadrant === 7 ||
+    quadrant === 8
+  ) {
+    adjustedP = { x: toothCenter.x, y: toothCenter.y - displacement };
+  }
+
+  const circ = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  circ.setAttribute('cx', adjustedP.x);
+  circ.setAttribute('cy', adjustedP.y);
+  circ.setAttribute('r', '10');
+  circ.setAttribute('fill', color);
+  circ.setAttribute('opacity', '0.75');
+  circ.setAttribute('class', 'annotation pulpotomia-mark');
+  circ.setAttribute('data-id', `pulpotomia-${toothDataName}-${Date.now()}`);
 
   overlay.appendChild(circ);
 
   return true;
 }
 
-export function addDentalProsthesis(color = 'blue'){
+export function addDentalProsthesis(color = 'blue') {
   const svg = getSvg();
   if (!svg) return { stop() {} };
   const overlay = ensureOverlay(svg);
@@ -1451,9 +1971,9 @@ export function addDentalProsthesis(color = 'blue'){
   const offset = 5;
 
   function onClick(e) {
-    if (!svg.contains(e.target)) return; 
+    if (!svg.contains(e.target)) return;
     const g = findToothGroupFromEvent(e.target);
-    if (!g){
+    if (!g) {
       console.warn('Clic ignorado: No se hizo clic en un diente.');
       return;
     }
@@ -1461,38 +1981,44 @@ export function addDentalProsthesis(color = 'blue'){
     if (!name) return;
     names.push(name);
 
-    const toothCenter = centerOfTooth(svg, name); 
+    const toothCenter = centerOfTooth(svg, name);
     if (!toothCenter) {
       console.warn(`No se encontró el centro para el diente ${name}.`);
-      return; 
+      return;
     }
     // 2. Definir el desplazamiento vertical (hacia la raíz/encía)
-    const displacement = 60; 
-    
+    const displacement = 60;
+
     let adjustedP;
     const quadrant = parseInt(name.charAt(0));
-    
-    if (quadrant === 1 || quadrant === 2 ) {
-        adjustedP = { x: toothCenter.x, y: toothCenter.y - displacement };
+
+    if (quadrant === 1 || quadrant === 2) {
+      adjustedP = { x: toothCenter.x, y: toothCenter.y - displacement };
     } else if (quadrant === 3 || quadrant === 4) {
-        adjustedP = { x: toothCenter.x, y: toothCenter.y + displacement };
+      adjustedP = { x: toothCenter.x, y: toothCenter.y + displacement };
     } else {
-        if (quadrant === 5 || quadrant === 6) {
-             adjustedP = { x: toothCenter.x, y: toothCenter.y - displacement };
-        } else {
-             adjustedP = { x: toothCenter.x, y: toothCenter.y + displacement };
-        }
+      if (quadrant === 5 || quadrant === 6) {
+        adjustedP = { x: toothCenter.x, y: toothCenter.y - displacement };
+      } else {
+        adjustedP = { x: toothCenter.x, y: toothCenter.y + displacement };
+      }
     }
     const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    c.setAttribute('cx', adjustedP.x); c.setAttribute('cy', adjustedP.y); c.setAttribute('r', '4'); c.setAttribute('fill', color);
-    overlay.appendChild(c); markers.push(c);
+    c.setAttribute('cx', adjustedP.x);
+    c.setAttribute('cy', adjustedP.y);
+    c.setAttribute('r', '4');
+    c.setAttribute('fill', color);
+    overlay.appendChild(c);
+    markers.push(c);
     pts.push(adjustedP);
 
     if (pts.length === 2) {
       // 1. VALIDACIÓN CLÍNICA
       if (!isValidArcade(names[0], names[1])) {
-        alert('❌ Error clínico: La Prótesis Removible debe conectar dientes de la misma arcada.');
-        cleanup(); 
+        alert(
+          '❌ Error clínico: La Prótesis Removible debe conectar dientes de la misma arcada.'
+        );
+        cleanup();
         return;
       }
       // 2. Lógica de Dibujo (Doble Línea)
@@ -1501,30 +2027,41 @@ export function addDentalProsthesis(color = 'blue'){
       const dxLine = p2.x - p1.x;
       const dyLine = p2.y - p1.y;
       const angle = Math.atan2(dyLine, dxLine);
-      const perpAngle = angle + Math.PI / 2; 
+      const perpAngle = angle + Math.PI / 2;
       const dx = Math.cos(perpAngle) * offset;
       const dy = Math.sin(perpAngle) * offset;
       // Línea 1
       const l1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      l1.setAttribute('x1', p1.x + dx); l1.setAttribute('y1', p1.y + dy);
-      l1.setAttribute('x2', p2.x + dx); l1.setAttribute('y2', p2.y + dy);
-      l1.setAttribute('stroke', color); 
-      l1.setAttribute('stroke-width', '5'); 
+      l1.setAttribute('x1', p1.x + dx);
+      l1.setAttribute('y1', p1.y + dy);
+      l1.setAttribute('x2', p2.x + dx);
+      l1.setAttribute('y2', p2.y + dy);
+      l1.setAttribute('stroke', color);
+      l1.setAttribute('stroke-width', '5');
       overlay.appendChild(l1);
       // Línea 2
       const l2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      l2.setAttribute('x1', p1.x - dx); l2.setAttribute('y1', p1.y - dy);
-      l2.setAttribute('x2', p2.x - dx); l2.setAttribute('y2', p2.y - dy);
-      l2.setAttribute('stroke', color); 
+      l2.setAttribute('x1', p1.x - dx);
+      l2.setAttribute('y1', p1.y - dy);
+      l2.setAttribute('x2', p2.x - dx);
+      l2.setAttribute('y2', p2.y - dy);
+      l2.setAttribute('stroke', color);
       l2.setAttribute('stroke-width', '5');
       overlay.appendChild(l2);
- 
+
       cleanup();
     }
   }
-  function onKey(e) { if (e.key === 'Escape') cleanup(); }
-  function cleanup() { svg.removeEventListener('click', onClick); window.removeEventListener('keydown', onKey); markers.forEach(m => m.remove()); }
-  svg.addEventListener('click', onClick); window.addEventListener('keydown', onKey);
+  function onKey(e) {
+    if (e.key === 'Escape') cleanup();
+  }
+  function cleanup() {
+    svg.removeEventListener('click', onClick);
+    window.removeEventListener('keydown', onKey);
+    markers.forEach((m) => m.remove());
+  }
+  svg.addEventListener('click', onClick);
+  window.addEventListener('keydown', onKey);
   return { stop: cleanup };
 }
 
@@ -1535,35 +2072,47 @@ export function addPDC(arcada, color = 'blue', typeId) {
   let toothStartName, toothEndName;
   let displacement;
   const offset = 5;
-  
+
   // 1. Determinar los dientes terminales y el desplazamiento
   if (arcada === 'superior') {
     if (typeId === 'SUP_PERM') {
-      toothStartName = '1.8'; toothEndName = '2.8';
+      toothStartName = '1.8';
+      toothEndName = '2.8';
     } else if (typeId === 'SUP_DECID') {
-      toothStartName = '5.5'; toothEndName = '6.5';
+      toothStartName = '5.5';
+      toothEndName = '6.5';
     } else {
       // Fallback a lógica anterior si no hay typeId (opcional)
       const c1_perm = centerOfTooth(svg, '1.8');
-      if (c1_perm) { toothStartName = '1.8'; toothEndName = '2.8'; } 
-      else { toothStartName = '5.5'; toothEndName = '6.5'; }
+      if (c1_perm) {
+        toothStartName = '1.8';
+        toothEndName = '2.8';
+      } else {
+        toothStartName = '5.5';
+        toothEndName = '6.5';
+      }
     }
-    displacement= -60;
-
+    displacement = -60;
   } else if (arcada === 'inferior') {
     if (typeId === 'INF_PERM') {
-            toothStartName = '4.8'; toothEndName = '3.8';
-        } else if (typeId === 'INF_DECID') {
-            toothStartName = '8.5'; toothEndName = '7.5'; 
-        } else {
-             // Fallback a lógica anterior si no hay typeId (opcional)
-             const c1_perm = centerOfTooth(svg, '4.8');
-             if (c1_perm) { toothStartName = '4.8'; toothEndName = '3.8'; } 
-             else { toothStartName = '8.5'; toothEndName = '7.5'; }
-        }
+      toothStartName = '4.8';
+      toothEndName = '3.8';
+    } else if (typeId === 'INF_DECID') {
+      toothStartName = '8.5';
+      toothEndName = '7.5';
+    } else {
+      // Fallback a lógica anterior si no hay typeId (opcional)
+      const c1_perm = centerOfTooth(svg, '4.8');
+      if (c1_perm) {
+        toothStartName = '4.8';
+        toothEndName = '3.8';
+      } else {
+        toothStartName = '8.5';
+        toothEndName = '7.5';
+      }
+    }
     // Desplazamiento basado en la lógica de Q3/Q4/Q7/Q8 del usuario: Y hacia abajo (positivo)
-    displacement = 60; 
-    
+    displacement = 60;
   } else {
     alert('❌ Arcada no válida.');
     return false;
@@ -1574,7 +2123,9 @@ export function addPDC(arcada, color = 'blue', typeId) {
   const c2 = centerOfTooth(svg, toothEndName);
 
   if (!c1 || !c2) {
-    console.error(`No se pudo obtener el centro de los molares terminales (${toothStartName} o ${toothEndName}).`);
+    console.error(
+      `No se pudo obtener el centro de los molares terminales (${toothStartName} o ${toothEndName}).`
+    );
     return false;
   }
 
@@ -1587,25 +2138,29 @@ export function addPDC(arcada, color = 'blue', typeId) {
   const dxLine = p2.x - p1.x;
   const dyLine = p2.y - p1.y;
   const angle = Math.atan2(dyLine, dxLine);
-  const perpAngle = angle + Math.PI / 2; 
+  const perpAngle = angle + Math.PI / 2;
   const dx = Math.cos(perpAngle) * offset;
   const dy = Math.sin(perpAngle) * offset;
 
   // Línea 1 (offset positivo)
   const l1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  l1.setAttribute('x1', p1.x + dx); l1.setAttribute('y1', p1.y + dy);
-  l1.setAttribute('x2', p2.x + dx); l1.setAttribute('y2', p2.y + dy);
-  l1.setAttribute('stroke', color); 
-  l1.setAttribute('stroke-width', '5'); 
+  l1.setAttribute('x1', p1.x + dx);
+  l1.setAttribute('y1', p1.y + dy);
+  l1.setAttribute('x2', p2.x + dx);
+  l1.setAttribute('y2', p2.y + dy);
+  l1.setAttribute('stroke', color);
+  l1.setAttribute('stroke-width', '5');
   l1.setAttribute('class', 'annotation pdc-line-1');
   l1.setAttribute('data-id', `pdc-${arcada}-1-${Date.now()}`);
   overlay.appendChild(l1);
 
   // Línea 2 (offset negativo)
   const l2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  l2.setAttribute('x1', p1.x - dx); l2.setAttribute('y1', p1.y - dy);
-  l2.setAttribute('x2', p2.x - dx); l2.setAttribute('y2', p2.y - dy);
-  l2.setAttribute('stroke', color); 
+  l2.setAttribute('x1', p1.x - dx);
+  l2.setAttribute('y1', p1.y - dy);
+  l2.setAttribute('x2', p2.x - dx);
+  l2.setAttribute('y2', p2.y - dy);
+  l2.setAttribute('stroke', color);
   l2.setAttribute('stroke-width', '5');
   l2.setAttribute('class', 'annotation pdc-line-2');
   l2.setAttribute('data-id', `pdc-${arcada}-2-${Date.now()}`);
@@ -1617,67 +2172,84 @@ export function addPDC(arcada, color = 'blue', typeId) {
 export function addPPF(color = 'blue') {
   const svg = getSvg();
   if (!svg) return { stop() {} };
-  
+
   const overlay = ensureOverlay(svg);
-  const pts = []; 
-  const names = []; 
-  const markers = []; 
+  const pts = [];
+  const names = [];
+  const markers = [];
   const displacement = 55;
-  const LINE_WIDTH = 5; 
+  const LINE_WIDTH = 5;
   let offset;
 
-  alert('Modo PPF: Haz clic en el primer diente pilar y luego en el segundo diente pilar. Presiona ESC para cancelar.');
+  alert(
+    'Modo PPF: Haz clic en el primer diente pilar y luego en el segundo diente pilar. Presiona ESC para cancelar.'
+  );
 
-  function cleanup() { 
-    svg.removeEventListener('click', onClick); 
-    window.removeEventListener('keydown', onKey); 
-    markers.forEach(m => m.remove()); 
+  function cleanup() {
+    svg.removeEventListener('click', onClick);
+    window.removeEventListener('keydown', onKey);
+    markers.forEach((m) => m.remove());
   }
 
   function onClick(e) {
     const g = findToothGroupFromEvent(e.target);
-    if (!g) { console.warn('Clic ignorado: No se hizo clic en un diente.'); return; }
-    
+    if (!g) {
+      console.warn('Clic ignorado: No se hizo clic en un diente.');
+      return;
+    }
+
     const name = g.getAttribute('data-name');
     if (!name || names.includes(name)) return;
     names.push(name);
 
-    const toothCenter = centerOfTooth(svg, name); 
-    if (!toothCenter) { console.warn(`No se encontró el centro para el diente ${name}.`); return; }
-    
+    const toothCenter = centerOfTooth(svg, name);
+    if (!toothCenter) {
+      console.warn(`No se encontró el centro para el diente ${name}.`);
+      return;
+    }
+
     // 1. Determinar el punto de conexión ajustado (p1 y p2)
     let adjustedP;
     const quadrant = parseInt(name.charAt(0));
-    
-    // Superior: Desplazamiento negativo (hacia ARRIBA/raíz)
-    if (quadrant >= 1 && quadrant <= 2 || quadrant >= 5 && quadrant <= 6) {
-        adjustedP = { x: toothCenter.x, y: toothCenter.y - displacement };
-        offset = -8;
 
-    // Inferior: Desplazamiento positivo (hacia ABAJO/raíz)
-    } else if (quadrant >= 3 && quadrant <= 4 || quadrant >= 7 && quadrant <= 8) {
-        adjustedP = { x: toothCenter.x, y: toothCenter.y + displacement };
-        offset = 8;
+    // Superior: Desplazamiento negativo (hacia ARRIBA/raíz)
+    if ((quadrant >= 1 && quadrant <= 2) || (quadrant >= 5 && quadrant <= 6)) {
+      adjustedP = { x: toothCenter.x, y: toothCenter.y - displacement };
+      offset = -8;
+
+      // Inferior: Desplazamiento positivo (hacia ABAJO/raíz)
+    } else if (
+      (quadrant >= 3 && quadrant <= 4) ||
+      (quadrant >= 7 && quadrant <= 8)
+    ) {
+      adjustedP = { x: toothCenter.x, y: toothCenter.y + displacement };
+      offset = 8;
     } else {
-        console.error('Cuadrante no válido.');
-        cleanup();
-        return;
+      console.error('Cuadrante no válido.');
+      cleanup();
+      return;
     }
 
     // Dibujar marcador temporal
     const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    c.setAttribute('cx', adjustedP.x); c.setAttribute('cy', adjustedP.y); c.setAttribute('r', '4'); c.setAttribute('fill', color);
-    overlay.appendChild(c); markers.push(c);
+    c.setAttribute('cx', adjustedP.x);
+    c.setAttribute('cy', adjustedP.y);
+    c.setAttribute('r', '4');
+    c.setAttribute('fill', color);
+    overlay.appendChild(c);
+    markers.push(c);
     pts.push(adjustedP); // Almacena P1 / P2 (Punto en el pilar)
 
     if (pts.length === 2) {
       // 2. VALIDACIÓN CLÍNICA
       if (!isValidArcade(names[0], names[1])) {
-        alert('❌ Error clínico: La Prótesis Fija debe conectar dientes de la misma arcada.');
-        cleanup(); 
+        alert(
+          '❌ Error clínico: La Prótesis Fija debe conectar dientes de la misma arcada.'
+        );
+        cleanup();
         return;
       }
-      
+
       // 3. Lógica de Dibujo de la PPF (Conectores en esquina, grosor uniforme)
       const p1 = pts[0]; // Pilar 1
       const p2 = pts[1]; // Pilar 2
@@ -1691,21 +2263,29 @@ export function addPPF(color = 'blue') {
       // Calcular el desplazamiento (dx/dy) para movernos del pilar al cuerpo del puente
       const dx = Math.cos(perpAngle) * offset;
       const dy = Math.sin(perpAngle) * offset;
-      
+
       // Puntos en el CUERPO del puente (P1' y P2')
       const p1_body = { x: p1.x + dx, y: p1.y + dy };
       const p2_body = { x: p2.x + dx, y: p2.y + dy };
 
       // Función auxiliar para dibujar una línea SVG
       const drawLine = (x1, y1, x2, y2, idSuffix) => {
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', x1); line.setAttribute('y1', y1);
-        line.setAttribute('x2', x2); line.setAttribute('y2', y2);
-        line.setAttribute('stroke', color); 
+        const line = document.createElementNS(
+          'http://www.w3.org/2000/svg',
+          'line'
+        );
+        line.setAttribute('x1', x1);
+        line.setAttribute('y1', y1);
+        line.setAttribute('x2', x2);
+        line.setAttribute('y2', y2);
+        line.setAttribute('stroke', color);
         line.setAttribute('stroke-width', LINE_WIDTH); // Grosor uniforme
-        line.setAttribute('stroke-linecap', 'butt'); 
+        line.setAttribute('stroke-linecap', 'butt');
         line.setAttribute('class', 'annotation ppf-' + idSuffix);
-        line.setAttribute('data-id', `ppf-${names.join('-')}-${Date.now()}-${idSuffix}`);
+        line.setAttribute(
+          'data-id',
+          `ppf-${names.join('-')}-${Date.now()}-${idSuffix}`
+        );
         overlay.appendChild(line);
       };
       drawLine(p1.x, p1.y, p1_body.x, p1_body.y, 'conn-1');
@@ -1716,75 +2296,96 @@ export function addPPF(color = 'blue') {
       cleanup();
     }
   }
-  function onKey(e) { if (e.key === 'Escape') cleanup(); }
-  svg.addEventListener('click', onClick); 
+  function onKey(e) {
+    if (e.key === 'Escape') cleanup();
+  }
+  svg.addEventListener('click', onClick);
   window.addEventListener('keydown', onKey);
   return { stop: cleanup };
 }
 
-export function addTransposition(color ='blue') {
+export function addTransposition(color = 'blue') {
   const svg = getSvg();
   if (!svg) return { stop() {} };
-  
+
   const overlay = ensureOverlay(svg);
   const pts = []; // Almacena los puntos ajustados {x, y}
-  const names = []; 
-  const markers = []; 
+  const names = [];
+  const markers = [];
   const CURVE_HEIGHT = 20;
-  const DISPLACEMENT = 55; 
-  
+  const DISPLACEMENT = 55;
+
   // 🔑 AJUSTE CLAVE: Aumentamos el desplazamiento a 25 para evitar superposición
-  const ARROW_H_OFFSET = 15; 
+  const ARROW_H_OFFSET = 15;
 
-  alert('Modo Transposición Dentaria: Haz clic en el primer diente y luego en el segundo diente que están transpuestos. Presiona ESC para cancelar.');
+  alert(
+    'Modo Transposición Dentaria: Haz clic en el primer diente y luego en el segundo diente que están transpuestos. Presiona ESC para cancelar.'
+  );
 
-  function cleanup() { 
-    svg.removeEventListener('click', onClick); 
-    window.removeEventListener('keydown', onKey); 
-    markers.forEach(m => m.remove()); 
+  function cleanup() {
+    svg.removeEventListener('click', onClick);
+    window.removeEventListener('keydown', onKey);
+    markers.forEach((m) => m.remove());
   }
 
   function onClick(e) {
     const g = findToothGroupFromEvent(e.target);
-    if (!g) { console.warn('Clic ignorado: No se hizo clic en un diente.'); return; }
-    
+    if (!g) {
+      console.warn('Clic ignorado: No se hizo clic en un diente.');
+      return;
+    }
+
     const name = g.getAttribute('data-name');
     if (!name || names.includes(name)) return;
     names.push(name);
 
-    const toothCenter = centerOfTooth(svg, name); 
-    if (!toothCenter) { console.warn(`No se encontró el centro para el diente ${name}.`); return; }
+    const toothCenter = centerOfTooth(svg, name);
+    if (!toothCenter) {
+      console.warn(`No se encontró el centro para el diente ${name}.`);
+      return;
+    }
 
     let adjustedP;
     const quadrant = parseInt(name.charAt(0));
-    
+
     // Cálculo de adjustedP (Y)
     if (quadrant === 1 || quadrant === 2 || quadrant === 5 || quadrant === 6) {
-        adjustedP = { x: toothCenter.x, y: toothCenter.y - DISPLACEMENT };
-    } else if (quadrant === 3 || quadrant === 4 || quadrant === 7 || quadrant === 8) {
-        adjustedP = { x: toothCenter.x, y: toothCenter.y + DISPLACEMENT };
+      adjustedP = { x: toothCenter.x, y: toothCenter.y - DISPLACEMENT };
+    } else if (
+      quadrant === 3 ||
+      quadrant === 4 ||
+      quadrant === 7 ||
+      quadrant === 8
+    ) {
+      adjustedP = { x: toothCenter.x, y: toothCenter.y + DISPLACEMENT };
     } else {
-        console.error('Cuadrante no válido.');
-        cleanup();
-        return;
+      console.error('Cuadrante no válido.');
+      cleanup();
+      return;
     }
     // Dibujar marcador temporal
     const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    c.setAttribute('cx', adjustedP.x); c.setAttribute('cy', adjustedP.y); c.setAttribute('r', '4'); c.setAttribute('fill', color);
-    overlay.appendChild(c); markers.push(c);
-    pts.push(adjustedP); 
+    c.setAttribute('cx', adjustedP.x);
+    c.setAttribute('cy', adjustedP.y);
+    c.setAttribute('r', '4');
+    c.setAttribute('fill', color);
+    overlay.appendChild(c);
+    markers.push(c);
+    pts.push(adjustedP);
 
     if (pts.length === 2) {
       // 2. VALIDACIÓN CLÍNICA:
       if (!isValidArcade(names[0], names[1])) {
-        alert('❌ Error clínico: La Transposición debe ser entre dientes de la misma arcada.');
-        cleanup(); 
+        alert(
+          '❌ Error clínico: La Transposición debe ser entre dientes de la misma arcada.'
+        );
+        cleanup();
         return;
       }
-      
+
       // 3. Lógica de Dibujo de las DOS Curvas
-      const p1 = pts[0]; 
-      const p2 = pts[1]; 
+      const p1 = pts[0];
+      const p2 = pts[1];
 
       // Ordenar por posición X
       const startP = p1.x < p2.x ? p1 : p2; // Diente Izquierdo
@@ -1792,66 +2393,78 @@ export function addTransposition(color ='blue') {
 
       const curveY = startP.y; // Y común para la curva
       // Determinar la dirección de la curva (solo necesitamos el cuadrante de uno)
-      let curveDirection; 
-      if (quadrant >= 1 && quadrant <= 2 || quadrant >= 5 && quadrant <= 6) {
-          curveDirection = 1;
-      } else if (quadrant >= 3 && quadrant <= 4 || quadrant >= 7 && quadrant <= 8) {
-          curveDirection = -1; // Inferior: arco hacia abajo
+      let curveDirection;
+      if (
+        (quadrant >= 1 && quadrant <= 2) ||
+        (quadrant >= 5 && quadrant <= 6)
+      ) {
+        curveDirection = 1;
+      } else if (
+        (quadrant >= 3 && quadrant <= 4) ||
+        (quadrant >= 7 && quadrant <= 8)
+      ) {
+        curveDirection = -1; // Inferior: arco hacia abajo
       }
-      
+
       // Punto de control Y
-      const cpY = curveY - curveDirection * CURVE_HEIGHT; 
+      const cpY = curveY - curveDirection * CURVE_HEIGHT;
 
       // --- Función auxiliar para dibujar una flecha (Path de Bézier Cúbico) ---
       const drawArrow = (startX, endX, idSuffix) => {
         const diffX = endX - startX;
-        
-        const cp1X = startX + diffX * 0.25; 
-        const cp2X = startX + diffX * 0.75; 
-        
+
+        const cp1X = startX + diffX * 0.25;
+        const cp2X = startX + diffX * 0.75;
+
         const pathData = `M ${startX} ${curveY} 
                           C ${cp1X} ${cpY} 
                             ${cp2X} ${cpY} 
                             ${endX} ${curveY}`;
-        
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+
+        const path = document.createElementNS(
+          'http://www.w3.org/2000/svg',
+          'path'
+        );
         path.setAttribute('d', pathData);
         path.setAttribute('stroke', color);
         path.setAttribute('stroke-width', '2');
         path.setAttribute('fill', 'none');
-        path.setAttribute('marker-end', `url(#transposition-arrow-head-${color})`); 
+        path.setAttribute(
+          'marker-end',
+          `url(#transposition-arrow-head-${color})`
+        );
         path.setAttribute('class', 'annotation transposition-' + idSuffix);
         overlay.appendChild(path);
       };
 
       // 4. DIBUJAR FLECHA A (Izquierda -> Derecha)
       // INICIO: Se mueve a la derecha del centro de startP
-      const startA_X = startP.x - ARROW_H_OFFSET; 
+      const startA_X = startP.x - ARROW_H_OFFSET;
       // FIN: Se mueve a la izquierda del centro de endP
-      const endA_X = endP.x; 
-      
+      const endA_X = endP.x;
+
       drawArrow(startA_X, endA_X, 'A');
 
       // 5. DIBUJAR FLECHA B (Derecha -> Izquierda)
       // INICIO: Se mueve a la izquierda del centro de endP
-      const startB_X = endP.x + ARROW_H_OFFSET; 
+      const startB_X = endP.x + ARROW_H_OFFSET;
       // FIN: Se mueve a la derecha del centro de startP
-      const endB_X = startP.x; 
+      const endB_X = startP.x;
 
       drawArrow(startB_X, endB_X, 'B');
 
       cleanup();
     }
   }
-  function onKey(e) { if (e.key === 'Escape') cleanup(); }
-  svg.addEventListener('click', onClick); 
+  function onKey(e) {
+    if (e.key === 'Escape') cleanup();
+  }
+  svg.addEventListener('click', onClick);
   window.addEventListener('keydown', onKey);
   return { stop: cleanup };
 }
 
-
-// LESION 
-
+// LESION
 
 // Default export (compatibilidad)
 export default {

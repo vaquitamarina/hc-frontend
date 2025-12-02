@@ -32,8 +32,6 @@ export function StudentDashboard() {
         <HCList studentId={data.id} />
       </div>
       <div className="linea-vertical"></div>
-
-      
     </div>
   );
 }
