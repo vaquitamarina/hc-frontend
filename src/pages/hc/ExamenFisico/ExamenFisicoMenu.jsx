@@ -31,7 +31,7 @@ export default function ExamenFisicoMenu() {
       {/* Botón de Odontograma separado como en tu diseño */}
       <button
         className="bg-[var(--color-primary)] text-white text-xl font-medium py-10 px-20 rounded-[var(--radius-lg)] shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200 w-full max-w-md cursor-pointer border-none"
-        onClick={() => alert('Módulo de Odontograma en construcción')}
+        onClick={() => navigate(`/historia/${id}/examen-fisico/odonto`)}
       >
         Odontograma
       </button>

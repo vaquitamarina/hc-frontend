@@ -17,6 +17,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import AdminLayout from './layouts/AdminLayout.jsx';
 import AdminDashboard from './pages/Admin/AdminDashboard.jsx';
 import StudentDetailPage from './pages/Admin/StudentDetailPage.jsx';
+import Odonto from './pages/hc/ExamenFisico/odonto.jsx';
 
 function App() {
   return (
@@ -70,6 +71,10 @@ function App() {
             <Route
               path="/historia/:id/examen-fisico/regional"
               element={<ExamenRegional />}
+            />
+            <Route
+              path="/historia/:id/examen-fisico/odonto"
+              element={<Odonto />}
             />
           </Route>
         </Route>
