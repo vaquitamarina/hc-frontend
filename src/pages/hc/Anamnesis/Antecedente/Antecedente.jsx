@@ -16,7 +16,7 @@ import {
 } from '@hooks/useAnamnesis';
 import { useBloodType } from '@hooks/useCatalog';
 import Button from '@ui/Button';
-import './antecedente.css';
+import './Antecedente.css';
 
 const initialFormPersonal = {
   esta_embarazada: false,
