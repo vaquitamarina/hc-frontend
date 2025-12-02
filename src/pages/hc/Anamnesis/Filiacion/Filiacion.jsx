@@ -9,9 +9,14 @@ import {
 } from '@hooks/useAnamnesis';
 import { usePatientByHistory, useAssignPatient } from '@hooks/useHistoria';
 import { useCreatePatient, useUpdatePatient } from '@hooks/usePatients';
+import { useCatalog } from '@hooks/useCatalog';
 import './Filiacion.css';
 
 function Filiacion() {
+  // Catálogos para selects
+  const { data: sexoCatalog } = useCatalog('catalogo_sexo');
+  const { data: estadoCivilCatalog } = useCatalog('catalogo_estado_civil');
+  const { data: ocupacionCatalog } = useCatalog('catalogo_ocupacion');
   const { id } = useParams();
   const { data, isLoading, error } = useFiliacion(id);
   const updateFiliacion = useUpdateFiliacion();
@@ -96,13 +101,31 @@ function Filiacion() {
       );
       return;
     }
+    // Validación: fecha de última visita al dentista no puede ser mayor a la fecha de elaboración
+    if (
+      filiacionData.ultima_visita_dentista &&
+      filiacionData.fecha_elaboracion
+    ) {
+      const fechaVisita = new Date(filiacionData.ultima_visita_dentista);
+      const fechaElaboracion = new Date(filiacionData.fecha_elaboracion);
+      fechaVisita.setHours(0, 0, 0, 0);
+      fechaElaboracion.setHours(0, 0, 0, 0);
+      if (fechaVisita > fechaElaboracion) {
+        alert(
+          'La fecha de última visita al dentista no puede ser mayor a la fecha de elaboración.'
+        );
+        return;
+      }
+    }
     // Convertir edad a número antes de enviar
     const filiacionPayload = {
       id_historia: id, // ¡CRÍTICO! Incluir id_historia
       edad: filiacionData.edad ? Number(filiacionData.edad) : null,
       sexo: filiacionData.sexo || null,
       raza: filiacionData.raza || null,
-      fecha_nacimiento: filiacionData.fecha_nacimiento || null,
+      fecha_nacimiento: filiacionData.fecha_nacimiento
+        ? filiacionData.fecha_nacimiento
+        : null,
       lugar: filiacionData.lugar || null,
       estado_civil: filiacionData.estado_civil || null,
       nombre_conyuge: filiacionData.nombre_conyuge || null,
@@ -110,16 +133,26 @@ function Filiacion() {
       lugar_procedencia: filiacionData.lugar_procedencia || null,
       tiempo_residencia_tacna: filiacionData.tiempo_residencia_tacna || null,
       direccion: filiacionData.direccion || null,
-      ultima_visita_dentista: filiacionData.ultima_visita_dentista || null,
+      ultima_visita_dentista: filiacionData.ultima_visita_dentista
+        ? filiacionData.ultima_visita_dentista
+        : null,
       motivo_visita_dentista: filiacionData.motivo_visita_dentista || null,
-      ultima_visita_medico: filiacionData.ultima_visita_medico || null,
+      ultima_visita_medico: filiacionData.ultima_visita_medico
+        ? filiacionData.ultima_visita_medico
+        : null,
       motivo_visita_medico: filiacionData.motivo_visita_medico || null,
       contacto_emergencia: filiacionData.contacto_emergencia || null,
       telefono_emergencia: filiacionData.telefono_emergencia || null,
       acompaniante: filiacionData.acompaniante || null,
-      fecha_elaboracion: filiacionData.fecha_elaboracion || null,
+      fecha_elaboracion: filiacionData.fecha_elaboracion
+        ? filiacionData.fecha_elaboracion
+        : null,
     };
 
+    console.log(
+      'Valor enviado ultima_visita_dentista:',
+      filiacionPayload.ultima_visita_dentista
+    );
     try {
       let patientId = patient?.id_paciente;
       // Si no hay paciente, crearlo y asociarlo
@@ -155,7 +188,16 @@ function Filiacion() {
       alert('Filiación guardada correctamente');
     } catch (error) {
       console.error('Error al guardar filiación:', error);
-      alert(`Error: ${error.message || 'No se pudo guardar la filiación'}`);
+      if (
+        error.message &&
+        error.message.includes('chk_filiacion_ultima_visita_dentista')
+      ) {
+        alert(
+          'Error: La fecha de última visita al dentista no puede ser mayor a la fecha de elaboración. Por favor, corrige la fecha.'
+        );
+      } else {
+        alert(`Error: ${error.message || 'No se pudo guardar la filiación'}`);
+      }
     }
   };
 
@@ -209,14 +251,28 @@ function Filiacion() {
             isFormMode={true}
             onChange={handleChange}
           />
-          <FormField
-            label="Sexo"
-            value={filiacionData.sexo || ''}
-            name="sexo"
-            type="text"
-            isFormMode={true}
-            onChange={handleChange}
-          />
+          {/* Select Sexo */}
+          <div className="form-field">
+            <label htmlFor="sexo">Sexo</label>
+            <select
+              id="sexo"
+              name="sexo"
+              value={filiacionData.sexo || ''}
+              onChange={handleChange}
+              className="form-select"
+            >
+              <option value="">Seleccione sexo</option>
+              {sexoCatalog?.data?.map((item) => (
+                <option
+                  key={item.id_sexo || item.descripcion}
+                  value={item.descripcion}
+                >
+                  {item.descripcion}
+                </option>
+              ))}
+            </select>
+          </div>
+          {/* Raza como texto */}
           <FormField
             label="Raza"
             value={filiacionData.raza || ''}
@@ -241,14 +297,27 @@ function Filiacion() {
 
         {/* Estado civil, Nombre del cónyuge */}
         <div className="form-row">
-          <FormField
-            label="Estado civil"
-            value={filiacionData.estado_civil || ''}
-            name="estado_civil"
-            type="text"
-            isFormMode={true}
-            onChange={handleChange}
-          />
+          {/* Select Estado Civil */}
+          <div className="form-field">
+            <label htmlFor="estado_civil">Estado civil</label>
+            <select
+              id="estado_civil"
+              name="estado_civil"
+              value={filiacionData.estado_civil || ''}
+              onChange={handleChange}
+              className="form-select"
+            >
+              <option value="">Seleccione estado civil</option>
+              {estadoCivilCatalog?.data?.map((item) => (
+                <option
+                  key={item.id_estado_civil || item.descripcion}
+                  value={item.descripcion}
+                >
+                  {item.descripcion}
+                </option>
+              ))}
+            </select>
+          </div>
           <FormField
             label="Nombre del conyuge"
             value={filiacionData.nombre_conyuge || ''}
@@ -261,14 +330,27 @@ function Filiacion() {
 
         {/* Ocupación, Lugar de procedencia */}
         <div className="form-row">
-          <FormField
-            label="Ocupacion"
-            value={filiacionData.ocupacion || ''}
-            name="ocupacion"
-            type="text"
-            isFormMode={true}
-            onChange={handleChange}
-          />
+          {/* Select Ocupación */}
+          <div className="form-field">
+            <label htmlFor="ocupacion">Ocupación</label>
+            <select
+              id="ocupacion"
+              name="ocupacion"
+              value={filiacionData.ocupacion || ''}
+              onChange={handleChange}
+              className="form-select"
+            >
+              <option value="">Seleccione ocupación</option>
+              {ocupacionCatalog?.data?.map((item) => (
+                <option
+                  key={item.id_ocupacion || item.descripcion}
+                  value={item.descripcion}
+                >
+                  {item.descripcion}
+                </option>
+              ))}
+            </select>
+          </div>
           <FormField
             label="Lugar de procedencia"
             value={filiacionData.lugar_procedencia || ''}
@@ -290,6 +372,8 @@ function Filiacion() {
             onChange={handleChange}
           />
         </div>
+
+        {/* ...el resto del formulario... */}
 
         {/* Dirección */}
         <div className="form-row">
