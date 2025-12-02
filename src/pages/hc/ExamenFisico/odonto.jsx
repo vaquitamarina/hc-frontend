@@ -1009,7 +1009,7 @@ export default function Odontograma() {
             >
               <use xlinkHref="#design2" />
             </g>
-            <text x="55" y="50" className="tooth-name">
+            <text x="55" y="63" className="tooth-name">
               8.5
             </text>
             <foreignObject x="25" y="70" width="68" height="30" id="input27">
@@ -1026,7 +1026,7 @@ export default function Odontograma() {
             >
               <use xlinkHref="#design2" />
             </g>
-            <text x="140" y="50" className="tooth-name">
+            <text x="140" y="63" className="tooth-name">
               8.4
             </text>
             <foreignObject x="105" y="70" width="68" height="30" id="input28">
@@ -1043,7 +1043,7 @@ export default function Odontograma() {
             >
               <use xlinkHref="#design8" />
             </g>
-            <text x="205" y="50" className="tooth-name">
+            <text x="205" y="63" className="tooth-name">
               8.3
             </text>
             <foreignObject x="185" y="70" width="55" height="30" id="input29">
@@ -1060,7 +1060,7 @@ export default function Odontograma() {
             >
               <use xlinkHref="#design8" />
             </g>
-            <text x="285" y="50" className="tooth-name">
+            <text x="285" y="63" className="tooth-name">
               8.2
             </text>
             <foreignObject x="260" y="70" width="60" height="30" id="input30">
@@ -1077,7 +1077,7 @@ export default function Odontograma() {
             >
               <use xlinkHref="#design8" />
             </g>
-            <text x="365" y="50" className="tooth-name">
+            <text x="365" y="63" className="tooth-name">
               8.1
             </text>
             <foreignObject x="340" y="70" width="60" height="30" id="input31">
@@ -1094,7 +1094,7 @@ export default function Odontograma() {
             >
               <use xlinkHref="#design8" />
             </g>
-            <text x="440" y="50" className="tooth-name">
+            <text x="440" y="63" className="tooth-name">
               7.1
             </text>
             <foreignObject x="420" y="70" width="65" height="30" id="input32">
@@ -1111,7 +1111,7 @@ export default function Odontograma() {
             >
               <use xlinkHref="#design8" />
             </g>
-            <text x="525" y="50" className="tooth-name">
+            <text x="525" y="63" className="tooth-name">
               7.2
             </text>
             <foreignObject x="500" y="70" width="60" height="30" id="input33">
@@ -1128,7 +1128,7 @@ export default function Odontograma() {
             >
               <use xlinkHref="#design8" />
             </g>
-            <text x="605" y="50" className="tooth-name">
+            <text x="605" y="63" className="tooth-name">
               7.3
             </text>
             <foreignObject x="575" y="70" width="65" height="30" id="input34">
@@ -1145,7 +1145,7 @@ export default function Odontograma() {
             >
               <use xlinkHref="#design2" />
             </g>
-            <text x="700" y="50" className="tooth-name">
+            <text x="700" y="63" className="tooth-name">
               7.4
             </text>
             <foreignObject x="665" y="70" width="68" height="30" id="input35">
@@ -1162,7 +1162,7 @@ export default function Odontograma() {
             >
               <use xlinkHref="#design2" />
             </g>
-            <text x="780" y="50" className="tooth-name">
+            <text x="780" y="63" className="tooth-name">
               7.5
             </text>
             <foreignObject x="750" y="70" width="68" height="30" id="input36">
