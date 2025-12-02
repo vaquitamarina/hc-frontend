@@ -33,13 +33,7 @@ export function StudentDashboard() {
       </div>
       <div className="linea-vertical"></div>
 
-      <div className="student-content__patient">
-        <div className="student-content__tittle">
-          <h2>Niño</h2>
-          <Button onClick={handleAddHc}>Añadir</Button>
-        </div>
-        <HCList studentId={data.id} />
-      </div>
+      
     </div>
   );
 }
