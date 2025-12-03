@@ -12,5 +12,8 @@ export const fetchHCsByStudent = async (studentId) => {
     const errBody = await response.json().catch(() => null);
     throw new Error(errBody?.message || `Error: ${response.status}`);
   }
-  return response.json();
+  const data = await response.json();
+  // Si la respuesta no es un array, retorna array vacío
+  if (!Array.isArray(data)) return [];
+  return data;
 };

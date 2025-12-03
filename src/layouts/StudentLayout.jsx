@@ -13,7 +13,6 @@ function StudentLayout() {
             <Tab isActive={true} name="hc">
               HISTORIA CLÍNICA
             </Tab>
-            <Tab name="cita">CITAS</Tab>
           </div>
           <div className="max-w-auto">
             <Outlet></Outlet>

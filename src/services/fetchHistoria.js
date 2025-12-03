@@ -1,16 +1,4 @@
-export const fetchCreateDraft = async () => {
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/hc/draft`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-  });
-  if (!response.ok) {
-    const errBody = await response.json().catch(() => null);
-    console.error('Error al crear borrador:', errBody);
-    throw new Error(errBody?.error || `Error: ${response.status}`);
-  }
-  return response.json();
-};
+// Eliminado: fetchCreateDraft
 
 export const fetchAssignPatient = async ({ idHistory, idPatient }) => {
   const response = await fetch(

@@ -1,31 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  fetchCreateDraft,
+  // fetchCreateDraft,
   fetchAssignPatient,
   fetchPatientByHistory,
   registerHc,
 } from '@services/fetchHistoria';
-import { useHistoriaStore } from '@stores/historiaStore';
+//import { useHistoriaStore } from '@stores/historiaStore';
 
 /**
  * Hook para crear o obtener borrador de historia clínica
  * Devuelve el ID del borrador (nuevo o existente)
  */
-export function useCreateDraft() {
-  const queryClient = useQueryClient();
-  const setDraftHistoriaId = useHistoriaStore((s) => s.setDraftHistoriaId);
-
-  return useMutation({
-    mutationFn: fetchCreateDraft,
-    onSuccess: (data) => {
-      // Guardar el id del borrador en el store para que la UI lo use
-      const id = data?.id_historia ?? data?.id ?? null;
-      if (id) setDraftHistoriaId(id);
-      // Invalidar queries relacionadas si es necesario
-      queryClient.invalidateQueries({ queryKey: ['historias'] });
-    },
-  });
-}
+// Eliminado: useCreateDraft
 
 /**
  * Hook para asignar paciente a historia clínica en borrador

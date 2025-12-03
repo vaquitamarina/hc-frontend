@@ -22,6 +22,7 @@ import Evolucion from './pages/hc/Evolucion/Evolucion.jsx';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import AdminLayout from './layouts/AdminLayout.jsx';
 import AdminDashboard from './pages/Admin/AdminDashboard.jsx';
+import CreateStudent from './pages/Admin/CreateStudent.jsx';
 import StudentDetailPage from './pages/Admin/StudentDetailPage.jsx';
 import Odonto from './pages/hc/ExamenFisico/odonto.jsx';
 
@@ -42,6 +43,7 @@ function App() {
 
           <Route element={<AdminLayout />}>
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/create-student" element={<CreateStudent />} />
             <Route path="/admin/student/:id" element={<StudentDetailPage />} />
           </Route>
 
