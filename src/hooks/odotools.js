@@ -393,6 +393,7 @@ function isValidArcade(name1, name2) {
   return false;
 }
 
+// clearAnnotations: elimina todas las anotaciones y resetea estilos
 export function clearAnnotations() {
   const svg = getSvg();
   if (!svg) return;
@@ -405,6 +406,44 @@ export function clearAnnotations() {
     el.style.fill = '';
   });
 }
+/** AÑADISTE
+ * Remueve la última anotación (elemento SVG) añadido al overlay.
+ * @returns {boolean} True si se removió un elemento, false si no.
+ */
+export function clearLastAnnotation() {
+  const svg = getSvg();
+  if (!svg) return false;
+  const overlay = ensureOverlay(svg);
+  const lastAnnotation = overlay.lastChild;
+  if (lastAnnotation) {
+    lastAnnotation.remove();
+    return true;
+  }
+  return false;
+}
+
+/**AÑADISTE
+ * Remueve las anotaciones SVG para un diente específico.
+ * Se basa en que las funciones de anotación añaden el nombre del diente
+ * en el atributo `data-id` (e.g., data-id="crown-hull-1.6-...")
+ * @param {string} toothDataName - El nombre del diente (ej: '1.6').
+ * @returns {boolean} True si se encontraron y removieron anotaciones.
+ */
+export function clearAnnotationsForTooth(toothDataName) {
+  const svg = getSvg();
+  if (!svg) return false;
+  const overlay = svg.querySelector('#odontograma-overlay');
+  if (!overlay) return false;
+
+  // Selector que busca cualquier anotación que contenga el nombre del diente en el data-id
+  const selector = `.annotation[data-id*="-${toothDataName}-"]`;
+  const annotations = Array.from(overlay.querySelectorAll(selector));
+
+  annotations.forEach((el) => el.remove());
+
+  return annotations.length > 0;
+}
+// render
 
 function computeFixedMargin(w, h) {
   return Math.max(1, Math.min(70, Math.min(w, h) * 0.7));
@@ -421,6 +460,36 @@ export function addCrown(
   if (!svg) return false;
   const group = getToothGroup(svg, toothDataName);
   if (!group) return false;
+
+  // --- Constantes de Adaptación de Tamaño y Posición ---
+  // Dientes que típicamente son más delgados y requieren mayor ajuste
+  const isThinTooth =
+    toothDataName.startsWith('5.') ||
+    toothDataName.startsWith('6.') ||
+    toothDataName.startsWith('7.') ||
+    toothDataName.startsWith('8.') || // Dientes deciduos (5.x, 6.x, 7.x, 8.x)
+    toothDataName.endsWith('.1') ||
+    toothDataName.endsWith('.2') ||
+    toothDataName.endsWith('.3') ||
+    toothDataName.endsWith('.4'); // Incisivos (X.1, X.2) y Caninos (X.3, X.4) permanentes
+
+  // Cuadrantes inferiores que están invertidos (3.x, 4.x, 7.x, 8.x)
+  const isLowerQuadrant =
+    toothDataName.startsWith('3.') ||
+    toothDataName.startsWith('4.') ||
+    toothDataName.startsWith('7.') ||
+    toothDataName.startsWith('8.');
+
+  // Valores proporcionados por el usuario para dientes delgados
+  const COMP_X = 0.31; // Compensación en X
+  const COMP_W = 0.58; // Reducción en Ancho
+  const COMP_Y_UPPER = 0.6; // Desplazamiento Y para cuadrantes superiores (1.x, 2.x, 5.x, 6.x)
+  const COMP_H = 0.75; // Reducción en Altura
+
+  // AJUSTE CLAVE: Factor para subir el cuadro en los cuadrantes inferiores (3.x, 4.x, 7.x, 8.x)
+  // Valor más alto = el cuadro sube más (se aleja de la raíz y se acerca a la corona).
+  const Y_AJUSTE_ARRIBA = 0.58; // Ajusta este valor (ej: 0.10, 0.20) si es necesario.
+  // ----------------------------------------------------------------------
 
   const defaultParts = [
     'raiz-izq',
@@ -447,6 +516,7 @@ export function addCrown(
 
   if (includedParts && includedParts.length) {
     if (points && points.length >= 1) {
+      // Lógica de convexHull para las partes (MANTENER ORIGINAL)
       const xs = points.map((p) => p[0]);
       const ys = points.map((p) => p[1]);
       const minX = Math.min(...xs);
@@ -478,9 +548,43 @@ export function addCrown(
         `crown-parts-bbox-${toothDataName}-${Date.now()}`
       );
     } else {
+      // --- FALLBACK 1: includedParts pero no se computan puntos ---
       const info = getToothBBox(svg, toothDataName);
       if (!info) return false;
-      const bbox = info.bbox;
+      let bbox = info.bbox; // Usamos 'let' para modificar
+
+      // *** LÓGICA DE ADAPTACIÓN DE TAMAÑO (FALLBACK 1) ***
+      if (isThinTooth) {
+        let x_compensation, w_compensation, y_compensation, h_compensation;
+
+        // La compensación horizontal y el ancho son fijos
+        x_compensation = bbox.width * COMP_X;
+        w_compensation = bbox.width * COMP_W;
+        h_compensation = bbox.height * COMP_H;
+
+        // Compensación Vertical (Y):
+        if (isLowerQuadrant) {
+          // Inferior: Desplazamiento para anclar la caja a la corona (parte inferior del BBox)
+          let y_compensation_anchor = bbox.height * COMP_H;
+
+          // Aplicamos el ajuste: RESTAMOS para mover el punto de inicio Y hacia arriba (subir el cuadro)
+          y_compensation =
+            y_compensation_anchor - bbox.height * Y_AJUSTE_ARRIBA;
+        } else {
+          // Superior: Usar el valor de desplazamiento Y del usuario
+          y_compensation = bbox.height * COMP_Y_UPPER;
+        }
+
+        // Sobrescribir el bbox con las nuevas dimensiones corregidas
+        bbox = {
+          x: bbox.x + x_compensation,
+          y: bbox.y + y_compensation,
+          width: bbox.width - w_compensation,
+          height: bbox.height - h_compensation,
+        };
+      }
+      // *** FIN DE LÓGICA DE ADAPTACIÓN ***
+
       const margin = computeFixedMargin(bbox.width, bbox.height);
       const rx = bbox.x - margin,
         ry = bbox.y - margin,
@@ -506,6 +610,7 @@ export function addCrown(
     }
   } else {
     if (points && points.length >= 3) {
+      // Lógica de convexHull para polígonos (MANTENER ORIGINAL)
       const hull = convexHull(points);
       if (hull && hull.length >= 3) {
         const polyEl = document.createElementNS(
@@ -527,9 +632,43 @@ export function addCrown(
         );
       }
     } else {
+      // --- FALLBACK 2: No hay includedParts y falla convexHull ---
       const info = getToothBBox(svg, toothDataName);
       if (!info) return false;
-      const bbox = info.bbox;
+      let bbox = info.bbox; // Usamos 'let' para modificar
+
+      // *** LÓGICA DE ADAPTACIÓN DE TAMAÑO (FALLBACK 2) ***
+      if (isThinTooth) {
+        let x_compensation, w_compensation, y_compensation, h_compensation;
+
+        // La compensación horizontal y el ancho son fijos
+        x_compensation = bbox.width * COMP_X;
+        w_compensation = bbox.width * COMP_W;
+        h_compensation = bbox.height * COMP_H;
+
+        // Compensación Vertical (Y):
+        if (isLowerQuadrant) {
+          // Inferior: Desplazamiento para anclar la caja a la corona (parte inferior del BBox)
+          let y_compensation_anchor = bbox.height * COMP_H;
+
+          // Aplicamos el ajuste: RESTAMOS para mover el punto de inicio Y hacia arriba (subir el cuadro)
+          y_compensation =
+            y_compensation_anchor - bbox.height * Y_AJUSTE_ARRIBA;
+        } else {
+          // Superior: Usar el valor de desplazamiento Y del usuario
+          y_compensation = bbox.height * COMP_Y_UPPER;
+        }
+
+        // Sobrescribir el bbox con las nuevas dimensiones corregidas
+        bbox = {
+          x: bbox.x + x_compensation,
+          y: bbox.y + y_compensation,
+          width: bbox.width - w_compensation,
+          height: bbox.height - h_compensation,
+        };
+      }
+      // *** FIN DE LÓGICA DE ADAPTACIÓN ***
+
       const margin = computeFixedMargin(bbox.width, bbox.height);
       const rx = bbox.x - margin,
         ry = bbox.y - margin,
@@ -555,7 +694,7 @@ export function addCrown(
     }
   }
 
-  // attempt to write crownType into nearest foreignObject input (autocomplete)
+  // Lógica para escribir el crownType en el input (MANTENER ORIGINAL)
   try {
     const info = getToothBBox(svg, toothDataName);
     const bbox = info ? info.bbox : null;
@@ -1950,126 +2089,19 @@ export function addGiroversion(
   }
 }
 
-export function addMissingTooth(toothDataName, color = 'blue') {
-  const svg = getSvg();
-  if (!svg) return false;
-  const toothCenter = centerOfTooth(svg, toothDataName);
-  if (toothCenter) {
-    const overlay = ensureOverlay(svg);
-    let size = 30; // Ajusta el tamaño de la 'X'
-    const displacement = 50;
-    let adjustedP;
-    const quadrant = parseInt(toothDataName.charAt(0));
-
-    if (quadrant === 1 || quadrant === 2 || quadrant === 5 || quadrant === 6) {
-      adjustedP = { x: toothCenter.x, y: toothCenter.y + displacement };
-    } else if (
-      quadrant === 3 ||
-      quadrant === 4 ||
-      quadrant === 7 ||
-      quadrant === 8
-    ) {
-      adjustedP = { x: toothCenter.x, y: toothCenter.y - displacement };
-      size = -30;
-    }
-    const line1 = document.createElementNS(
-      'http://www.w3.org/2000/svg',
-      'line'
-    );
-    line1.setAttribute('x1', adjustedP.x - size);
-    line1.setAttribute('y1', adjustedP.y);
-    line1.setAttribute('x2', adjustedP.x + size);
-    line1.setAttribute('y2', toothCenter.y - size);
-    line1.setAttribute('stroke', color);
-    line1.setAttribute('stroke-width', '3');
-    line1.setAttribute('data-target', toothDataName);
-    line1.setAttribute('class', 'pda-annotation');
-
-    const line2 = document.createElementNS(
-      'http://www.w3.org/2000/svg',
-      'line'
-    );
-    line2.setAttribute('x1', adjustedP.x + size);
-    line2.setAttribute('y1', adjustedP.y);
-    line2.setAttribute('x2', adjustedP.x - size);
-    line2.setAttribute('y2', toothCenter.y - size);
-    line2.setAttribute('stroke', color);
-    line2.setAttribute('stroke-width', '3');
-    line2.setAttribute('data-target', toothDataName);
-    line2.setAttribute('class', 'pda-annotation');
-
-    overlay.appendChild(line1);
-    overlay.appendChild(line2);
-
-    return true;
-  }
-  return false;
-}
-
-export function addPegTooth(toothDataName, color = 'blue') {
-  const svg = getSvg();
-  if (!svg) return false;
-  const toothCenter = centerOfTooth(svg, toothDataName);
-  if (toothCenter) {
-    const overlay = ensureOverlay(svg);
-    const displacement = 55;
-    const baseHalfWidth = 10;
-    let triangleHeight = 20;
-
-    let adjustedP;
-    const quadrant = parseInt(toothDataName.charAt(0));
-    if (quadrant === 1 || quadrant === 2 || quadrant === 5 || quadrant === 6) {
-      adjustedP = { x: toothCenter.x, y: toothCenter.y - displacement };
-    } else if (
-      quadrant === 3 ||
-      quadrant === 4 ||
-      quadrant === 7 ||
-      quadrant === 8
-    ) {
-      adjustedP = { x: toothCenter.x, y: toothCenter.y + displacement };
-      triangleHeight = -20;
-    }
-
-    // P1: Esquina inferior izquierda
-    const p1x = adjustedP.x - baseHalfWidth;
-    const p1y = adjustedP.y;
-    // P2: Esquina inferior derecha
-    const p2x = adjustedP.x + baseHalfWidth;
-    const p2y = adjustedP.y;
-    // P3: El ápice superior
-    const p3x = adjustedP.x;
-    const p3y = adjustedP.y - triangleHeight;
-
-    const points = `${p1x},${p1y} ${p2x},${p2y} ${p3x},${p3y}`;
-
-    const triangle = document.createElementNS(
-      'http://www.w3.org/2000/svg',
-      'polygon'
-    );
-    triangle.setAttribute('points', points);
-    triangle.setAttribute('fill', 'none'); // Sin relleno
-    triangle.setAttribute('stroke', color);
-    triangle.setAttribute('stroke-width', '3');
-    triangle.setAttribute('data-target', toothDataName); // Para identificar el diente
-    triangle.setAttribute('class', 'peg-tooth-annotation');
-    triangle.setAttribute('style', 'pointer-events: none;'); // Para que no interfiera con otros clics
-
-    overlay.appendChild(triangle);
-    return true;
-  }
-  return false;
-}
-
 export function addPulpotomy(toothDataName, color = 'red') {
   const svg = getSvg();
   if (!svg) return false;
+
   const toothCenter = centerOfTooth(svg, toothDataName);
   if (!toothCenter) {
     console.warn(`No se encontró el centro para el diente ${toothDataName}.`);
     return false;
   }
   const overlay = ensureOverlay(svg);
+
   const displacement = 20;
+
   let adjustedP;
   const quadrant = parseInt(toothDataName.charAt(0));
 
@@ -2094,224 +2126,6 @@ export function addPulpotomy(toothDataName, color = 'red') {
   circ.setAttribute('data-id', `pulpotomia-${toothDataName}-${Date.now()}`);
 
   overlay.appendChild(circ);
-
-  return true;
-}
-
-export function addPPF(color = 'blue') {
-  const svg = getSvg();
-  if (!svg) return { stop() {} };
-  const overlay = ensureOverlay(svg);
-  const pts = [];
-  const names = [];
-  const markers = [];
-  const displacement = 55;
-  const LINE_WIDTH = 5;
-  let offset;
-
-  alert(
-    'Modo PPF: Haz clic en el primer diente pilar y luego en el segundo diente pilar. Presiona ESC para cancelar.'
-  );
-
-  function cleanup() {
-    svg.removeEventListener('click', onClick);
-    window.removeEventListener('keydown', onKey);
-    markers.forEach((m) => m.remove());
-  }
-
-  function onClick(e) {
-    const g = findToothGroupFromEvent(e.target);
-    if (!g) {
-      console.warn('Clic ignorado: No se hizo clic en un diente.');
-      return;
-    }
-    const name = g.getAttribute('data-name');
-    if (!name || names.includes(name)) return;
-    names.push(name);
-
-    const toothCenter = centerOfTooth(svg, name);
-    if (!toothCenter) {
-      console.warn(`No se encontró el centro para el diente ${name}.`);
-      return;
-    }
-    let adjustedP;
-    const quadrant = parseInt(name.charAt(0));
-
-    if ((quadrant >= 1 && quadrant <= 2) || (quadrant >= 5 && quadrant <= 6)) {
-      adjustedP = { x: toothCenter.x, y: toothCenter.y - displacement };
-      offset = -8;
-    } else if (
-      (quadrant >= 3 && quadrant <= 4) ||
-      (quadrant >= 7 && quadrant <= 8)
-    ) {
-      adjustedP = { x: toothCenter.x, y: toothCenter.y + displacement };
-      offset = 8;
-    } else {
-      console.error('Cuadrante no válido.');
-      cleanup();
-      return;
-    }
-    // Dibujar marcador temporal
-    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    c.setAttribute('cx', adjustedP.x);
-    c.setAttribute('cy', adjustedP.y);
-    c.setAttribute('r', '4');
-    c.setAttribute('fill', color);
-    overlay.appendChild(c);
-    markers.push(c);
-    pts.push(adjustedP); // Almacena P1 / P2 (Punto en el pilar)
-
-    if (pts.length === 2) {
-      // VALIDACIÓN CLÍNICA
-      if (!isValidArcade(names[0], names[1])) {
-        alert(
-          '❌ Error clínico: La Prótesis Fija debe conectar dientes de la misma arcada.'
-        );
-        cleanup();
-        return;
-      }
-      const p1 = pts[0];
-      const p2 = pts[1];
-      // Calcular ángulo de la línea principal (p1 a p2)
-      const dxLine = p2.x - p1.x;
-      const dyLine = p2.y - p1.y;
-      const angle = Math.atan2(dyLine, dxLine);
-      const perpAngle = angle + Math.PI / 2; // Ángulo perpendicular (para la esquina)
-      // Calcular el desplazamiento (dx/dy) para movernos del pilar al cuerpo del puente
-      const dx = Math.cos(perpAngle) * offset;
-      const dy = Math.sin(perpAngle) * offset;
-      // Puntos en el CUERPO del puente (P1' y P2')
-      const p1_body = { x: p1.x + dx, y: p1.y + dy };
-      const p2_body = { x: p2.x + dx, y: p2.y + dy };
-      // Función auxiliar para dibujar una línea SVG
-      const drawLine = (x1, y1, x2, y2, idSuffix) => {
-        const line = document.createElementNS(
-          'http://www.w3.org/2000/svg',
-          'line'
-        );
-        line.setAttribute('x1', x1);
-        line.setAttribute('y1', y1);
-        line.setAttribute('x2', x2);
-        line.setAttribute('y2', y2);
-        line.setAttribute('stroke', color);
-        line.setAttribute('stroke-width', LINE_WIDTH);
-        line.setAttribute('stroke-linecap', 'butt');
-        line.setAttribute('class', 'annotation ppf-' + idSuffix);
-        line.setAttribute(
-          'data-id',
-          `ppf-${names.join('-')}-${Date.now()}-${idSuffix}`
-        );
-        overlay.appendChild(line);
-      };
-      drawLine(p1.x, p1.y, p1_body.x, p1_body.y, 'conn-1');
-      drawLine(p1_body.x, p1_body.y, p2_body.x, p2_body.y, 'main');
-      drawLine(p2_body.x, p2_body.y, p2.x, p2.y, 'conn-2');
-      // Eliminar marcadores temporales y finalizar
-      cleanup();
-    }
-  }
-  function onKey(e) {
-    if (e.key === 'Escape') cleanup();
-  }
-  svg.addEventListener('click', onClick);
-  window.addEventListener('keydown', onKey);
-  return { stop: cleanup };
-}
-
-export function addPDC(arcada, color = 'blue', typeId) {
-  const svg = getSvg();
-  if (!svg) return false;
-
-  let toothStartName, toothEndName;
-  let displacement;
-  const offset = 5;
-
-  // 1. Determinar los dientes terminales y el desplazamiento
-  if (arcada === 'superior') {
-    if (typeId === 'SUP_PERM') {
-      toothStartName = '1.8';
-      toothEndName = '2.8';
-    } else if (typeId === 'SUP_DECID') {
-      toothStartName = '5.5';
-      toothEndName = '6.5';
-    } else {
-      const c1_perm = centerOfTooth(svg, '1.8');
-      if (c1_perm) {
-        toothStartName = '1.8';
-        toothEndName = '2.8';
-      } else {
-        toothStartName = '5.5';
-        toothEndName = '6.5';
-      }
-    }
-    displacement = -60;
-  } else if (arcada === 'inferior') {
-    if (typeId === 'INF_PERM') {
-      toothStartName = '4.8';
-      toothEndName = '3.8';
-    } else if (typeId === 'INF_DECID') {
-      toothStartName = '8.5';
-      toothEndName = '7.5';
-    } else {
-      const c1_perm = centerOfTooth(svg, '4.8');
-      if (c1_perm) {
-        toothStartName = '4.8';
-        toothEndName = '3.8';
-      } else {
-        toothStartName = '8.5';
-        toothEndName = '7.5';
-      }
-    }
-    displacement = 60;
-  } else {
-    alert('❌ Arcada no válida.');
-    return false;
-  }
-
-  // 2. Obtener los centros de los dientes terminales (asumiendo centerOfTooth está disponible)
-  const c1 = centerOfTooth(svg, toothStartName);
-  const c2 = centerOfTooth(svg, toothEndName);
-
-  if (!c1 || !c2) {
-    console.error(
-      `No se pudo obtener el centro de los molares terminales (${toothStartName} o ${toothEndName}).`
-    );
-    return false;
-  }
-
-  const p1 = { x: c1.x, y: c1.y + displacement };
-  const p2 = { x: c2.x, y: c2.y + displacement };
-
-  const overlay = ensureOverlay(svg);
-
-  const dxLine = p2.x - p1.x;
-  const dyLine = p2.y - p1.y;
-  const angle = Math.atan2(dyLine, dxLine);
-  const perpAngle = angle + Math.PI / 2;
-  const dx = Math.cos(perpAngle) * offset;
-  const dy = Math.sin(perpAngle) * offset;
-
-  const l1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  l1.setAttribute('x1', p1.x + dx);
-  l1.setAttribute('y1', p1.y + dy);
-  l1.setAttribute('x2', p2.x + dx);
-  l1.setAttribute('y2', p2.y + dy);
-  l1.setAttribute('stroke', color);
-  l1.setAttribute('stroke-width', '5');
-  l1.setAttribute('class', 'annotation pdc-line-1');
-  l1.setAttribute('data-id', `pdc-${arcada}-1-${Date.now()}`);
-  overlay.appendChild(l1);
-
-  const l2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  l2.setAttribute('x1', p1.x - dx);
-  l2.setAttribute('y1', p1.y - dy);
-  l2.setAttribute('x2', p2.x - dx);
-  l2.setAttribute('y2', p2.y - dy);
-  l2.setAttribute('stroke', color);
-  l2.setAttribute('stroke-width', '5');
-  l2.setAttribute('class', 'annotation pdc-line-2');
-  l2.setAttribute('data-id', `pdc-${arcada}-2-${Date.now()}`);
-  overlay.appendChild(l2);
 
   return true;
 }
@@ -2341,8 +2155,9 @@ export function addDentalProsthesis(color = 'blue') {
       console.warn(`No se encontró el centro para el diente ${name}.`);
       return;
     }
-
+    // 2. Definir el desplazamiento vertical (hacia la raíz/encía)
     const displacement = 60;
+
     let adjustedP;
     const quadrant = parseInt(name.charAt(0));
 
@@ -2367,7 +2182,7 @@ export function addDentalProsthesis(color = 'blue') {
     pts.push(adjustedP);
 
     if (pts.length === 2) {
-      // VALIDACIÓN CLÍNICA
+      // 1. VALIDACIÓN CLÍNICA
       if (!isValidArcade(names[0], names[1])) {
         alert(
           '❌ Error clínico: La Prótesis Removible debe conectar dientes de la misma arcada.'
@@ -2375,7 +2190,7 @@ export function addDentalProsthesis(color = 'blue') {
         cleanup();
         return;
       }
-      // Lógica de Dibujo (Doble Línea)
+      // 2. Lógica de Dibujo (Doble Línea)
       const p1 = pts[0];
       const p2 = pts[1];
       const dxLine = p2.x - p1.x;
@@ -2419,6 +2234,245 @@ export function addDentalProsthesis(color = 'blue') {
   return { stop: cleanup };
 }
 
+export function addPDC(arcada, color = 'blue', typeId) {
+  const svg = getSvg();
+  if (!svg) return false;
+
+  let toothStartName, toothEndName;
+  let displacement;
+  const offset = 5;
+
+  // 1. Determinar los dientes terminales y el desplazamiento
+  if (arcada === 'superior') {
+    if (typeId === 'SUP_PERM') {
+      toothStartName = '1.8';
+      toothEndName = '2.8';
+    } else if (typeId === 'SUP_DECID') {
+      toothStartName = '5.5';
+      toothEndName = '6.5';
+    } else {
+      // Fallback a lógica anterior si no hay typeId (opcional)
+      const c1_perm = centerOfTooth(svg, '1.8');
+      if (c1_perm) {
+        toothStartName = '1.8';
+        toothEndName = '2.8';
+      } else {
+        toothStartName = '5.5';
+        toothEndName = '6.5';
+      }
+    }
+    displacement = -60;
+  } else if (arcada === 'inferior') {
+    if (typeId === 'INF_PERM') {
+      toothStartName = '4.8';
+      toothEndName = '3.8';
+    } else if (typeId === 'INF_DECID') {
+      toothStartName = '8.5';
+      toothEndName = '7.5';
+    } else {
+      // Fallback a lógica anterior si no hay typeId (opcional)
+      const c1_perm = centerOfTooth(svg, '4.8');
+      if (c1_perm) {
+        toothStartName = '4.8';
+        toothEndName = '3.8';
+      } else {
+        toothStartName = '8.5';
+        toothEndName = '7.5';
+      }
+    }
+    // Desplazamiento basado en la lógica de Q3/Q4/Q7/Q8 del usuario: Y hacia abajo (positivo)
+    displacement = 60;
+  } else {
+    alert('❌ Arcada no válida.');
+    return false;
+  }
+
+  // 2. Obtener los centros de los dientes terminales (asumiendo centerOfTooth está disponible)
+  const c1 = centerOfTooth(svg, toothStartName);
+  const c2 = centerOfTooth(svg, toothEndName);
+
+  if (!c1 || !c2) {
+    console.error(
+      `No se pudo obtener el centro de los molares terminales (${toothStartName} o ${toothEndName}).`
+    );
+    return false;
+  }
+
+  // 3. Aplicar el desplazamiento para posicionar la línea en la zona radicular
+  const p1 = { x: c1.x, y: c1.y + displacement };
+  const p2 = { x: c2.x, y: c2.y + displacement };
+
+  const overlay = ensureOverlay(svg);
+
+  const dxLine = p2.x - p1.x;
+  const dyLine = p2.y - p1.y;
+  const angle = Math.atan2(dyLine, dxLine);
+  const perpAngle = angle + Math.PI / 2;
+  const dx = Math.cos(perpAngle) * offset;
+  const dy = Math.sin(perpAngle) * offset;
+
+  // Línea 1 (offset positivo)
+  const l1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  l1.setAttribute('x1', p1.x + dx);
+  l1.setAttribute('y1', p1.y + dy);
+  l1.setAttribute('x2', p2.x + dx);
+  l1.setAttribute('y2', p2.y + dy);
+  l1.setAttribute('stroke', color);
+  l1.setAttribute('stroke-width', '5');
+  l1.setAttribute('class', 'annotation pdc-line-1');
+  l1.setAttribute('data-id', `pdc-${arcada}-1-${Date.now()}`);
+  overlay.appendChild(l1);
+
+  // Línea 2 (offset negativo)
+  const l2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  l2.setAttribute('x1', p1.x - dx);
+  l2.setAttribute('y1', p1.y - dy);
+  l2.setAttribute('x2', p2.x - dx);
+  l2.setAttribute('y2', p2.y - dy);
+  l2.setAttribute('stroke', color);
+  l2.setAttribute('stroke-width', '5');
+  l2.setAttribute('class', 'annotation pdc-line-2');
+  l2.setAttribute('data-id', `pdc-${arcada}-2-${Date.now()}`);
+  overlay.appendChild(l2);
+
+  return true;
+}
+
+export function addPPF(color = 'blue') {
+  const svg = getSvg();
+  if (!svg) return { stop() {} };
+
+  const overlay = ensureOverlay(svg);
+  const pts = [];
+  const names = [];
+  const markers = [];
+  const displacement = 55;
+  const LINE_WIDTH = 5;
+  let offset;
+
+  alert(
+    'Modo PPF: Haz clic en el primer diente pilar y luego en el segundo diente pilar. Presiona ESC para cancelar.'
+  );
+
+  function cleanup() {
+    svg.removeEventListener('click', onClick);
+    window.removeEventListener('keydown', onKey);
+    markers.forEach((m) => m.remove());
+  }
+
+  function onClick(e) {
+    const g = findToothGroupFromEvent(e.target);
+    if (!g) {
+      console.warn('Clic ignorado: No se hizo clic en un diente.');
+      return;
+    }
+
+    const name = g.getAttribute('data-name');
+    if (!name || names.includes(name)) return;
+    names.push(name);
+
+    const toothCenter = centerOfTooth(svg, name);
+    if (!toothCenter) {
+      console.warn(`No se encontró el centro para el diente ${name}.`);
+      return;
+    }
+
+    // 1. Determinar el punto de conexión ajustado (p1 y p2)
+    let adjustedP;
+    const quadrant = parseInt(name.charAt(0));
+
+    // Superior: Desplazamiento negativo (hacia ARRIBA/raíz)
+    if ((quadrant >= 1 && quadrant <= 2) || (quadrant >= 5 && quadrant <= 6)) {
+      adjustedP = { x: toothCenter.x, y: toothCenter.y - displacement };
+      offset = -8;
+
+      // Inferior: Desplazamiento positivo (hacia ABAJO/raíz)
+    } else if (
+      (quadrant >= 3 && quadrant <= 4) ||
+      (quadrant >= 7 && quadrant <= 8)
+    ) {
+      adjustedP = { x: toothCenter.x, y: toothCenter.y + displacement };
+      offset = 8;
+    } else {
+      console.error('Cuadrante no válido.');
+      cleanup();
+      return;
+    }
+
+    // Dibujar marcador temporal
+    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.setAttribute('cx', adjustedP.x);
+    c.setAttribute('cy', adjustedP.y);
+    c.setAttribute('r', '4');
+    c.setAttribute('fill', color);
+    overlay.appendChild(c);
+    markers.push(c);
+    pts.push(adjustedP); // Almacena P1 / P2 (Punto en el pilar)
+
+    if (pts.length === 2) {
+      // 2. VALIDACIÓN CLÍNICA
+      if (!isValidArcade(names[0], names[1])) {
+        alert(
+          '❌ Error clínico: La Prótesis Fija debe conectar dientes de la misma arcada.'
+        );
+        cleanup();
+        return;
+      }
+
+      // 3. Lógica de Dibujo de la PPF (Conectores en esquina, grosor uniforme)
+      const p1 = pts[0]; // Pilar 1
+      const p2 = pts[1]; // Pilar 2
+
+      // Calcular ángulo de la línea principal (p1 a p2)
+      const dxLine = p2.x - p1.x;
+      const dyLine = p2.y - p1.y;
+      const angle = Math.atan2(dyLine, dxLine);
+      const perpAngle = angle + Math.PI / 2; // Ángulo perpendicular (para la esquina)
+
+      // Calcular el desplazamiento (dx/dy) para movernos del pilar al cuerpo del puente
+      const dx = Math.cos(perpAngle) * offset;
+      const dy = Math.sin(perpAngle) * offset;
+
+      // Puntos en el CUERPO del puente (P1' y P2')
+      const p1_body = { x: p1.x + dx, y: p1.y + dy };
+      const p2_body = { x: p2.x + dx, y: p2.y + dy };
+
+      // Función auxiliar para dibujar una línea SVG
+      const drawLine = (x1, y1, x2, y2, idSuffix) => {
+        const line = document.createElementNS(
+          'http://www.w3.org/2000/svg',
+          'line'
+        );
+        line.setAttribute('x1', x1);
+        line.setAttribute('y1', y1);
+        line.setAttribute('x2', x2);
+        line.setAttribute('y2', y2);
+        line.setAttribute('stroke', color);
+        line.setAttribute('stroke-width', LINE_WIDTH); // Grosor uniforme
+        line.setAttribute('stroke-linecap', 'butt');
+        line.setAttribute('class', 'annotation ppf-' + idSuffix);
+        line.setAttribute(
+          'data-id',
+          `ppf-${names.join('-')}-${Date.now()}-${idSuffix}`
+        );
+        overlay.appendChild(line);
+      };
+      drawLine(p1.x, p1.y, p1_body.x, p1_body.y, 'conn-1');
+      drawLine(p1_body.x, p1_body.y, p2_body.x, p2_body.y, 'main');
+      drawLine(p2_body.x, p2_body.y, p2.x, p2.y, 'conn-2');
+
+      // Eliminar marcadores temporales y finalizar
+      cleanup();
+    }
+  }
+  function onKey(e) {
+    if (e.key === 'Escape') cleanup();
+  }
+  svg.addEventListener('click', onClick);
+  window.addEventListener('keydown', onKey);
+  return { stop: cleanup };
+}
+
 export function addTransposition(color = 'blue') {
   const svg = getSvg();
   if (!svg) return { stop() {} };
@@ -2429,6 +2483,8 @@ export function addTransposition(color = 'blue') {
   const markers = [];
   const CURVE_HEIGHT = 20;
   const DISPLACEMENT = 55;
+
+  // 🔑 AJUSTE CLAVE: Aumentamos el desplazamiento a 25 para evitar superposición
   const ARROW_H_OFFSET = 15;
 
   alert(
@@ -2461,6 +2517,7 @@ export function addTransposition(color = 'blue') {
     let adjustedP;
     const quadrant = parseInt(name.charAt(0));
 
+    // Cálculo de adjustedP (Y)
     if (quadrant === 1 || quadrant === 2 || quadrant === 5 || quadrant === 6) {
       adjustedP = { x: toothCenter.x, y: toothCenter.y - DISPLACEMENT };
     } else if (
@@ -2548,6 +2605,8 @@ export function addTransposition(color = 'blue') {
         path.setAttribute('class', 'annotation transposition-' + idSuffix);
         overlay.appendChild(path);
       };
+
+      // 4. DIBUJAR FLECHA A (Izquierda -> Derecha)
       // INICIO: Se mueve a la derecha del centro de startP
       const startA_X = startP.x - ARROW_H_OFFSET;
       // FIN: Se mueve a la izquierda del centro de endP
@@ -2555,6 +2614,7 @@ export function addTransposition(color = 'blue') {
 
       drawArrow(startA_X, endA_X, 'A');
 
+      // 5. DIBUJAR FLECHA B (Derecha -> Izquierda)
       // INICIO: Se mueve a la izquierda del centro de endP
       const startB_X = endP.x + ARROW_H_OFFSET;
       // FIN: Se mueve a la derecha del centro de startP
@@ -2583,6 +2643,8 @@ export default {
   getToothBBox,
   centerOfTooth,
   clearAnnotations,
+  clearLastAnnotation, //AÑADISTE
+  clearAnnotationsForTooth, //AÑADISTE
   addCrown,
   startFixedOrthoMode,
   startRemovableOrthoMode,
@@ -2598,11 +2660,9 @@ export default {
   addGerminacion,
   addFusion,
   addGiroversion,
-  addMissingTooth,
-  addPegTooth,
-  addPulpotomy,
-  addPPF,
-  addPDC,
   addDentalProsthesis,
+  addPDC,
+  addPPF,
+  addPulpotomy,
   addTransposition,
 };

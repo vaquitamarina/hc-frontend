@@ -8,12 +8,15 @@ import odontogramaTools from '../../../hooks/odotools';
  * Aparatos ortodónticos y utilidades de anotación.
  */
 
-export default function OdontogramaToolsPanel() {
+export default function OdontogramaToolsPanel({
+  onSaveVersion,
+  onLoadVersion,
+}) {
   const crownTypes = ['CM', 'CF', 'CMC', 'CV', 'CLM'];
   const colors = ['blue', 'red'];
 
   const defectTypes = ['O', 'PE', 'Fluorosis'];
-  const missingToothTypes = ['DNE', 'DEX', 'DAO'];
+
   const pdcTypes = [
     // Nuevas opciones de PDC
     { id: 'SUP_PERM', label: 'Superior Permanentes' },
@@ -30,7 +33,7 @@ export default function OdontogramaToolsPanel() {
 
   const [activeTool, setActiveTool] = useState(null);
   const [activeToolName, setActiveToolName] = useState(null);
-  const [pdaMenuOpen, setPDAMenuOpen] = useState(false);
+
   const [pdcMenuOpen, setPDCMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -181,7 +184,64 @@ export default function OdontogramaToolsPanel() {
     }
   }
 
-  // --- CORONA (mantener comportamiento original) ---
+  // AÑADISTE
+  function clearInputForTooth(tooth) {
+    try {
+      const svg = odontogramaTools.getSvg();
+      if (!svg) return false;
+      const info = odontogramaTools.getToothBBox(svg, tooth);
+      if (!info) return false;
+      const toothBox = info.bbox;
+      const inputs = Array.from(svg.querySelectorAll('foreignObject'));
+      if (!inputs.length) return false;
+
+      let bestFo = null;
+      let bestOverlap = -1;
+      let bestDist = Infinity;
+      let bestFoByDist = null;
+
+      const toothCenter = {
+        x: toothBox.x + toothBox.width / 2,
+        y: toothBox.y + toothBox.height / 2,
+      };
+
+      for (const fo of inputs) {
+        const foBox = foreignObjectBBoxInSvg(svg, fo); // foreignObjectBBoxInSvg ya existe
+        if (!foBox) continue;
+        const overlap = rectIntersectionArea(foBox, toothBox); // rectIntersectionArea ya existe
+        if (overlap > bestOverlap) {
+          bestOverlap = overlap;
+          bestFo = fo;
+        }
+        const foCenter = {
+          x: foBox.x + foBox.width / 2,
+          y: foBox.y + foBox.height / 2,
+        };
+        const dist = Math.hypot(
+          foCenter.x - toothCenter.x,
+          foCenter.y - toothCenter.y
+        );
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestFoByDist = fo;
+        }
+      }
+
+      const chosenFo = bestOverlap > 0 ? bestFo : bestFoByDist;
+      if (!chosenFo) return false;
+      const input = chosenFo.querySelector('input, textarea');
+      if (!input) return false;
+      // --- Lógica de Limpieza ---
+      input.value = '';
+      input.style.border = '';
+      input.style.color = '';
+      return true;
+    } catch (e) {
+      console.error('clearInputForTooth error', e);
+      return false;
+    }
+  }
+  // --- CORONA (mantener comportamiento original) ---  // MODIFICASTE
   const onSelectCorona = (type, color) => {
     setCoronaMenuOpen(false);
     const tooth = askTooth(
@@ -199,13 +259,7 @@ export default function OdontogramaToolsPanel() {
         'surco2',
         'surco3',
       ];
-      const ok = odontogramaTools.addCrown(
-        tooth,
-        type,
-        'BE',
-        color,
-        includedParts
-      );
+      const ok = odontogramaTools.addCrown(tooth, type, color, includedParts);
       if (!ok) {
         alert(
           `No se encontró el diente ${tooth}. Asegúrate de escribirlo exactamente como en la etiqueta (ej: 2.7).`
@@ -249,7 +303,6 @@ export default function OdontogramaToolsPanel() {
       const ok = odontogramaTools.addCrown(
         tooth,
         crownType,
-        'BE',
         color,
         includedParts
       );
@@ -352,13 +405,6 @@ export default function OdontogramaToolsPanel() {
     }
   };
 
-  const onObturacion = () => {
-    const tooth = askTooth('Diente para OBTURACIÓN (ej: 1.6):');
-    if (!tooth) return;
-    odontogramaTools.highlightToothBox(tooth, 'orange');
-    alert('Obturación anotada (demo)');
-  };
-
   // --- FOSAS Y FISURAS PROFUNDAS (nuevo) ---
   // Este manejador pregunta el diente y aplica la sigla "FFP" en azul,
   // tanto en el input asociado (foreignObject) como con una etiqueta SVG.
@@ -438,10 +484,86 @@ export default function OdontogramaToolsPanel() {
       );
     }
   };
-
+  /// actualizado MODIFICASTE
   const onClear = () => {
-    if (window.confirm('¿Borrar todas las anotaciones?')) {
-      odontogramaTools.clearAnnotations();
+    const action = window.prompt(
+      'Selecciona la acción de limpieza:\n' +
+        '1) Borrar TODAS las anotaciones (Limpieza Total).\n' +
+        '2) Borrar anotaciones de un DIENTE específico (Ej: 1.6).\n' +
+        'Escribe 1, 2, o el número del diente directamente si eliges la opción 2.'
+    );
+
+    if (!action) return;
+
+    const normalizedAction = action.trim();
+
+    if (normalizedAction === '1') {
+      if (
+        window.confirm(
+          '¿Confirmas que deseas borrar *todas* las anotaciones del odontograma y textos asociados?'
+        )
+      ) {
+        // Limpieza total SVG
+        odontogramaTools.clearAnnotations();
+
+        // Limpiar todos los inputs de texto
+        const svg = odontogramaTools.getSvg();
+        if (svg) {
+          svg
+            .querySelectorAll('foreignObject input, foreignObject textarea')
+            .forEach((input) => {
+              input.value = '';
+              input.style.border = '';
+              input.style.color = '';
+            });
+        }
+        alert('Todas las anotaciones y textos asociados han sido borrados.');
+      }
+    } else if (
+      normalizedAction === '2' ||
+      normalizedAction.match(/^[1-8]\.[1-8]\d?$/)
+    ) {
+      // Opción 2: Borrar por diente (o el usuario ingresó un diente directamente)
+      let tooth = normalizedAction;
+      if (normalizedAction === '2') {
+        tooth = askTooth('Ingresa el número de diente a limpiar (ej: 1.6):');
+        if (!tooth) return;
+      }
+
+      if (
+        window.confirm(
+          `¿Confirmas que deseas borrar las anotaciones del diente ${tooth}?`
+        )
+      ) {
+        const clearedSVG = odontogramaTools.clearAnnotationsForTooth(tooth);
+        const clearedInput = clearInputForTooth(tooth);
+
+        if (clearedSVG || clearedInput) {
+          alert(
+            `Se limpiaron las anotaciones y/o el input del diente ${tooth}.`
+          );
+        } else {
+          alert(`No se encontraron anotaciones para el diente ${tooth}.`);
+        }
+      }
+    } else {
+      alert(
+        'Opción no reconocida o diente inválido. Asegúrate de usar el formato X.Y (ej: 1.6).'
+      );
+    }
+  };
+
+  // --- NUEVA FUNCIÓN DE RETROCEDER (UNDO) --- AÑADISTE
+  const onUndo = () => {
+    const success = odontogramaTools.clearLastAnnotation();
+    if (success) {
+      // Nota: El deshecho del texto del input asociado es complejo de automatizar,
+      // se le indica al usuario que lo haga manualmente si es necesario.
+      alert(
+        'Se ha deshecho la *última anotación SVG*. Por favor, verifica el texto del input asociado y corrígelo manualmente si es necesario.'
+      );
+    } else {
+      alert('No hay anotaciones previas que deshacer.');
     }
   };
 
@@ -675,47 +797,6 @@ export default function OdontogramaToolsPanel() {
     }
   };
 
-  const onSelectPDA = (typeId, color = 'blue') => {
-    setPDAMenuOpen(false); // Cierra el menú
-    const tooth = askTooth(`Diente de Dentaría Ausente (ej: 2.7):`);
-    if (!tooth) return;
-    try {
-      const ok = setInputForTooth(tooth, typeId, color);
-      if (!ok) {
-        alert(
-          `No se encontró el diente ${tooth} ni su recuadro de texto asociado.`
-        );
-      }
-      odontogramaTools.addMissingTooth(tooth, color);
-    } catch (e) {
-      console.error('Error aplicando PDA:', e);
-      alert(
-        'Ocurrió un error al intentar aplicar la Piesa de dectadura ausente. Revisa la consola.'
-      );
-    }
-  };
-  const onPDAButton = () => {
-    setPDAMenuOpen((s) => !s);
-  };
-
-  const onPiezaClavija = () => {
-    const tooth = askTooth('Diente en Clavija (ej: 2.7):');
-    if (!tooth) return;
-    try {
-      const ok = odontogramaTools.addPegTooth(tooth, 'blue');
-      if (!ok) {
-        alert(
-          `No se pudo dibujar la Pieza dentaria en clavija en el diente ${tooth}.`
-        );
-      }
-    } catch (e) {
-      console.error('Error aplicando Pieza en Clavija:', e);
-      alert(
-        'Ocurrió un error al intentar aplicar la Pieza dentaria en clavija. Revisa la consola.'
-      );
-    }
-  };
-
   const onPulpotomia = () => {
     const tooth = askTooth('Diente para Pulpotomía (ej: 1.6):');
     if (!tooth) return;
@@ -733,6 +814,12 @@ export default function OdontogramaToolsPanel() {
       console.error('Error aplicando:', err);
       alert('Ocurrió un error al intentar anotar. Revisa la consola.');
     }
+  };
+
+  const onTransposicion = () => {
+    //const color = askColor('red'); // Pide el color (normalmente rojo)
+    // Llama a la nueva función interactiva
+    odontogramaTools.addTransposition('blue');
   };
 
   const onPPF = () => {
@@ -770,18 +857,12 @@ export default function OdontogramaToolsPanel() {
     setPDCMenuOpen((s) => !s);
   };
 
-  const onProtesisPR = () => {
+  const onProtesisDental = () => {
     const color = askColor('blue');
     odontogramaTools.addDentalProsthesis(color);
     alert(
       'Modo "PPR": Haz click en el diente pilar inicial y luego en el diente pilar final.\nPresiona ESC para cancelar.'
     );
-  };
-
-  const onTransposicion = () => {
-    //const color = askColor('red'); // Pide el color (normalmente rojo)
-    // Llama a la nueva función interactiva
-    odontogramaTools.addTransposition('blue');
   };
 
   // render
@@ -790,10 +871,15 @@ export default function OdontogramaToolsPanel() {
 
   return (
     <div
-      className="p-4 bg-white rounded shadow"
-      style={{ position: 'relative' }}
+      className="p-4 rounded-lg shadow-lg"
+      style={{
+        width: '400px',
+        background: '#fff',
+        maxHeight: '80vh',
+        overflowY: 'auto',
+      }}
     >
-      <h3 className="text-lg font-semibold mb-2">Herramientas Odontograma</h3>
+      <h3 className="text-xl font-bold mb-4">Tratamientos</h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <button
@@ -980,7 +1066,7 @@ export default function OdontogramaToolsPanel() {
             onClick={onEdentuloButton}
             aria-expanded={edentuloMenuOpen}
           >
-            7. Edéntulo
+            6 Edéntulo
           </button>
 
           {edentuloMenuOpen && (
@@ -1033,21 +1119,14 @@ export default function OdontogramaToolsPanel() {
           className="px-3 py-2 bg-teal-500 text-white rounded"
           onClick={onDiastema}
         >
-          6. Diastema
-        </button>
-
-        <button
-          className="px-3 py-2 bg-teal-500 text-white rounded"
-          onClick={onObturacion}
-        >
-          Espigo - Muñon
+          7. Diastema
         </button>
 
         <button
           className="px-3 py-2 bg-teal-600 text-white rounded"
           onClick={onFractura}
         >
-          9. Fosas y fisuras profundas
+          8. Fosas y fisuras profundas
         </button>
 
         {/*<button className="px-3 py-2 bg-teal-500 text-black rounded" onClick={onClear}>
@@ -1058,14 +1137,14 @@ export default function OdontogramaToolsPanel() {
           className="px-3 py-2 bg-teal-700 text-white rounded"
           onClick={onFusion}
         >
-          11. Fusión
+          9 Fusión
         </button>
 
         <button
           className="px-3 py-2 bg-teal-500 text-white rounded"
           onClick={onGerminacion}
         >
-          12. Germinación
+          10 Germinación
         </button>
 
         <div style={{ position: 'relative' }}>
@@ -1074,7 +1153,7 @@ export default function OdontogramaToolsPanel() {
             onClick={onGiroversionButton}
             aria-expanded={giroMenuOpen}
           >
-            13. Giroversión
+            11. Giroversión
           </button>
 
           {giroMenuOpen && (
@@ -1133,7 +1212,7 @@ export default function OdontogramaToolsPanel() {
             onClick={onImplanteButton}
             aria-expanded={implantMenuOpen}
           >
-            14. Implantación dental
+            12. Implantación dental
           </button>
           {implantMenuOpen && (
             <div
@@ -1188,7 +1267,7 @@ export default function OdontogramaToolsPanel() {
           className="px-3 py-2 bg-teal-500 text-white rounded"
           onClick={onImplantacion2}
         >
-          15. Impactacion
+          13. Impactacion
         </button>
         {/* <button className="px-3 py-2 bg-teal-500 text-white rounded" onClick={onClear}>
            Lesión de caries dental
@@ -1197,122 +1276,44 @@ export default function OdontogramaToolsPanel() {
           className="px-3 py-2 bg-teal-500 text-white rounded"
           onClick={onMacrodoncia}
         >
-          17. Macrodoncia
+          14. Macrodoncia
         </button>
         <button
           className="px-3 py-2 bg-teal-500 text-white rounded"
           onClick={onMicrodoncia}
         >
-          18. MICRODONCIA
+          15. MICRODONCIA
         </button>
         <button
           className="px-3 py-2 bg-teal-500 text-white rounded"
           onClick={onMobilidad}
         >
-          19. MOVILIDAD PATOLÓGIA
-        </button>
-        <div style={{ position: 'relative' }}>
-          <button
-            className="px-3 py-2 bg-teal-600 text-white rounded w-full"
-            onClick={onPDAButton}
-            aria-expanded={pdaMenuOpen}
-          >
-            20. Piesa dentaria ausente (PDA)
-          </button>
-          {pdaMenuOpen && (
-            <div
-              style={{
-                position: 'absolute',
-                top: '110%',
-                left: 0,
-                zIndex: 60,
-                background: 'white',
-                border: '1px solid #ddd',
-                padding: 8,
-                display: 'flex',
-                gap: 12,
-                boxShadow: '0 6px 18px rgba(0,0,0,0.08)',
-                width: 320,
-              }}
-            >
-              {colors
-                .filter((col) => col === 'blue')
-                .map((col) => (
-                  <div key={col} style={{ flex: 1 }}>
-                    <div
-                      style={{ marginBottom: 6, fontWeight: 600, color: col }}
-                    >
-                      {col.toUpperCase()}
-                    </div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                      {missingToothTypes.map((t) => (
-                        <button
-                          key={t + col}
-                          onClick={() => onSelectPDA(t, col)}
-                          style={{
-                            padding: '6px 8px',
-                            borderRadius: 6,
-                            border: `2px solid ${col}`,
-                            background: 'white',
-                            cursor: 'pointer',
-                          }}
-                          title={`Aplicar ${t} (${col})`}
-                        >
-                          {t}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <button
-                  onClick={() => {
-                    setPDAMenuOpen(false);
-                  }}
-                  style={{
-                    padding: '6px 8px',
-                    borderRadius: 6,
-                    border: '1px solid #ccc',
-                    background: '#f8f8f8',
-                  }}
-                >
-                  Cerrar
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-        <button
-          className="px-3 py-2 bg-teal-500 text-white rounded"
-          onClick={onPiezaClavija}
-        >
-          21. Pieza Dentaria en Clavija (PC)
+          16. MOVILIDAD PATOLÓGIA
         </button>
         <button
           className="px-3 py-2 bg-teal-700 text-white rounded"
           onClick={onPulpotomia}
         >
-          27. Pulpotomía
+          17. Pulpotomía
+        </button>
+        <button
+          className="px-3 py-2 bg-teal-600 text-white rounded"
+          onClick={onTransposicion}
+        >
+          18. Transposición dentaria
         </button>
         <button
           className="px-3 py-2 bg-teal-700 text-white rounded"
           onClick={onPPF}
         >
-          29. Prótesis Dental Parcial Fija (PPF)
+          19. Prótesis Dental Parcial Fija (PPF)
         </button>
         <div className="relative">
           <button
             className="px-3 py-2 bg-teal-500 text-white rounded"
             onClick={onPDCButton}
           >
-            30. Prótesis Dental Completa (PDC)
+            20. Prótesis Dental Completa (PDC)
           </button>
           {pdcMenuOpen && (
             <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-10 p-2">
@@ -1341,22 +1342,9 @@ export default function OdontogramaToolsPanel() {
         </div>
         <button
           className="px-3 py-2 bg-teal-600 text-white rounded"
-          onClick={onProtesisPR}
+          onClick={onProtesisDental}
         >
-          31. Protesis dental parcial removible (PPR)
-        </button>
-        <button
-          className="px-3 py-2 bg-teal-600 text-white rounded"
-          onClick={onTransposicion}
-        >
-          38. Transposición dentaria
-        </button>
-
-        <button
-          className="px-3 py-2 bg-teal-500 text-white rounded"
-          onClick={onClear}
-        >
-          Limpiar
+          21. Protesis dental parcial removible (PPR)
         </button>
       </div>
 
@@ -1379,10 +1367,36 @@ export default function OdontogramaToolsPanel() {
         </div>
       )}
 
-      <p className="text-xs text-gray-500 mt-2">
-        Nota: al seleccionar la sigla, el sistema pedirá el número de diente
-        (ej: 2.7) y aplicará el borde y la sigla en el input.
-      </p>
+      <div className="flex flex-col space-y-3 mt-5">
+        <button
+          className="px-3 py-2 bg-red-600 text-white rounded font-bold"
+          onClick={onClear}
+        >
+          Borrar 🗑️
+        </button>
+
+        <button
+          className="px-3 py-2 bg-gray-500 text-white rounded font-bold"
+          onClick={onUndo}
+          title="Deshace la última anotación SVG"
+        >
+          Deshacer 🔄
+        </button>
+
+        <button
+          className="px-3 py-2 bg-blue-700 text-white rounded font-bold"
+          onClick={onLoadVersion}
+        >
+          Historial de versiones
+        </button>
+
+        <button
+          className="px-3 py-2 bg-blue-900 text-white rounded font-bold"
+          onClick={onSaveVersion}
+        >
+          Guardar cambios
+        </button>
+      </div>
     </div>
   );
 }

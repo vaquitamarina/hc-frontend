@@ -1,16 +1,39 @@
 // src/pages/hc/ExamenFisico/odonto.jsx
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import OdontogramaToolsPanel from './odotools';
 
-/**
- * Página principal del odontograma: SVG (clase "odo") y panel de herramientas.
- * He sustituido todos los <use href=... /> por <use xlinkHref=... /> y añadido xmlnsXlink.
- */
-
+const CRITICAL_SVG_STYLES = `
+  .letra {
+    border: 1px solid #000;
+    padding: 4px;
+    border-radius: 4px;
+  }
+  .line { stroke-width: 2; }
+  .thin { stroke-width: 1 !important; }
+  .posnumber { font-size: 10px; fill: #333; }
+  .tooth-name { font-size: 10px; fill: #111; pointer-events: none; }
+  .part { cursor: pointer; stroke: black; fill: none; }
+  .tooth-group:hover .highlight rect,
+  .tooth-group:hover .highlight polygon,
+  .tooth-group:hover .highlight path { stroke: #e33; stroke-width: 2.5; }
+  input.letra, textarea.letra { font-size: 12px; } 
+  .annotation { display: block; }
+`;
 export default function Odontograma() {
+  // 2. OBTENER EL ID DEL PACIENTE DESDE LA URL
+  const { id: patientId } = useParams();
+
+  // 3. CLAVE ÚNICA DE LOCALSTORAGE
+  const STORAGE_KEY = `odontogramaVersions_${patientId}`;
+
+  const [showHistory, setShowHistory] = useState(false);
+  const [selectedVersion, setSelectedVersion] = useState(null);
+  const [historyList, setHistoryList] = useState([]);
+
   useEffect(() => {
-    // Intentamos cargar el script visorOdonto.js desde la raíz pública (si lo usas)
+    // ... Carga del script visorOdonto.js ...
     const script = document.createElement('script');
     script.src = '/visorOdonto.js';
     script.async = false;
@@ -24,6 +47,251 @@ export default function Odontograma() {
       }
     };
   }, []);
+
+  // Función para GUARDAR la versión actual
+  const saveOdontogramaVersion = useCallback(() => {
+    const svgElement = document.querySelector('svg.odo');
+    if (!svgElement) return alert('SVG no encontrado.');
+
+    // 1. OBTENER LOS VALORES ACTUALES DEL DOM ACTIVO
+    const dateInput = document.querySelector('input[type="date"]');
+    const especificacionesEl = document.querySelector('#inputEspecificaciones');
+    const observacionesEl = document.querySelector('#inputObservaciones');
+
+    const currentDate = dateInput ? dateInput.value : '';
+    const currentEspec = especificacionesEl ? especificacionesEl.value : '';
+    const currentObs = observacionesEl ? observacionesEl.value : '';
+
+    const toothInputs = document.querySelectorAll('foreignObject input.letra');
+
+    // 2. Clonar el SVG
+    const svgClone = svgElement.cloneNode(true);
+
+    // 3. INYECTAR VALORES Y ESTILOS EN EL SVG CLONADO ANTES DE GUARDAR
+
+    // A. Inyectar Fecha
+    const clonedDateInput = svgClone.querySelector('input[type="date"]');
+    if (clonedDateInput) {
+      clonedDateInput.setAttribute('value', currentDate);
+    }
+
+    // B. Inyectar Especificaciones y Observaciones
+    const clonedEspecEl = svgClone.querySelector('#inputEspecificaciones');
+    const clonedObsEl = svgClone.querySelector('#inputObservaciones');
+
+    if (clonedEspecEl) {
+      clonedEspecEl.textContent = currentEspec;
+    }
+    if (clonedObsEl) {
+      clonedObsEl.textContent = currentObs;
+    }
+
+    // C. Inyectar valores de los INPUTS DE DIENTES
+    const clonedToothInputs = svgClone.querySelectorAll(
+      'foreignObject input.letra'
+    );
+
+    clonedToothInputs.forEach((clonedInput, index) => {
+      const originalInput = toothInputs[index];
+      if (originalInput) {
+        clonedInput.setAttribute('value', originalInput.value);
+      }
+    });
+
+    // D. INYECTAR ESTILOS DENTRO DEL SVG CLONADO
+    const styleEl = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'style'
+    );
+    styleEl.setAttribute('type', 'text/css');
+    styleEl.textContent = CRITICAL_SVG_STYLES;
+    svgClone.prepend(styleEl);
+
+    // 4. Serializar el SVG
+    const svgContent = new XMLSerializer().serializeToString(svgClone);
+
+    // 5. Crear el objeto de datos
+    const data = {
+      date: currentDate,
+      svg: svgContent,
+      especificaciones: currentEspec,
+      observaciones: currentObs,
+      timestamp: new Date().toLocaleString(),
+      id: Date.now(),
+    };
+
+    // 6. Cargar el historial existente, añadir la nueva versión y guardar
+    // USAMOS LA CLAVE ESPECÍFICA DEL PACIENTE (STORAGE_KEY)
+    const existingVersions = localStorage.getItem(STORAGE_KEY);
+    let versions = existingVersions ? JSON.parse(existingVersions) : [];
+
+    versions.unshift(data);
+
+    const MAX_VERSIONS = 10;
+    if (versions.length > MAX_VERSIONS) {
+      versions = versions.slice(0, MAX_VERSIONS);
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(versions));
+    alert(
+      `Versión guardada con éxito el ${data.timestamp} para el paciente con ID: ${patientId}.`
+    );
+  }, [patientId, STORAGE_KEY]); // <--- patientId como dependencia
+
+  // Función para CARGAR el historial de versiones
+  const loadHistory = useCallback(() => {
+    // USAMOS LA CLAVE ESPECÍFICA DEL PACIENTE (STORAGE_KEY)
+    const data = localStorage.getItem(STORAGE_KEY);
+    if (!data)
+      return alert(
+        `No hay versiones guardadas en el historial para este paciente (ID: ${patientId}).`
+      );
+
+    const parsedData = JSON.parse(data);
+    setHistoryList(parsedData);
+    setShowHistory(true);
+    setSelectedVersion(null);
+  }, [patientId, STORAGE_KEY]); // <--- patientId como dependencia
+
+  // Función para SELECCIONAR y visualizar una versión específica
+  const selectAndShowVersion = useCallback((versionData) => {
+    setSelectedVersion(versionData);
+  }, []);
+
+  // Función para CERRAR la vista del historial
+  const closeHistory = useCallback(() => {
+    setShowHistory(false);
+    setSelectedVersion(null);
+    setHistoryList([]);
+  }, []);
+
+  // --- NUEVO RENDERIZADO: MODOS DE VISTA ---
+
+  // 1. Vista de una versión seleccionada (Historial abierto)
+  if (showHistory && selectedVersion) {
+    return (
+      <div style={{ padding: 20, background: '#e0f7fa', borderRadius: 8 }}>
+        <button
+          onClick={() => setSelectedVersion(null)}
+          style={{
+            marginBottom: 15,
+            padding: '8px 15px',
+            background: '#00bcd4',
+            color: 'white',
+            border: 'none',
+            borderRadius: 5,
+            cursor: 'pointer',
+          }}
+        >
+          ← Volver al Historial
+        </button>
+        <h2>Odontograma Guardado ({selectedVersion.timestamp})</h2>
+
+        <p>
+          <strong>Fecha del Examen:</strong>{' '}
+          {selectedVersion.date || 'No especificada'}
+        </p>
+
+        <div
+          dangerouslySetInnerHTML={{ __html: selectedVersion.svg }}
+          style={{ border: '1px solid #ccc', padding: 10, background: 'white' }}
+        />
+
+        <div style={{ marginTop: 20 }}>
+          <h3>Especificaciones:</h3>
+          <p
+            style={{
+              whiteSpace: 'pre-wrap',
+              border: '1px solid #eee',
+              padding: 10,
+              background: '#fafafa',
+            }}
+          >
+            {selectedVersion.especificaciones || 'Sin texto.'}
+          </p>
+          <h3>Observaciones:</h3>
+          <p
+            style={{
+              whiteSpace: 'pre-wrap',
+              border: '1px solid #eee',
+              padding: 10,
+              background: '#fafafa',
+            }}
+          >
+            {selectedVersion.observaciones || 'Sin texto.'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. Vista de la lista del historial
+  if (showHistory) {
+    return (
+      <div style={{ padding: 20, background: '#f0f4c3', borderRadius: 8 }}>
+        <button
+          onClick={closeHistory}
+          style={{
+            marginBottom: 15,
+            padding: '8px 15px',
+            background: '#e53935',
+            color: 'white',
+            border: 'none',
+            borderRadius: 5,
+            cursor: 'pointer',
+          }}
+        >
+          ← Cerrar Historial y Volver al Odontograma Actual
+        </button>
+        <h2>
+          Historial de Versiones Guardadas para el Paciente ID: {patientId} (
+          {historyList.length})
+        </h2>
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          {historyList.map((version, index) => (
+            <li
+              key={version.id}
+              style={{
+                padding: '10px 15px',
+                margin: '5px 0',
+                borderBottom: '1px solid #ccc',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                background: index === 0 ? '#ffecb3' : '#fff',
+              }}
+            >
+              <span>
+                <strong>Versión #{historyList.length - index}:</strong>{' '}
+                {version.timestamp}
+                {index === 0 && (
+                  <span
+                    style={{ marginLeft: 10, fontSize: '12px', color: 'green' }}
+                  >
+                    {' '}
+                    (Más Reciente)
+                  </span>
+                )}
+              </span>
+              <button
+                onClick={() => selectAndShowVersion(version)}
+                style={{
+                  padding: '5px 10px',
+                  background: '#1e88e5',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 5,
+                  cursor: 'pointer',
+                }}
+              >
+                Ver
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -60,8 +328,8 @@ export default function Odontograma() {
         <svg
           className="odo"
           width="1400"
-          height="1000"
-          viewBox="0 0 1400 1000"
+          height="1400"
+          viewBox="0 0 1400 1400"
           xmlns="http://www.w3.org/2000/svg"
           xmlnsXlink="http://www.w3.org/1999/xlink"
           style={{
@@ -70,6 +338,22 @@ export default function Odontograma() {
             display: 'block',
           }}
         >
+          <foreignObject x="1170" y="20" width="270" height="40">
+            <div>
+              <label
+                htmlFor="fecha"
+                style={{ fontSize: '12px', marginRight: '10px' }}
+              >
+                Fecha:
+              </label>
+              <input
+                id="fecha"
+                type="date"
+                className="letra"
+                style={{ width: '100px' }}
+              />
+            </div>
+          </foreignObject>
           {/* ======= DEFINICIÓN DE LOS 8 DISEÑOS (design1..design8) ======= */}
           <defs>
             {/* DESIGN 1 */}
@@ -551,9 +835,26 @@ export default function Odontograma() {
             </g>
           </defs>
 
+          <foreignObject x="570" y="20" width="600" height="30">
+            <div xmlns="http://www.w3.org/1999/xhtml">
+              <label
+                htmlFor="odontograma-title"
+                style={{
+                  fontSize: '25px',
+                  marginRight: '10px',
+                  WebkitTextStrokeWidth: '2px',
+                }}
+              >
+                Odontograma
+              </label>
+              <span id="odontograma-title" style={{ display: 'none' }}></span>
+            </div>
+          </foreignObject>
+
           {/* FILAS (1..52) */}
           {/* ----------------- FILA 1 (1..16) ----------------- */}
-          <g id="fila1" transform="translate(20,60)">
+
+          <g id="fila1" transform="translate(20,110)">
             <g
               id="tooth_1_8"
               className="tooth-group"
@@ -828,7 +1129,7 @@ export default function Odontograma() {
           </g>
 
           {/* FILA 2 (17..26) */}
-          <g id="fila2" transform="translate(261,270)">
+          <g id="fila2" transform="translate(261,320)">
             <g
               id="tooth_5_1"
               className="tooth-group"
@@ -1001,7 +1302,7 @@ export default function Odontograma() {
           </g>
 
           {/* FILA 3 (27..36) */}
-          <g id="fila3" transform="translate(261,520)">
+          <g id="fila3" transform="translate(261,570)">
             <g
               id="tooth_8_5"
               className="tooth-group"
@@ -1174,7 +1475,7 @@ export default function Odontograma() {
           </g>
 
           {/* FILA 4 (37..52) */}
-          <g id="fila4" transform="translate(20,745)">
+          <g id="fila4" transform="translate(20,795)">
             <g
               id="tooth_4_8"
               className="tooth-group"
@@ -1447,12 +1748,47 @@ export default function Odontograma() {
               </div>
             </foreignObject>
           </g>
+          <foreignObject x="50" y="900" width="1270" height="160">
+            <div xmlns="http://www.w3.org/1999/xhtml">
+              <label
+                htmlFor="inputEspecificaciones"
+                style={{ fontSize: '14px', fontWeight: 'bold' }}
+              >
+                Especificaciones:
+              </label>
+
+              <textarea
+                id="inputEspecificaciones"
+                className="letra"
+                rows="2"
+                style={{ width: '100%', resize: 'none' }}
+              ></textarea>
+            </div>
+          </foreignObject>
+          <foreignObject x="50" y="1000" width="1270" height="60">
+            <div xmlns="http://www.w3.org/1999/xhtml">
+              <label
+                htmlFor="inputObservaciones"
+                style={{ fontSize: '14px', fontWeight: 'bold' }}
+              >
+                Observaciones:
+              </label>
+
+              <textarea
+                id="inputObservaciones"
+                className="letra"
+                rows="2"
+                style={{ width: '100%', resize: 'none' }}
+              ></textarea>
+            </div>
+          </foreignObject>
         </svg>
       </div>
 
-      <div style={{ width: 360 }}>
-        <OdontogramaToolsPanel />
-      </div>
+      <OdontogramaToolsPanel
+        onSaveVersion={saveOdontogramaVersion} // <--- Pasar la función de guardar
+        onLoadVersion={loadHistory} // <--- Pasar la función de cargar
+      />
     </div>
   );
 }
