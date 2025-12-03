@@ -13,6 +13,9 @@ Antes de comenzar, asegúrate de tener instalado:
 - npm versión 9 o superior (incluido con Node.js)
 - Git
 
+
+
+
 ---
 
 ## 📂 Estructura del proyecto
