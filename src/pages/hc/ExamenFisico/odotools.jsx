@@ -698,6 +698,24 @@ export default function OdontogramaToolsPanel() {
     setPDAMenuOpen((s) => !s);
   };
 
+  const onPiezaClavija = () => {
+    const tooth = askTooth('Diente en Clavija (ej: 2.7):');
+    if (!tooth) return;
+    try {
+      const ok = odontogramaTools.addPegTooth(tooth, 'blue');
+      if (!ok) {
+        alert(
+          `No se pudo dibujar la Pieza dentaria en clavija en el diente ${tooth}.`
+        );
+      }
+    } catch (e) {
+      console.error('Error aplicando Pieza en Clavija:', e);
+      alert(
+        'Ocurrió un error al intentar aplicar la Pieza dentaria en clavija. Revisa la consola.'
+      );
+    }
+  };
+
   const onPulpotomia = () => {
     const tooth = askTooth('Diente para Pulpotomía (ej: 1.6):');
     if (!tooth) return;
@@ -1271,6 +1289,12 @@ export default function OdontogramaToolsPanel() {
             </div>
           )}
         </div>
+        <button
+          className="px-3 py-2 bg-teal-500 text-white rounded"
+          onClick={onPiezaClavija}
+        >
+          21. Pieza Dentaria en Clavija (PC)
+        </button>
         <button
           className="px-3 py-2 bg-teal-700 text-white rounded"
           onClick={onPulpotomia}

@@ -2006,6 +2006,60 @@ export function addMissingTooth(toothDataName, color = 'blue') {
   return false;
 }
 
+export function addPegTooth(toothDataName, color = 'blue') {
+  const svg = getSvg();
+  if (!svg) return false;
+  const toothCenter = centerOfTooth(svg, toothDataName);
+  if (toothCenter) {
+    const overlay = ensureOverlay(svg);
+    const displacement = 55;
+    const baseHalfWidth = 10;
+    let triangleHeight = 20;
+
+    let adjustedP;
+    const quadrant = parseInt(toothDataName.charAt(0));
+    if (quadrant === 1 || quadrant === 2 || quadrant === 5 || quadrant === 6) {
+      adjustedP = { x: toothCenter.x, y: toothCenter.y - displacement };
+    } else if (
+      quadrant === 3 ||
+      quadrant === 4 ||
+      quadrant === 7 ||
+      quadrant === 8
+    ) {
+      adjustedP = { x: toothCenter.x, y: toothCenter.y + displacement };
+      triangleHeight = -20;
+    }
+
+    // P1: Esquina inferior izquierda
+    const p1x = adjustedP.x - baseHalfWidth;
+    const p1y = adjustedP.y;
+    // P2: Esquina inferior derecha
+    const p2x = adjustedP.x + baseHalfWidth;
+    const p2y = adjustedP.y;
+    // P3: El ápice superior
+    const p3x = adjustedP.x;
+    const p3y = adjustedP.y - triangleHeight;
+
+    const points = `${p1x},${p1y} ${p2x},${p2y} ${p3x},${p3y}`;
+
+    const triangle = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'polygon'
+    );
+    triangle.setAttribute('points', points);
+    triangle.setAttribute('fill', 'none'); // Sin relleno
+    triangle.setAttribute('stroke', color);
+    triangle.setAttribute('stroke-width', '3');
+    triangle.setAttribute('data-target', toothDataName); // Para identificar el diente
+    triangle.setAttribute('class', 'peg-tooth-annotation');
+    triangle.setAttribute('style', 'pointer-events: none;'); // Para que no interfiera con otros clics
+
+    overlay.appendChild(triangle);
+    return true;
+  }
+  return false;
+}
+
 export function addPulpotomy(toothDataName, color = 'red') {
   const svg = getSvg();
   if (!svg) return false;
@@ -2545,6 +2599,7 @@ export default {
   addFusion,
   addGiroversion,
   addMissingTooth,
+  addPegTooth,
   addPulpotomy,
   addPPF,
   addPDC,
