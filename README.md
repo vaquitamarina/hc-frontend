@@ -2,6 +2,7 @@
 
 Este repositorio contiene el frontend del sistema de gestión de historias clínicas.  
 Está construido con **React + Vite + JavaScript**
+
 ---
 
 ## 🚀 Requisitos previos
@@ -11,10 +12,8 @@ Antes de comenzar, asegúrate de tener instalado:
 - Node.js versión 22.19.0 o superior
 - npm versión 9 o superior (incluido con Node.js)
 - Git
+
 ---
-
-
-
 
 ## 📂 Estructura del proyecto
 
