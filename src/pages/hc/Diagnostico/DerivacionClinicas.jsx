@@ -20,6 +20,9 @@ export default function DerivacionClinicas() {
     docente: '',
   });
 
+  // Determinamos si ya existe información guardada (si hay fecha u observaciones)
+  const hasSavedData = Boolean(data?.fechaDerivacion || data?.observaciones);
+
   useEffect(() => {
     if (data) {
       setFormData({
@@ -31,8 +34,17 @@ export default function DerivacionClinicas() {
         alumno: data.alumno || '',
         docente: data.docente || '',
       });
+
+      // Auto-activar edición SOLO si parece un registro nuevo (sin fecha guardada).
+      // Eliminamos isFormMode de las dependencias para evitar bucles al guardar.
+      if (!data.fechaDerivacion) {
+        setFormMode();
+      }
     }
-  }, [data]);
+    return () => {
+      setViewMode();
+    };
+  }, [data, setFormMode, setViewMode]);
 
   const handleCheckbox = (key) => {
     setFormData((prev) => ({
@@ -65,15 +77,55 @@ export default function DerivacionClinicas() {
   if (isLoading) return <div className="p-8 text-center">Cargando...</div>;
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-[var(--color-primary)] uppercase border-l-4 border-[var(--color-primary)] pl-4">
-          IV. Derivado a Clínicas
-        </h2>
-        {!isFormMode && <Button onClick={setFormMode}>Editar</Button>}
+    <div className="w-full rounded-lg shadow-sm border border-gray-100 bg-white">
+      {/* HEADER DINÁMICO */}
+      <div className="bg-[var(--color-primary)] text-white px-8 py-5 rounded-t-lg flex justify-between items-center">
+        {/* IZQUIERDA */}
+        <div className="flex items-center gap-6">
+          <h2 className="text-2xl font-bold">Derivado a Clínicas</h2>
+
+          {/* CASO GUARDADO: El ID se mueve aquí */}
+          {hasSavedData && (
+            <>
+              <div className="h-8 w-px bg-white/30 hidden md:block"></div>
+              <div className="flex flex-col justify-center">
+                <span className="text-[11px] opacity-80 uppercase tracking-wider leading-tight">
+                  Historia Clínica Nº
+                </span>
+                <span className="text-lg font-bold leading-tight">HC-{id}</span>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* DERECHA */}
+        <div>
+          {hasSavedData ? (
+            // CASO GUARDADO: Botón Editar
+            !isFormMode && (
+              <button
+                onClick={setFormMode}
+                className="bg-white/20 hover:bg-white/30 text-white px-6 py-2 rounded-md transition-colors text-sm font-semibold tracking-wide cursor-pointer uppercase"
+              >
+                Editar
+              </button>
+            )
+          ) : (
+            // CASO NUEVO: ID a la derecha
+            <div className="text-right">
+              <span className="block text-[11px] opacity-80 uppercase tracking-wider leading-tight">
+                Historia Clínica Nº
+              </span>
+              <span className="block text-xl font-bold leading-tight">
+                HC-{id}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-100 flex flex-col gap-6">
+      {/* CONTENIDO DEL FORMULARIO */}
+      <div className="p-8 flex flex-col gap-6">
         {/* Checkboxes */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {clinicasOptions.map((opt) => (
@@ -119,7 +171,7 @@ export default function DerivacionClinicas() {
             onChange={(e) =>
               setFormData({ ...formData, fechaDerivacion: e.target.value })
             }
-            disabled={!isFormMode} // En modo vista usa tu componente TextInput que soporta disabled? Si no, avísame.
+            disabled={!isFormMode}
           />
           <TextInput
             label="Alumno:"

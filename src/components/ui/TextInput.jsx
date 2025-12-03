@@ -21,7 +21,7 @@ const textInputField = tv({
     'px-4 py-3',
     'border-2',
     'rounded-[var(--radius-md)]',
-    'bg-[var(--color-surface)]',
+    'bg-[var(--color-surface)]', // Se usa color surface por defecto
     'shadow-[var(--shadow-sm)]',
     'text-base',
     'text-[var(--color-text)]',
@@ -29,6 +29,11 @@ const textInputField = tv({
     'transition-all',
     'duration-200',
     'ease-in-out',
+    // Estilos para estado disabled
+    'disabled:opacity-60',
+    'disabled:cursor-not-allowed',
+    'disabled:bg-gray-100', // Fondo gris claro al estar deshabilitado
+    'disabled:border-gray-200',
   ],
   variants: {
     hasError: {
@@ -64,14 +69,18 @@ function TextInput({
   error,
   name,
   type = 'text',
+  disabled, // Recibimos la propiedad disabled
+  ...props
 }) {
   const hasError = !!error;
 
   return (
     <div className={textInputContainer()}>
-      <label htmlFor={name} className={textInputLabel()}>
-        {label}
-      </label>
+      {label && (
+        <label htmlFor={name} className={textInputLabel()}>
+          {label}
+        </label>
+      )}
       <div className={textInputWrapper()}>
         <input
           type={type}
@@ -81,6 +90,8 @@ function TextInput({
           placeholder={placeholder}
           value={value}
           onChange={onChange}
+          disabled={disabled} // Aplicamos la propiedad al input nativo
+          {...props}
         />
         {error && <span className={textInputError()}>{error}</span>}
       </div>
@@ -89,19 +100,21 @@ function TextInput({
 }
 
 TextInput.propTypes = {
-  label: PropTypes.string.isRequired,
+  label: PropTypes.string, // Hice opcional el label para mayor flexibilidad
   placeholder: PropTypes.string,
-  value: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]), // Acepta números también
   onChange: PropTypes.func.isRequired,
   error: PropTypes.string,
-  name: PropTypes.string.isRequired,
+  name: PropTypes.string,
   type: PropTypes.string,
+  disabled: PropTypes.bool, // Validación de propType
 };
 
 TextInput.defaultProps = {
   placeholder: '',
   error: '',
   type: 'text',
+  disabled: false,
 };
 
 export default TextInput;
