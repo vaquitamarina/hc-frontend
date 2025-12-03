@@ -66,7 +66,7 @@ export const updateRespuestaDerivacion = async ({ idHistory, data }) => {
 // --- SECCIÓN V + PLAN DE TRABAJO (UNIFICADO) ---
 export const fetchDiagnosticoClinicasCompleto = async (historyId) => {
   const response = await fetch(
-    `${API_URL}/hc/${historyId}/diagnostico-clinicas-completo`,
+    `${API_URL}/hc/${historyId}/diagnostico-clinicas`,
     { credentials: 'include' }
   );
   if (!response.ok) throw new Error('Error al cargar diagnóstico clínico');
@@ -78,7 +78,7 @@ export const updateDiagnosticoClinicasCompleto = async ({
   data,
 }) => {
   const response = await fetch(
-    `${API_URL}/hc/${idHistory}/diagnostico-clinicas-completo`,
+    `${API_URL}/hc/${idHistory}/diagnostico-clinicas`,
     {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
