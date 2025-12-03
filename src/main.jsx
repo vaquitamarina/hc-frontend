@@ -8,7 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 createRoot(document.getElementById('root')).render(
   <QueryClientProvider client={new QueryClient()}>
     <StrictMode>
-      <BrowserRouter basename="/hc-frontend/">
+      <BrowserRouter>
         <App />
       </BrowserRouter>
     </StrictMode>
