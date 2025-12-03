@@ -13,7 +13,7 @@ export default function OdontogramaToolsPanel() {
   const colors = ['blue', 'red'];
 
   const defectTypes = ['O', 'PE', 'Fluorosis'];
-
+  const missingToothTypes = ['DNE', 'DEX', 'DAO'];
   const pdcTypes = [
     // Nuevas opciones de PDC
     { id: 'SUP_PERM', label: 'Superior Permanentes' },
@@ -30,7 +30,7 @@ export default function OdontogramaToolsPanel() {
 
   const [activeTool, setActiveTool] = useState(null);
   const [activeToolName, setActiveToolName] = useState(null);
-
+  const [pdaMenuOpen, setPDAMenuOpen] = useState(false);
   const [pdcMenuOpen, setPDCMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -675,6 +675,29 @@ export default function OdontogramaToolsPanel() {
     }
   };
 
+  const onSelectPDA = (typeId, color = 'blue') => {
+    setPDAMenuOpen(false); // Cierra el menú
+    const tooth = askTooth(`Diente de Dentaría Ausente (ej: 2.7):`);
+    if (!tooth) return;
+    try {
+      const ok = setInputForTooth(tooth, typeId, color);
+      if (!ok) {
+        alert(
+          `No se encontró el diente ${tooth} ni su recuadro de texto asociado.`
+        );
+      }
+      odontogramaTools.addMissingTooth(tooth, color);
+    } catch (e) {
+      console.error('Error aplicando PDA:', e);
+      alert(
+        'Ocurrió un error al intentar aplicar la Piesa de dectadura ausente. Revisa la consola.'
+      );
+    }
+  };
+  const onPDAButton = () => {
+    setPDAMenuOpen((s) => !s);
+  };
+
   const onPulpotomia = () => {
     const tooth = askTooth('Diente para Pulpotomía (ej: 1.6):');
     if (!tooth) return;
@@ -692,12 +715,6 @@ export default function OdontogramaToolsPanel() {
       console.error('Error aplicando:', err);
       alert('Ocurrió un error al intentar anotar. Revisa la consola.');
     }
-  };
-
-  const onTransposicion = () => {
-    //const color = askColor('red'); // Pide el color (normalmente rojo)
-    // Llama a la nueva función interactiva
-    odontogramaTools.addTransposition('blue');
   };
 
   const onPPF = () => {
@@ -735,12 +752,18 @@ export default function OdontogramaToolsPanel() {
     setPDCMenuOpen((s) => !s);
   };
 
-  const onProtesisDental = () => {
+  const onProtesisPR = () => {
     const color = askColor('blue');
     odontogramaTools.addDentalProsthesis(color);
     alert(
       'Modo "PPR": Haz click en el diente pilar inicial y luego en el diente pilar final.\nPresiona ESC para cancelar.'
     );
+  };
+
+  const onTransposicion = () => {
+    //const color = askColor('red'); // Pide el color (normalmente rojo)
+    // Llama a la nueva función interactiva
+    odontogramaTools.addTransposition('blue');
   };
 
   // render
@@ -1170,30 +1193,102 @@ export default function OdontogramaToolsPanel() {
         >
           19. MOVILIDAD PATOLÓGIA
         </button>
+        <div style={{ position: 'relative' }}>
+          <button
+            className="px-3 py-2 bg-teal-600 text-white rounded w-full"
+            onClick={onPDAButton}
+            aria-expanded={pdaMenuOpen}
+          >
+            20. Piesa dentaria ausente (PDA)
+          </button>
+          {pdaMenuOpen && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '110%',
+                left: 0,
+                zIndex: 60,
+                background: 'white',
+                border: '1px solid #ddd',
+                padding: 8,
+                display: 'flex',
+                gap: 12,
+                boxShadow: '0 6px 18px rgba(0,0,0,0.08)',
+                width: 320,
+              }}
+            >
+              {colors
+                .filter((col) => col === 'blue')
+                .map((col) => (
+                  <div key={col} style={{ flex: 1 }}>
+                    <div
+                      style={{ marginBottom: 6, fontWeight: 600, color: col }}
+                    >
+                      {col.toUpperCase()}
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {missingToothTypes.map((t) => (
+                        <button
+                          key={t + col}
+                          onClick={() => onSelectPDA(t, col)}
+                          style={{
+                            padding: '6px 8px',
+                            borderRadius: 6,
+                            border: `2px solid ${col}`,
+                            background: 'white',
+                            cursor: 'pointer',
+                          }}
+                          title={`Aplicar ${t} (${col})`}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <button
+                  onClick={() => {
+                    setPDAMenuOpen(false);
+                  }}
+                  style={{
+                    padding: '6px 8px',
+                    borderRadius: 6,
+                    border: '1px solid #ccc',
+                    background: '#f8f8f8',
+                  }}
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
         <button
           className="px-3 py-2 bg-teal-700 text-white rounded"
           onClick={onPulpotomia}
         >
-          20. Pulpotomía
-        </button>
-        <button
-          className="px-3 py-2 bg-teal-600 text-white rounded"
-          onClick={onTransposicion}
-        >
-          21. Transposición dentaria
+          27. Pulpotomía
         </button>
         <button
           className="px-3 py-2 bg-teal-700 text-white rounded"
           onClick={onPPF}
         >
-          22. Prótesis Dental Parcial Fija (PPF)
+          29. Prótesis Dental Parcial Fija (PPF)
         </button>
         <div className="relative">
           <button
             className="px-3 py-2 bg-teal-500 text-white rounded"
             onClick={onPDCButton}
           >
-            23. Prótesis Dental Completa (PDC)
+            30. Prótesis Dental Completa (PDC)
           </button>
           {pdcMenuOpen && (
             <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-10 p-2">
@@ -1222,9 +1317,15 @@ export default function OdontogramaToolsPanel() {
         </div>
         <button
           className="px-3 py-2 bg-teal-600 text-white rounded"
-          onClick={onProtesisDental}
+          onClick={onProtesisPR}
         >
-          24. Protesis dental parcial removible (PPR)
+          31. Protesis dental parcial removible (PPR)
+        </button>
+        <button
+          className="px-3 py-2 bg-teal-600 text-white rounded"
+          onClick={onTransposicion}
+        >
+          38. Transposición dentaria
         </button>
 
         <button
