@@ -14,6 +14,7 @@ Antes de comenzar, asegúrate de tener instalado:
 - Git
 ---
 
+;;
 ## 📂 Estructura del proyecto
 
 ### 📁 Descripción de carpetas y archivos
