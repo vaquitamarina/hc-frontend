@@ -7,7 +7,7 @@ function AuthLayout() {
       <Header />
       <div
         className="flex justify-center items-center h-full bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/hc-frontend/fondo.webp')" }}
+        style={{ backgroundImage: "url('/fondo.webp')" }}
       >
         {/* Overlay oscuro */}
         <div className="absolute inset-0 bg-black/40 pointer-events-none z-[1]" />
