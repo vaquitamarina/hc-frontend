@@ -17,10 +17,12 @@ export function useCurrentUser() {
 export function useLogin() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+  
   return useMutation({
     mutationFn: fetchLogin,
     onSuccess: () => {
+      // Invalidar DESPUÉS del login exitoso
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
       navigate('/dashboard');
     },
   });
