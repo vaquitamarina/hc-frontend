@@ -24,14 +24,16 @@ function Enfermedad_Actual() {
   });
 
   useEffect(() => {
-    if (data) {
+    // Backend returns { message, data } on success — unwrap safely
+    const payload = data?.data ?? data;
+    if (payload) {
       setFormData({
-        sintoma_principal: data.sintoma_principal || '',
-        tiempo_enfermedad: data.tiempo_enfermedad || '',
-        forma_inicio: data.forma_inicio || '',
-        curso: data.curso || '',
-        relato: data.relato || '',
-        tratamiento_prev: data.tratamiento_prev || '',
+        sintoma_principal: payload.sintoma_principal || '',
+        tiempo_enfermedad: payload.tiempo_enfermedad || '',
+        forma_inicio: payload.forma_inicio || '',
+        curso: payload.curso || '',
+        relato: payload.relato || '',
+        tratamiento_prev: payload.tratamiento_prev || '',
       });
     }
   }, [data]);
@@ -52,9 +54,11 @@ function Enfermedad_Actual() {
         // Si no existe, crear nuevo
         await createEnfermedad.mutateAsync({ id_historia: id, ...formData });
       }
+      // Optimistically update local state and notify user
+      setFormData({ ...formData });
       alert('Enfermedad actual guardada exitosamente');
     } catch (error) {
-      alert('Error al guardar: ' + error.message);
+      alert('Error al guardar: ' + (error?.message || 'Error desconocido'));
     }
   };
 
@@ -171,9 +175,9 @@ function Enfermedad_Actual() {
           <Button
             variant="primary"
             type="submit"
-            disabled={updateEnfermedad.isPending || createEnfermedad.isPending}
+            disabled={updateEnfermedad.isLoading || createEnfermedad.isLoading}
           >
-            {updateEnfermedad.isPending || createEnfermedad.isPending
+            {updateEnfermedad.isLoading || createEnfermedad.isLoading
               ? 'Guardando...'
               : data
                 ? 'Actualizar'

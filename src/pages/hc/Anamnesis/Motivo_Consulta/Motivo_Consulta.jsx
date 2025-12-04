@@ -17,8 +17,10 @@ function Motivo_Consulta() {
 
   useEffect(() => {
     // Cargar motivo existente si hay datos
-    if (data?.motivo) {
-      setMotivo(data.motivo);
+    // Backend returns { message, data } on success — unwrap safely
+    const payload = data?.data ?? data;
+    if (payload?.motivo) {
+      setMotivo(payload.motivo);
     }
   }, [data]);
 
@@ -38,9 +40,11 @@ function Motivo_Consulta() {
         // Si no existe, crear nuevo
         await createMotivo.mutateAsync({ id_historia: id, motivo });
       }
+      // Optimistically update local state and notify user
+      setMotivo(motivo);
       alert('Motivo de consulta guardado exitosamente');
     } catch (error) {
-      alert('Error al guardar: ' + error.message);
+      alert('Error al guardar: ' + (error?.message || 'Error desconocido'));
     }
   };
 
@@ -76,9 +80,9 @@ function Motivo_Consulta() {
           <Button
             variant="primary"
             type="submit"
-            disabled={updateMotivo.isPending || createMotivo.isPending}
+            disabled={updateMotivo.isLoading || createMotivo.isLoading}
           >
-            {updateMotivo.isPending || createMotivo.isPending
+            {updateMotivo.isLoading || createMotivo.isLoading
               ? 'Guardando...'
               : data
                 ? 'Actualizar'

@@ -1,7 +1,7 @@
 // src/pages/hc/ExamenFisico/odonto.jsx
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import OdontogramaToolsPanel from './odotools';
 
 const CRITICAL_SVG_STYLES = `
