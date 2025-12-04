@@ -98,7 +98,7 @@ export default function DerivacionClinicas() {
       <div className="bg-[var(--color-primary)] text-white px-8 py-5 rounded-t-lg flex justify-between items-center">
         {/* IZQUIERDA */}
         <div className="flex items-center gap-6">
-          <h2 className="text-2xl font-bold">IV. Derivado a Clínicas</h2>
+          <h2 className="text-2xl font-bold">Derivado a Clínicas</h2>
 
           {/* CASO GUARDADO: El ID se muestra aquí a la izquierda */}
           {hasSavedData && (

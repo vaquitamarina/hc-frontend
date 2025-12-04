@@ -171,7 +171,7 @@ export default function DiagnosticoClinicas() {
         {/* IZQUIERDA: Título (+ ID si ya está guardado) */}
         <div className="flex items-center gap-6">
           <h2 className="text-2xl font-bold">
-            V. Diagnóstico en Clínicas y Plan de Trabajo
+            Diagnóstico en Clínicas y Plan de Trabajo
           </h2>
 
           {/* Si ya hay datos, mostramos el ID aquí a la izquierda */}
