@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
+import toast from 'react-hot-toast';
 import { useGeneralExam, useMutateGeneralExam } from '@hooks/useExamenFisico';
 import { useForm } from '@stores/useForm';
 import Button from '@ui/Button';
@@ -82,10 +83,10 @@ export default function ExamenGeneral() {
       { idHistory: id, data: formData },
       {
         onSuccess: () => {
-          alert('Examen General guardado correctamente');
+          toast.success('Examen General guardado correctamente');
           setViewMode(); // Cambiar a modo resumen
         },
-        onError: () => alert('Error al guardar'),
+        onError: () => toast.error('Error al guardar'),
       }
     );
   };

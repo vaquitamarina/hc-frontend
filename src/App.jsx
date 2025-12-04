@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router';
+import { Toaster } from 'react-hot-toast';
 import Login from './pages/Login/Login.jsx';
 import AuthLayout from './layouts/AuthLayout.jsx';
 import ProtectedRoutes from './components/routes/ProtectedRoutes.jsx';
@@ -108,6 +109,33 @@ function App() {
           </Route>
         </Route>
       </Routes>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#fff',
+            color: '#1e293b',
+            border: '1px solid #e2e8f0',
+            borderRadius: '0.5rem',
+            padding: '1rem',
+            fontSize: '0.875rem',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          },
+          success: {
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
       <ReactQueryDevtools initialIsOpen={false} />
     </>
   );

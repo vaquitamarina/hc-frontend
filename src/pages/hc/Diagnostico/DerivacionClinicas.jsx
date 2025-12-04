@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
+import toast from 'react-hot-toast';
 import Button from '@ui/Button';
 import TextInput from '@ui/TextInput';
 import FormField from '@ui/FormField/FormField'; // Para el resumen
@@ -65,10 +66,10 @@ export default function DerivacionClinicas() {
       { idHistory: id, data: formData },
       {
         onSuccess: () => {
-          alert('Derivación guardada');
+          toast.success('Derivación guardada');
           setViewMode();
         },
-        onError: () => alert('Error al guardar'),
+        onError: () => toast.error('Error al guardar'),
       }
     );
   };

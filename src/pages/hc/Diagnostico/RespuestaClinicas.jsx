@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
+import toast from 'react-hot-toast';
 import Button from '@ui/Button';
 import TextInput from '@ui/TextInput';
 import {
@@ -45,10 +46,10 @@ export default function RespuestaClinicas() {
       },
       {
         onSuccess: () => {
-          alert('Respuesta guardada');
+          toast.success('Respuesta guardada');
           setViewMode();
         },
-        onError: () => alert('Error al guardar'),
+        onError: () => toast.error('Error al guardar'),
       }
     );
   };

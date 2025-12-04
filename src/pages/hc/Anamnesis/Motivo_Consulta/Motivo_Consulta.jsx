@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
+import toast from 'react-hot-toast';
 import Button from '@ui/Button';
 import {
   useMotivoConsulta,
@@ -28,7 +29,7 @@ function Motivo_Consulta() {
     e.preventDefault();
 
     if (!motivo.trim()) {
-      alert('Por favor, ingresa el motivo de consulta.');
+      toast.error('Por favor, ingresa el motivo de consulta.');
       return;
     }
 
@@ -42,9 +43,11 @@ function Motivo_Consulta() {
       }
       // Optimistically update local state and notify user
       setMotivo(motivo);
-      alert('Motivo de consulta guardado exitosamente');
+      toast.success('Motivo de consulta guardado exitosamente');
     } catch (error) {
-      alert('Error al guardar: ' + (error?.message || 'Error desconocido'));
+      toast.error(
+        'Error al guardar: ' + (error?.message || 'Error desconocido')
+      );
     }
   };
 

@@ -1,5 +1,6 @@
 // src/pages/hc/ExamenFisico/odotools.jsx
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import odontogramaTools from '../../../hooks/odotools';
 
 /**
@@ -261,7 +262,7 @@ export default function OdontogramaToolsPanel({
       ];
       const ok = odontogramaTools.addCrown(tooth, type, color, includedParts);
       if (!ok) {
-        alert(
+        toast.error(
           `No se encontró el diente ${tooth}. Asegúrate de escribirlo exactamente como en la etiqueta (ej: 2.7).`
         );
         return;
@@ -269,7 +270,7 @@ export default function OdontogramaToolsPanel({
       setInputForTooth(tooth, type, color);
     } catch (e) {
       console.error('Error aplicando corona:', e);
-      alert(
+      toast.error(
         'Ocurrió un error al intentar aplicar la corona. Revisa la consola.'
       );
     }
@@ -307,13 +308,13 @@ export default function OdontogramaToolsPanel({
         includedParts
       );
       if (!ok) {
-        alert(`No se encontró el diente ${tooth}.`);
+        toast.error(`No se encontró el diente ${tooth}.`);
         return;
       }
       setInputForTooth(tooth, crownType, color);
     } catch (e) {
       console.error('Error aplicando corona temporal:', e);
-      alert(
+      toast.error(
         'Ocurrió un error al intentar aplicar la corona temporal. Revisa la consola.'
       );
     }
@@ -345,7 +346,7 @@ export default function OdontogramaToolsPanel({
       }
     } catch (e) {
       console.error('Error aplicando defecto:', e);
-      alert(
+      toast.error(
         'Ocurrió un error al intentar aplicar el defecto. Revisa la consola.'
       );
     }
@@ -367,12 +368,12 @@ export default function OdontogramaToolsPanel({
         setActiveTool(handle);
         setActiveToolName('Aparato ortod. fijo');
       }
-      alert(
+      toast(
         'Modo "Aparato ortodóntico fijo": Haz click en dos puntos del odontograma para dibujar la línea.\nPresiona ESC para cancelar o usa el botón "Detener modo".'
       );
     } catch (e) {
       console.error('Error iniciando modo fijo:', e);
-      alert('No se pudo iniciar el modo. Revisa la consola.');
+      toast.error('No se pudo iniciar el modo. Revisa la consola.');
     }
   };
 
@@ -396,12 +397,12 @@ export default function OdontogramaToolsPanel({
         setActiveTool(handle);
         setActiveToolName('Aparato ortod. removible');
       }
-      alert(
+      toast(
         'Modo "Aparato ortodóntico removible": Haz click en dos puntos del odontograma para dibujar el zig-zag.\nPresiona ESC para cancelar o usa el botón "Detener modo".'
       );
     } catch (e) {
       console.error('Error iniciando modo removible:', e);
-      alert('No se pudo iniciar el modo. Revisa la consola.');
+      toast.error('No se pudo iniciar el modo. Revisa la consola.');
     }
   };
 
@@ -422,7 +423,7 @@ export default function OdontogramaToolsPanel({
         setInputForTooth(tooth, 'FFP', 'blue');
         if (!ok) {
           // si no encontró centro/diente en SVG, avisar
-          alert(
+          toast.error(
             `No se pudo anotar "FFP" en el odontograma para el diente ${tooth}. Revisa la consola.`
           );
         }
@@ -430,11 +431,13 @@ export default function OdontogramaToolsPanel({
         // si no está disponible la función en el hook, cae a escribir solo en el input
         const wrote = setInputForTooth(tooth, 'FFP', 'blue');
         if (!wrote)
-          alert(`No se encontró el diente ${tooth} ni el input asociado.`);
+          toast.error(
+            `No se encontró el diente ${tooth} ni el input asociado.`
+          );
       }
     } catch (e) {
       console.error('Error aplicando FFP:', e);
-      alert('Ocurrió un error al aplicar FFP. Revisa la consola.');
+      toast.error('Ocurrió un error al aplicar FFP. Revisa la consola.');
     }
   };
 
@@ -468,18 +471,20 @@ export default function OdontogramaToolsPanel({
         // respaldo: escribir en el input por si el hook no encuentra el foreignObject
         setInputForTooth(tooth, 'IMP', color);
         if (!ok) {
-          alert(
+          toast.error(
             `No se pudo anotar "IMP" en el odontograma para el diente ${tooth}. Revisa la consola.`
           );
         }
       } else {
         const wrote = setInputForTooth(tooth, 'IMP', color);
         if (!wrote)
-          alert(`No se encontró el diente ${tooth} ni el input asociado.`);
+          toast.error(
+            `No se encontró el diente ${tooth} ni el input asociado.`
+          );
       }
     } catch (err) {
       console.error('Error aplicando implante:', err);
-      alert(
+      toast.error(
         'Ocurrió un error al intentar anotar el implante. Revisa la consola.'
       );
     }
@@ -517,7 +522,9 @@ export default function OdontogramaToolsPanel({
               input.style.color = '';
             });
         }
-        alert('Todas las anotaciones y textos asociados han sido borrados.');
+        toast.success(
+          'Todas las anotaciones y textos asociados han sido borrados.'
+        );
       }
     } else if (
       normalizedAction === '2' ||
@@ -539,15 +546,15 @@ export default function OdontogramaToolsPanel({
         const clearedInput = clearInputForTooth(tooth);
 
         if (clearedSVG || clearedInput) {
-          alert(
+          toast.success(
             `Se limpiaron las anotaciones y/o el input del diente ${tooth}.`
           );
         } else {
-          alert(`No se encontraron anotaciones para el diente ${tooth}.`);
+          toast.error(`No se encontraron anotaciones para el diente ${tooth}.`);
         }
       }
     } else {
-      alert(
+      toast.error(
         'Opción no reconocida o diente inválido. Asegúrate de usar el formato X.Y (ej: 1.6).'
       );
     }
@@ -559,11 +566,11 @@ export default function OdontogramaToolsPanel({
     if (success) {
       // Nota: El deshecho del texto del input asociado es complejo de automatizar,
       // se le indica al usuario que lo haga manualmente si es necesario.
-      alert(
+      toast.success(
         'Se ha deshecho la *última anotación SVG*. Por favor, verifica el texto del input asociado y corrígelo manualmente si es necesario.'
       );
     } else {
-      alert('No hay anotaciones previas que deshacer.');
+      toast.error('No hay anotaciones previas que deshacer.');
     }
   };
 
@@ -575,7 +582,9 @@ export default function OdontogramaToolsPanel({
     const strokeWidth = 1;
 
     if (typeof odontogramaTools.startDiastemaMode !== 'function') {
-      alert('Función de diastema no disponible. Revisa src/hooks/odotools.js');
+      toast.error(
+        'Función de diastema no disponible. Revisa src/hooks/odotools.js'
+      );
       return;
     }
 
@@ -595,7 +604,7 @@ export default function OdontogramaToolsPanel({
       setActiveTool(handle);
       setActiveToolName('Diastema');
     }
-    alert(
+    toast(
       'Modo Diastema activo: haz click donde quieras colocar la "X" azul. Presiona ESC para salir.'
     );
   };
@@ -616,7 +625,7 @@ export default function OdontogramaToolsPanel({
       if (typeof odontogramaTools.addEdentulousLineBetween === 'function') {
         odontogramaTools.addEdentulousLineBetween(start, end, 'Blue', 2);
       } else {
-        alert('Función de edéntulo no disponible en hooks.');
+        toast.error('Función de edéntulo no disponible en hooks.');
       }
     } catch (err) {
       console.error('Error dibujando edéntulo superior', err);
@@ -633,7 +642,7 @@ export default function OdontogramaToolsPanel({
       if (typeof odontogramaTools.addEdentulousLineBetween === 'function') {
         odontogramaTools.addEdentulousLineBetween(start, end, 'blue', 2);
       } else {
-        alert('Función de edéntulo no disponible en hooks.');
+        toast.error('Función de edéntulo no disponible en hooks.');
       }
     } catch (err) {
       console.error('Error dibujando edéntulo inferior', err);
@@ -649,13 +658,15 @@ export default function OdontogramaToolsPanel({
     try {
       const ok = setInputForTooth(tooth, 'MAC', 'blue');
       if (!ok) {
-        alert(
+        toast.error(
           `No se encontró el diente ${tooth} ni su recuadro de texto asociado.`
         );
       }
     } catch (err) {
       console.error('Error aplicando MAC:', err);
-      alert('Ocurrió un error al intentar anotar MAC. Revisa la consola.');
+      toast.error(
+        'Ocurrió un error al intentar anotar MAC. Revisa la consola.'
+      );
     }
   };
   // --- RENDER ---
@@ -667,13 +678,13 @@ export default function OdontogramaToolsPanel({
     try {
       const ok = setInputForTooth(tooth, 'I', 'blue');
       if (!ok) {
-        alert(
+        toast.error(
           `No se encontró el diente ${tooth} ni su recuadro de texto asociado.`
         );
       }
     } catch (err) {
       console.error('Error aplicando I:', err);
-      alert('Ocurrió un error al intentar anotar I. Revisa la consola.');
+      toast.error('Ocurrió un error al intentar anotar I. Revisa la consola.');
     }
   };
 
@@ -685,18 +696,20 @@ export default function OdontogramaToolsPanel({
       if (typeof odontogramaTools.addGerminacion === 'function') {
         const ok = odontogramaTools.addGerminacion(tooth, 'blue');
         if (!ok) {
-          alert(
+          toast.error(
             `No se pudo dibujar la germinación en el diente ${tooth}. Revisa la consola.`
           );
         }
       } else {
-        alert(
+        toast.error(
           'La función addGerminacion no está disponible en hooks/odotools.'
         );
       }
     } catch (err) {
       console.error('Error aplicando germinación:', err);
-      alert('Ocurrió un error al aplicar germinación. Revisa la consola.');
+      toast.error(
+        'Ocurrió un error al aplicar germinación. Revisa la consola.'
+      );
     }
   };
 
@@ -709,16 +722,18 @@ export default function OdontogramaToolsPanel({
       if (typeof odontogramaTools.addFusion === 'function') {
         const ok = odontogramaTools.addFusion(tooth, 'blue');
         if (!ok) {
-          alert(
+          toast.error(
             `No se pudo dibujar la FUSIÓN en el diente ${tooth}. Revisa la consola.`
           );
         }
       } else {
-        alert('La función addFusion no está disponible en hooks/odotools.');
+        toast.error(
+          'La función addFusion no está disponible en hooks/odotools.'
+        );
       }
     } catch (err) {
       console.error('Error aplicando FUSIÓN:', err);
-      alert('Ocurrió un error al aplicar FUSIÓN. Revisa la consola.');
+      toast.error('Ocurrió un error al aplicar FUSIÓN. Revisa la consola.');
     }
   };
 
@@ -746,18 +761,20 @@ export default function OdontogramaToolsPanel({
       if (typeof odontogramaTools.addGiroversion === 'function') {
         const ok = odontogramaTools.addGiroversion(tooth, direction, 'blue');
         if (!ok) {
-          alert(
+          toast.error(
             `No se pudo dibujar giroversión para ${tooth}. Revisa la consola.`
           );
         }
       } else {
-        alert(
+        toast.error(
           'La función addGiroversion no está disponible en hooks/odotools.'
         );
       }
     } catch (err) {
       console.error('Error aplicando giroversión:', err);
-      alert('Ocurrió un error al aplicar giroversión. Revisa la consola.');
+      toast.error(
+        'Ocurrió un error al aplicar giroversión. Revisa la consola.'
+      );
     }
   };
   // --- RENDER ---
@@ -769,13 +786,15 @@ export default function OdontogramaToolsPanel({
     try {
       const ok = setInputForTooth(tooth, 'MIC', 'blue');
       if (!ok) {
-        alert(
+        toast.error(
           `No se encontró el diente ${tooth} ni su recuadro de texto asociado.`
         );
       }
     } catch (err) {
       console.error('Error aplicando MIC:', err);
-      alert('Ocurrió un error al intentar anotar MIC. Revisa la consola.');
+      toast.error(
+        'Ocurrió un error al intentar anotar MIC. Revisa la consola.'
+      );
     }
   };
 
@@ -787,13 +806,13 @@ export default function OdontogramaToolsPanel({
     try {
       const ok = setInputForTooth(tooth, 'M', 'red');
       if (!ok) {
-        alert(
+        toast.error(
           `No se encontró el diente ${tooth} ni su recuadro de texto asociado.`
         );
       }
     } catch (err) {
       console.error('Error aplicando M:', err);
-      alert('Ocurrió un error al intentar anotar M. Revisa la consola.');
+      toast.error('Ocurrió un error al intentar anotar M. Revisa la consola.');
     }
   };
 
@@ -804,14 +823,14 @@ export default function OdontogramaToolsPanel({
     try {
       const ok = setInputForTooth(tooth, typeId, color);
       if (!ok) {
-        alert(
+        toast.error(
           `No se encontró el diente ${tooth} ni su recuadro de texto asociado.`
         );
       }
       odontogramaTools.addMissingTooth(tooth, color);
     } catch (e) {
       console.error('Error aplicando PDA:', e);
-      alert(
+      toast.error(
         'Ocurrió un error al intentar aplicar la Pieza de dentadura ausente. Revisa la consola.'
       );
     }
@@ -827,13 +846,13 @@ export default function OdontogramaToolsPanel({
     try {
       const ok = setInputForTooth(tooth, 'E', 'blue');
       if (!ok) {
-        alert(
+        toast.error(
           `No se encontró el diente ${tooth} ni su recuadro de texto asociado.`
         );
       }
     } catch (e) {
       console.error('Error aplicando Pieza Dentaria Ectópica:', e);
-      alert('Ocurrió un error al intentar anotar. Revisa la consola.');
+      toast.error('Ocurrió un error al intentar anotar. Revisa la consola.');
     }
   };
 
@@ -843,13 +862,13 @@ export default function OdontogramaToolsPanel({
     try {
       const ok = odontogramaTools.addPegTooth(tooth, 'blue');
       if (!ok) {
-        alert(
+        toast.error(
           `No se pudo dibujar la Pieza dentaria en clavija en el diente ${tooth}.`
         );
       }
     } catch (e) {
       console.error('Error aplicando Pieza en Clavija:', e);
-      alert(
+      toast.error(
         'Ocurrió un error al intentar aplicar la Pieza dentaria en clavija. Revisa la consola.'
       );
     }
@@ -862,7 +881,7 @@ export default function OdontogramaToolsPanel({
       const color = askColor('blue');
       const ok = setInputForTooth(tooth, 'PP', color);
       if (!ok) {
-        alert(
+        toast.error(
           `No se encontró el diente ${tooth} ni su recuadro de texto asociado.`
         );
       }
@@ -870,14 +889,14 @@ export default function OdontogramaToolsPanel({
       //const svg = document.querySelector('svg.odo');
     } catch (err) {
       console.error('Error aplicando:', err);
-      alert('Ocurrió un error al intentar anotar. Revisa la consola.');
+      toast.error('Ocurrió un error al intentar anotar. Revisa la consola.');
     }
   };
 
   const onProtesisPR = () => {
     const color = askColor('blue');
     odontogramaTools.addDentalProsthesis(color);
-    alert(
+    toast(
       'Modo "PPR": Haz click en el diente pilar inicial y luego en el diente pilar final.\nPresiona ESC para cancelar.'
     );
   };
@@ -896,13 +915,13 @@ export default function OdontogramaToolsPanel({
     try {
       const ok = odontogramaTools.addPDC(arcada, color, typeId);
       if (!ok) {
-        alert(
+        toast.error(
           'No se pudo dibujar la Prótesis Completa. Revisa si los molares terminales están presentes.'
         );
       }
     } catch (e) {
       console.error('Error aplicando PDC:', e);
-      alert(
+      toast.error(
         'Ocurrió un error al intentar aplicar la Prótesis Completa. Revisa la consola.'
       );
     }

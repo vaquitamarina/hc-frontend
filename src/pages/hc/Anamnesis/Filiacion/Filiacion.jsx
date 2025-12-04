@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
+import toast from 'react-hot-toast';
 import FormField from '@ui/FormField/FormField';
 import Button from '@ui/Button';
 import {
@@ -89,14 +90,14 @@ function Filiacion() {
 
     // Validación: nombre y apellido obligatorios para paciente
     if (!filiacionData.nombres || !filiacionData.apellidos) {
-      alert(
+      toast.error(
         'Por favor, ingresa nombre y apellido (obligatorios para crear paciente).'
       );
       return;
     }
     // Validación: edad y sexo obligatorios para filiación
     if (!filiacionData.edad || !filiacionData.sexo) {
-      alert(
+      toast.error(
         'Por favor, ingresa edad y sexo (obligatorios para crear filiación).'
       );
       return;
@@ -111,7 +112,7 @@ function Filiacion() {
       fechaVisita.setHours(0, 0, 0, 0);
       fechaElaboracion.setHours(0, 0, 0, 0);
       if (fechaVisita > fechaElaboracion) {
-        alert(
+        toast.error(
           'La fecha de última visita al dentista no puede ser mayor a la fecha de elaboración.'
         );
         return;
@@ -185,18 +186,20 @@ function Filiacion() {
       } else {
         await createFiliacion.mutateAsync(filiacionPayload);
       }
-      alert('Filiación guardada correctamente');
+      toast.success('Filiación guardada correctamente');
     } catch (error) {
       console.error('Error al guardar filiación:', error);
       if (
         error.message &&
         error.message.includes('chk_filiacion_ultima_visita_dentista')
       ) {
-        alert(
+        toast.error(
           'Error: La fecha de última visita al dentista no puede ser mayor a la fecha de elaboración. Por favor, corrige la fecha.'
         );
       } else {
-        alert(`Error: ${error.message || 'No se pudo guardar la filiación'}`);
+        toast.error(
+          `Error: ${error.message || 'No se pudo guardar la filiación'}`
+        );
       }
     }
   };

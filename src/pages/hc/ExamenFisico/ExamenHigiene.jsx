@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
+import toast from 'react-hot-toast';
 import { useHigieneOral, useMutateHigieneOral } from '@hooks/useExamenFisico';
 import { useForm } from '@stores/useForm';
 import Button from '@ui/Button';
@@ -40,7 +41,7 @@ export default function ExamenHigiene() {
   const handleSubmit = (e) => {
     e.preventDefault(); // Prevenir reload si se usa dentro de form
     if (!estadoHigiene) {
-      alert('Por favor seleccione una opción');
+      toast.error('Por favor seleccione una opción');
       return;
     }
 
@@ -48,11 +49,11 @@ export default function ExamenHigiene() {
       { idHistory: id, data: { estadoHigiene } },
       {
         onSuccess: () => {
-          alert('Higiene bucal guardada correctamente');
+          toast.success('Higiene bucal guardada correctamente');
           setViewMode(); // Cambiar a modo resumen
         },
         onError: () => {
-          alert('Error al guardar');
+          toast.error('Error al guardar');
         },
       }
     );

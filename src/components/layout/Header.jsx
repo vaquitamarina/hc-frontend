@@ -1,4 +1,5 @@
 import { LogOut } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { fetchLogout } from '../../services/fetchLogout';
 
 export default function Header() {
@@ -8,7 +9,7 @@ export default function Header() {
       localStorage.clear();
       window.location.href = '/login';
     } catch {
-      alert('Error al cerrar sesión');
+      toast.error('Error al cerrar sesión');
     }
   };
   return (

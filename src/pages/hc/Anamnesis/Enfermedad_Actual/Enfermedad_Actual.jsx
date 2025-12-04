@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
+import toast from 'react-hot-toast';
 import Button from '@ui/Button';
 import {
   useEnfermedadActual,
@@ -56,9 +57,11 @@ function Enfermedad_Actual() {
       }
       // Optimistically update local state and notify user
       setFormData({ ...formData });
-      alert('Enfermedad actual guardada exitosamente');
+      toast.success('Enfermedad actual guardada exitosamente');
     } catch (error) {
-      alert('Error al guardar: ' + (error?.message || 'Error desconocido'));
+      toast.error(
+        'Error al guardar: ' + (error?.message || 'Error desconocido')
+      );
     }
   };
 

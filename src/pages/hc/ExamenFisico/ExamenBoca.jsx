@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
+import toast from 'react-hot-toast';
 import { useExamBoca, useMutateExamBoca } from '@hooks/useExamenFisico';
 import { useForm } from '@stores/useForm';
 import Button from '@ui/Button';
@@ -249,10 +250,10 @@ export default function ExamenBoca() {
       { idHistory: id, data: formData },
       {
         onSuccess: () => {
-          alert('Examen guardado correctamente');
+          toast.success('Examen guardado correctamente');
           setViewMode();
         },
-        onError: () => alert('Error al guardar'),
+        onError: () => toast.error('Error al guardar'),
       }
     );
   };

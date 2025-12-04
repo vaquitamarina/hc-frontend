@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
+import toast from 'react-hot-toast';
 import Button from '@ui/Button';
 import TextInput from '@ui/TextInput';
 import SectionTitle from '@ui/SectionTitle';
@@ -153,10 +154,10 @@ export default function DiagnosticoClinicas() {
       { idHistory: id, data: form },
       {
         onSuccess: () => {
-          alert('Información clínica guardada correctamente');
+          toast.success('Información clínica guardada correctamente');
           setViewMode();
         },
-        onError: () => alert('Error al guardar'),
+        onError: () => toast.error('Error al guardar'),
       }
     );
   };
