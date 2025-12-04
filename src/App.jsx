@@ -110,11 +110,11 @@ function App() {
         </Route>
       </Routes>
       <Toaster
-        position="top-right"
+        position="bottom-right"
         toastOptions={{
           duration: 3000,
           style: {
-            background: '#fff',
+            background: '#e0e8eb',
             color: '#1e293b',
             border: '1px solid #e2e8f0',
             borderRadius: '0.5rem',
