@@ -3,7 +3,6 @@
 Este repositorio contiene el frontend del sistema de gestión de historias clínicas.  
 Está construido con **React + Vite + JavaScript**
 
-
 ---
 
 ## 🚀 Requisitos previos
