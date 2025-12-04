@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router';
+import toast from 'react-hot-toast';
 import OdontogramaToolsPanel from './odotools';
 
 const CRITICAL_SVG_STYLES = `
@@ -51,7 +52,7 @@ export default function Odontograma() {
   // Función para GUARDAR la versión actual
   const saveOdontogramaVersion = useCallback(() => {
     const svgElement = document.querySelector('svg.odo');
-    if (!svgElement) return alert('SVG no encontrado.');
+    if (!svgElement) return toast.error('SVG no encontrado.');
 
     // 1. OBTENER LOS VALORES ACTUALES DEL DOM ACTIVO
     const dateInput = document.querySelector('input[type="date"]');
@@ -133,7 +134,7 @@ export default function Odontograma() {
     }
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(versions));
-    alert(
+    toast.success(
       `Versión guardada con éxito el ${data.timestamp} para el paciente con ID: ${patientId}.`
     );
   }, [patientId, STORAGE_KEY]); // <--- patientId como dependencia
@@ -143,7 +144,7 @@ export default function Odontograma() {
     // USAMOS LA CLAVE ESPECÍFICA DEL PACIENTE (STORAGE_KEY)
     const data = localStorage.getItem(STORAGE_KEY);
     if (!data)
-      return alert(
+      return toast.error(
         `No hay versiones guardadas en el historial para este paciente (ID: ${patientId}).`
       );
 

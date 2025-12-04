@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import {
   // fetchCreateDraft,
   fetchAssignPatient,
@@ -59,10 +60,10 @@ export function useCreateHistoriaClinica() {
     onSuccess: () => {
       // Puedes invalidar queries relacionadas aquí si es necesario
       queryClient.invalidateQueries({ queryKey: ['historias'] });
-      alert('Historia Clínica creada con éxito');
+      toast.success('Historia Clínica creada con éxito');
     },
     onError: (error) => {
-      alert(`Error al crear Historia Clínica: ${error.message}`);
+      toast.error(`Error al crear Historia Clínica: ${error.message}`);
     },
   });
 }
@@ -76,10 +77,10 @@ export function useRegisterHc() {
     mutationFn: (studentId) => registerHc(studentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['historias'] });
-      alert('Historia Clínica registrada con éxito');
+      toast.success('Historia Clínica registrada con éxito');
     },
     onError: (error) => {
-      alert(`Error al registrar Historia Clínica: ${error.message}`);
+      toast.error(`Error al registrar Historia Clínica: ${error.message}`);
     },
   });
 }

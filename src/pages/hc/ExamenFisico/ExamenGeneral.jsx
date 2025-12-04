@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
+import toast from 'react-hot-toast';
 import { useGeneralExam, useMutateGeneralExam } from '@hooks/useExamenFisico';
 import { useForm } from '@stores/useForm';
 import Button from '@ui/Button';
 import TextInput from '@ui/TextInput';
+import FormField from '@ui/FormField/FormField';
 
 const RadioGroup = ({
   label,
@@ -51,22 +53,21 @@ export default function ExamenGeneral() {
 
   const [formData, setFormData] = useState({});
 
-  // Determinamos si ya hay datos guardados (usamos un campo clave como 'posicion' o simplemente si el objeto tiene keys)
+  // Determinamos si ya hay datos guardados
   const hasSavedData =
     examData && Object.keys(examData).length > 0 && examData.posicion;
 
-  // Cargar datos al iniciar
   useEffect(() => {
     if (examData) {
       setFormData(examData);
 
-      // Si es un registro nuevo (vacío), activamos edición automáticamente
+      // Si es nuevo (sin datos), abrir editor automáticamente
       if (Object.keys(examData).length === 0 || !examData.posicion) {
         setFormMode();
       }
     }
 
-    // CLEANUP: Cerrar modo edición al salir de la pantalla
+    // CLEANUP: Cerrar modo edición al salir
     return () => {
       setViewMode();
     };
@@ -82,12 +83,23 @@ export default function ExamenGeneral() {
       { idHistory: id, data: formData },
       {
         onSuccess: () => {
-          alert('Examen General guardado correctamente');
-          setViewMode();
+          toast.success('Examen General guardado correctamente');
+          setViewMode(); // Cambiar a modo resumen
         },
-        onError: () => alert('Error al guardar'),
+        onError: () => toast.error('Error al guardar'),
       }
     );
+  };
+
+  // Lógica corregida para el botón Cancelar
+  const handleCancel = () => {
+    if (hasSavedData) {
+      // Si hay datos, solo volvemos al modo vista (Resumen)
+      setViewMode();
+    } else {
+      // Si NO hay datos (es nuevo), volvemos al menú anterior
+      navigate(-1);
+    }
   };
 
   if (isLoading)
@@ -95,7 +107,7 @@ export default function ExamenGeneral() {
 
   return (
     <div className="w-full rounded-lg shadow-sm border border-gray-100 bg-white">
-      {/* HEADER FIJO (ID SIEMPRE A LA IZQUIERDA) */}
+      {/* HEADER FIJO */}
       <div className="bg-[var(--color-primary)] text-white px-8 py-5 rounded-t-lg flex justify-between items-center">
         {/* IZQUIERDA: Título + ID */}
         <div className="flex items-center gap-6">
@@ -109,9 +121,8 @@ export default function ExamenGeneral() {
           </div>
         </div>
 
-        {/* DERECHA: Botones de Acción */}
+        {/* DERECHA: Botones */}
         <div className="flex items-center gap-4">
-          {/* Botón VOLVER (Siempre visible) */}
           <button
             onClick={() => navigate(-1)}
             className="bg-white/10 hover:bg-white/20 text-white px-5 py-2 rounded-md transition-colors text-sm font-medium cursor-pointer border border-white/30"
@@ -119,329 +130,405 @@ export default function ExamenGeneral() {
             VOLVER
           </button>
 
-          {/* Botón EDITAR (Solo si hay datos y no estamos editando) */}
           {hasSavedData && !isFormMode && (
             <button
               onClick={setFormMode}
               className="bg-white text-[var(--color-primary)] hover:bg-gray-100 px-6 py-2 rounded-md transition-colors text-sm font-bold tracking-wide cursor-pointer uppercase shadow-sm"
             >
-              Editar
+              EDITAR
             </button>
           )}
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-8 flex flex-col gap-8">
-        {/* 1. ASPECTO GENERAL */}
-        <section>
-          <h3 className="text-[var(--color-primary)] font-bold text-lg border-b-2 border-gray-100 mb-6 pb-2 uppercase tracking-wide">
-            Aspecto General
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
-            <RadioGroup
-              label="Posición:"
-              name="posicion"
-              options={['Pie', 'Sentado', 'De cúbito']}
-              value={formData.posicion}
-              onChange={(v) => handleChange('posicion', v)}
-              disabled={!isFormMode}
-            />
-
-            <RadioGroup
-              label="Actitud:"
-              name="actitud"
-              options={['Activa', 'Pasiva']}
-              value={formData.actitud}
-              onChange={(v) => handleChange('actitud', v)}
-              disabled={!isFormMode}
-            />
-
-            <RadioGroup
-              label="Deambulación:"
-              name="deambulacion"
-              options={['Embásica', 'Disbásica', 'Abásica']}
-              value={formData.deambulacion}
-              onChange={(v) => handleChange('deambulacion', v)}
-              disabled={!isFormMode}
-            />
-
-            <div>
+      {/* CONTENIDO PRINCIPAL */}
+      {isFormMode ? (
+        /* --- MODO EDICIÓN --- */
+        <form onSubmit={handleSubmit} className="p-8 flex flex-col gap-8">
+          {/* 1. ASPECTO GENERAL */}
+          <section>
+            <h3 className="text-[var(--color-primary)] font-bold text-lg border-b-2 border-gray-100 mb-6 pb-2 uppercase tracking-wide">
+              Aspecto General
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
               <RadioGroup
-                label="Facies:"
-                name="facies"
-                options={['No característica', 'Característica']}
-                value={formData.facies}
-                onChange={(v) => handleChange('facies', v)}
-                disabled={!isFormMode}
+                label="Posición:"
+                name="posicion"
+                options={['Pie', 'Sentado', 'De cúbito']}
+                value={formData.posicion}
+                onChange={(v) => handleChange('posicion', v)}
               />
-              {formData.facies === 'Característica' && (
-                <div className="mt-2">
-                  <TextInput
-                    placeholder="Describa característica..."
-                    value={formData.faciesObs || ''}
-                    onChange={(e) => handleChange('faciesObs', e.target.value)}
-                    disabled={!isFormMode}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-6">
-            <label
-              htmlFor="conciencia-input"
-              className="block font-bold text-[var(--color-text)] mb-2 text-sm"
-            >
-              Conciencia (G° de conciencia, Orientación, Percepción,
-              Inteligencia...):
-            </label>
-            <textarea
-              id="conciencia-input"
-              className="w-full p-4 border-2 border-[var(--color-surface)] bg-white rounded-lg h-24 resize-none focus:border-[var(--color-primary-soft)] outline-none transition-all shadow-sm disabled:bg-gray-100 disabled:text-gray-500"
-              value={formData.conciencia || ''}
-              onChange={(e) => handleChange('conciencia', e.target.value)}
-              disabled={!isFormMode}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 mt-6">
-            <RadioGroup
-              label="Constitución:"
-              name="constitucion"
-              options={['Pícnico', 'Asténico', 'Normotipo']}
-              value={formData.constitucion}
-              onChange={(v) => handleChange('constitucion', v)}
-              disabled={!isFormMode}
-            />
-            <RadioGroup
-              label="Estado nutritivo:"
-              name="estadoNutritivo"
-              options={['Adecuado', 'No adecuado']}
-              value={formData.estadoNutritivo}
-              onChange={(v) => handleChange('estadoNutritivo', v)}
-              disabled={!isFormMode}
-            />
-          </div>
-        </section>
-
-        {/* 2. SIGNOS VITALES */}
-        <section>
-          <h3 className="text-[var(--color-primary)] font-bold text-lg border-b-2 border-gray-100 mb-6 pb-2 uppercase tracking-wide">
-            Signos Vitales
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 items-end">
-            <TextInput
-              label="Temperatura:"
-              value={formData.temperatura || ''}
-              onChange={(e) => handleChange('temperatura', e.target.value)}
-              disabled={!isFormMode}
-            />
-            <TextInput
-              label="P.A.:"
-              value={formData.presionArterial || ''}
-              onChange={(e) => handleChange('presionArterial', e.target.value)}
-              disabled={!isFormMode}
-            />
-            <TextInput
-              label="F.R.:"
-              value={formData.frecuenciaRespiratoria || ''}
-              onChange={(e) =>
-                handleChange('frecuenciaRespiratoria', e.target.value)
-              }
-              disabled={!isFormMode}
-            />
-            <TextInput
-              label="Pulso:"
-              value={formData.pulso || ''}
-              onChange={(e) => handleChange('pulso', e.target.value)}
-              disabled={!isFormMode}
-            />
-            <TextInput
-              label="Peso (kg):"
-              type="number"
-              value={formData.peso || ''}
-              onChange={(e) => handleChange('peso', e.target.value)}
-              disabled={!isFormMode}
-            />
-            <TextInput
-              label="Talla (cm):"
-              type="number"
-              value={formData.talla || ''}
-              onChange={(e) => handleChange('talla', e.target.value)}
-              disabled={!isFormMode}
-            />
-          </div>
-        </section>
-
-        {/* 3. PIEL Y ANEXOS */}
-        <section>
-          <h3 className="text-[var(--color-primary)] font-bold text-lg border-b-2 border-gray-100 mb-6 pb-2 uppercase tracking-wide">
-            Piel y Anexos
-          </h3>
-
-          <div className="mb-6 max-w-md">
-            <TextInput
-              label="Color (piel):"
-              value={formData.pielColor || ''}
-              onChange={(e) => handleChange('pielColor', e.target.value)}
-              disabled={!isFormMode}
-            />
-          </div>
-
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col md:flex-row md:items-center gap-4">
-              <div className="min-w-[200px]">
+              <RadioGroup
+                label="Actitud:"
+                name="actitud"
+                options={['Activa', 'Pasiva']}
+                value={formData.actitud}
+                onChange={(v) => handleChange('actitud', v)}
+              />
+              <RadioGroup
+                label="Deambulación:"
+                name="deambulacion"
+                options={['Embásica', 'Disbásica', 'Abásica']}
+                value={formData.deambulacion}
+                onChange={(v) => handleChange('deambulacion', v)}
+              />
+              <div>
                 <RadioGroup
-                  label="Humedad:"
-                  name="humedad"
-                  options={['Conservada', 'Disminuida']}
-                  value={formData.pielHumedad}
-                  onChange={(v) => handleChange('pielHumedad', v)}
-                  disabled={!isFormMode}
+                  label="Facies:"
+                  name="facies"
+                  options={['No característica', 'Característica']}
+                  value={formData.facies}
+                  onChange={(v) => handleChange('facies', v)}
                 />
+                {formData.facies === 'Característica' && (
+                  <div className="mt-2">
+                    <TextInput
+                      placeholder="Describa característica..."
+                      value={formData.faciesObs || ''}
+                      onChange={(e) =>
+                        handleChange('faciesObs', e.target.value)
+                      }
+                    />
+                  </div>
+                )}
               </div>
             </div>
+            <div className="mt-6">
+              <label
+                htmlFor="conciencia"
+                className="block font-bold text-[var(--color-text)] mb-2 text-sm"
+              >
+                Conciencia (G° de conciencia, Orientación, Percepción...):
+              </label>
+              <textarea
+                id="conciencia"
+                className="w-full p-4 border-2 border-[var(--color-surface)] bg-white rounded-lg h-24 resize-none focus:border-[var(--color-primary-soft)] outline-none transition-all shadow-sm"
+                value={formData.conciencia || ''}
+                onChange={(e) => handleChange('conciencia', e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 mt-6">
+              <RadioGroup
+                label="Constitución:"
+                name="constitucion"
+                options={['Pícnico', 'Asténico', 'Normotipo']}
+                value={formData.constitucion}
+                onChange={(v) => handleChange('constitucion', v)}
+              />
+              <RadioGroup
+                label="Estado nutritivo:"
+                name="estadoNutritivo"
+                options={['Adecuado', 'No adecuado']}
+                value={formData.estadoNutritivo}
+                onChange={(v) => handleChange('estadoNutritivo', v)}
+              />
+            </div>
+          </section>
 
-            <div className="flex flex-col md:flex-row gap-6 items-start">
-              <div className="min-w-[200px]">
-                <RadioGroup
-                  label="Lesiones:"
-                  name="lesiones"
-                  options={['Ausentes', 'Presentes']}
-                  value={formData.pielLesiones}
-                  onChange={(v) => handleChange('pielLesiones', v)}
-                  disabled={!isFormMode}
-                />
-              </div>
-              {formData.pielLesiones === 'Presentes' && (
-                <div className="flex-1 w-full pt-2">
-                  <TextInput
-                    placeholder="Describa lesiones..."
-                    value={formData.pielLesionesObs || ''}
-                    onChange={(e) =>
-                      handleChange('pielLesionesObs', e.target.value)
-                    }
-                    disabled={!isFormMode}
+          {/* 2. SIGNOS VITALES */}
+          <section>
+            <h3 className="text-[var(--color-primary)] font-bold text-lg border-b-2 border-gray-100 mb-6 pb-2 uppercase tracking-wide">
+              Signos Vitales
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 items-end">
+              <TextInput
+                label="Temperatura:"
+                value={formData.temperatura || ''}
+                onChange={(e) => handleChange('temperatura', e.target.value)}
+              />
+              <TextInput
+                label="P.A.:"
+                value={formData.presionArterial || ''}
+                onChange={(e) =>
+                  handleChange('presionArterial', e.target.value)
+                }
+              />
+              <TextInput
+                label="F.R.:"
+                value={formData.frecuenciaRespiratoria || ''}
+                onChange={(e) =>
+                  handleChange('frecuenciaRespiratoria', e.target.value)
+                }
+              />
+              <TextInput
+                label="Pulso:"
+                value={formData.pulso || ''}
+                onChange={(e) => handleChange('pulso', e.target.value)}
+              />
+              <TextInput
+                label="Peso (kg):"
+                type="number"
+                value={formData.peso || ''}
+                onChange={(e) => handleChange('peso', e.target.value)}
+              />
+              <TextInput
+                label="Talla (cm):"
+                type="number"
+                value={formData.talla || ''}
+                onChange={(e) => handleChange('talla', e.target.value)}
+              />
+            </div>
+          </section>
+
+          {/* 3. PIEL Y ANEXOS */}
+          <section>
+            <h3 className="text-[var(--color-primary)] font-bold text-lg border-b-2 border-gray-100 mb-6 pb-2 uppercase tracking-wide">
+              Piel y Anexos
+            </h3>
+            <div className="mb-6 max-w-md">
+              <TextInput
+                label="Color (piel):"
+                value={formData.pielColor || ''}
+                onChange={(e) => handleChange('pielColor', e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-6">
+              <RadioGroup
+                label="Humedad:"
+                name="humedad"
+                options={['Conservada', 'Disminuida']}
+                value={formData.pielHumedad}
+                onChange={(v) => handleChange('pielHumedad', v)}
+              />
+              <div className="flex flex-col md:flex-row gap-6 items-start">
+                <div className="min-w-[200px]">
+                  <RadioGroup
+                    label="Lesiones:"
+                    name="lesiones"
+                    options={['Ausentes', 'Presentes']}
+                    value={formData.pielLesiones}
+                    onChange={(v) => handleChange('pielLesiones', v)}
                   />
                 </div>
-              )}
-            </div>
-
-            <div className="flex flex-col md:flex-row gap-6 items-start">
-              <div className="min-w-[200px]">
-                <RadioGroup
-                  label="Anexos:"
-                  name="anexos"
-                  options={['Sin Alteraciones', 'Alterados']}
-                  value={formData.pielAnexos}
-                  onChange={(v) => handleChange('pielAnexos', v)}
-                  disabled={!isFormMode}
-                />
+                {formData.pielLesiones === 'Presentes' && (
+                  <div className="flex-1 w-full pt-2">
+                    <TextInput
+                      placeholder="Describa lesiones..."
+                      value={formData.pielLesionesObs || ''}
+                      onChange={(e) =>
+                        handleChange('pielLesionesObs', e.target.value)
+                      }
+                    />
+                  </div>
+                )}
               </div>
-              {formData.pielAnexos === 'Alterados' && (
-                <div className="flex-1 w-full pt-2">
-                  <TextInput
-                    placeholder="Describa alteraciones..."
-                    value={formData.pielAnexosObs || ''}
-                    onChange={(e) =>
-                      handleChange('pielAnexosObs', e.target.value)
-                    }
-                    disabled={!isFormMode}
+              <div className="flex flex-col md:flex-row gap-6 items-start">
+                <div className="min-w-[200px]">
+                  <RadioGroup
+                    label="Anexos:"
+                    name="anexos"
+                    options={['Sin Alteraciones', 'Alterados']}
+                    value={formData.pielAnexos}
+                    onChange={(v) => handleChange('pielAnexos', v)}
                   />
                 </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* 4. TEJIDO CELULAR SUBCUTÁNEO */}
-        <section>
-          <h3 className="text-[var(--color-primary)] font-bold text-lg border-b-2 border-gray-100 mb-6 pb-2 uppercase tracking-wide">
-            Tejido Celular Subcutáneo
-          </h3>
-
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col md:flex-row gap-6 items-start">
-              <div className="min-w-[200px]">
-                <RadioGroup
-                  label="Distribución:"
-                  name="distribucion"
-                  options={['Adecuada', 'No adecuada']}
-                  value={formData.tcsDistribucion}
-                  onChange={(v) => handleChange('tcsDistribucion', v)}
-                  disabled={!isFormMode}
-                />
+                {formData.pielAnexos === 'Alterados' && (
+                  <div className="flex-1 w-full pt-2">
+                    <TextInput
+                      placeholder="Describa alteraciones..."
+                      value={formData.pielAnexosObs || ''}
+                      onChange={(e) =>
+                        handleChange('pielAnexosObs', e.target.value)
+                      }
+                    />
+                  </div>
+                )}
               </div>
-              {formData.tcsDistribucion === 'No adecuada' && (
-                <div className="flex-1 w-full pt-2">
-                  <TextInput
-                    placeholder="Describa..."
-                    value={formData.tcsDistribucionObs || ''}
-                    onChange={(e) =>
-                      handleChange('tcsDistribucionObs', e.target.value)
-                    }
-                    disabled={!isFormMode}
+            </div>
+          </section>
+
+          {/* 4. TEJIDO CELULAR SUBCUTÁNEO */}
+          <section>
+            <h3 className="text-[var(--color-primary)] font-bold text-lg border-b-2 border-gray-100 mb-6 pb-2 uppercase tracking-wide">
+              Tejido Celular Subcutáneo
+            </h3>
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col md:flex-row gap-6 items-start">
+                <div className="min-w-[200px]">
+                  <RadioGroup
+                    label="Distribución:"
+                    name="distribucion"
+                    options={['Adecuada', 'No adecuada']}
+                    value={formData.tcsDistribucion}
+                    onChange={(v) => handleChange('tcsDistribucion', v)}
                   />
                 </div>
-              )}
-            </div>
-
-            <RadioGroup
-              label="Cantidad:"
-              name="cantidad"
-              options={['Regular', 'Escasa', 'Abundante']}
-              value={formData.tcsCantidad}
-              onChange={(v) => handleChange('tcsCantidad', v)}
-              disabled={!isFormMode}
-            />
-
-            <div className="flex flex-col md:flex-row gap-6 items-start">
-              <div className="min-w-[200px]">
-                <RadioGroup
-                  label="Ganglios:"
-                  name="ganglios"
-                  options={['No palpables', 'Palpables']}
-                  value={formData.ganglios}
-                  onChange={(v) => handleChange('ganglios', v)}
-                  disabled={!isFormMode}
-                />
+                {formData.tcsDistribucion === 'No adecuada' && (
+                  <div className="flex-1 w-full pt-2">
+                    <TextInput
+                      placeholder="Describa..."
+                      value={formData.tcsDistribucionObs || ''}
+                      onChange={(e) =>
+                        handleChange('tcsDistribucionObs', e.target.value)
+                      }
+                    />
+                  </div>
+                )}
               </div>
-              {formData.ganglios === 'Palpables' && (
-                <div className="flex-1 w-full pt-2">
-                  <TextInput
-                    placeholder="Describa hallazgos..."
-                    value={formData.gangliosObs || ''}
-                    onChange={(e) =>
-                      handleChange('gangliosObs', e.target.value)
-                    }
-                    disabled={!isFormMode}
+              <RadioGroup
+                label="Cantidad:"
+                name="cantidad"
+                options={['Regular', 'Escasa', 'Abundante']}
+                value={formData.tcsCantidad}
+                onChange={(v) => handleChange('tcsCantidad', v)}
+              />
+              <div className="flex flex-col md:flex-row gap-6 items-start">
+                <div className="min-w-[200px]">
+                  <RadioGroup
+                    label="Ganglios:"
+                    name="ganglios"
+                    options={['No palpables', 'Palpables']}
+                    value={formData.ganglios}
+                    onChange={(v) => handleChange('ganglios', v)}
                   />
                 </div>
-              )}
+                {formData.ganglios === 'Palpables' && (
+                  <div className="flex-1 w-full pt-2">
+                    <TextInput
+                      placeholder="Describa hallazgos..."
+                      value={formData.gangliosObs || ''}
+                      onChange={(e) =>
+                        handleChange('gangliosObs', e.target.value)
+                      }
+                    />
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Botones de Acción (Solo visibles en modo edición) */}
-        {isFormMode && (
+          {/* BOTONES DE ACCIÓN */}
           <div className="flex justify-end gap-4 mt-8 pt-6 border-t border-gray-100">
-            <Button
-              variant="secondary"
-              type="button"
-              onClick={() => {
-                setViewMode();
-                navigate(-1); // Opcional: Si quieres que cancelar regrese al menú anterior
-              }}
-            >
+            <Button variant="secondary" type="button" onClick={handleCancel}>
               Cancelar
             </Button>
             <Button type="submit" disabled={isPending}>
               {isPending ? 'Guardando...' : 'Guardar cambios'}
             </Button>
           </div>
-        )}
-      </form>
+        </form>
+      ) : (
+        /* --- MODO RESUMEN (VISTA) --- */
+        <div className="p-8 flex flex-col gap-10 text-gray-800">
+          <section>
+            <h3 className="text-[var(--color-primary)] font-bold text-lg border-b border-gray-200 mb-4 pb-1 uppercase">
+              Aspecto General
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <FormField label="Posición" value={formData.posicion} />
+              <FormField label="Actitud" value={formData.actitud} />
+              <FormField label="Deambulación" value={formData.deambulacion} />
+              <FormField
+                label="Facies"
+                value={
+                  formData.facies === 'Característica' && formData.faciesObs
+                    ? `${formData.facies} (${formData.faciesObs})`
+                    : formData.facies
+                }
+              />
+              <FormField label="Constitución" value={formData.constitucion} />
+              <FormField
+                label="Estado Nutritivo"
+                value={formData.estadoNutritivo}
+              />
+              <div className="col-span-full">
+                <FormField label="Conciencia" value={formData.conciencia} />
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <h3 className="text-[var(--color-primary)] font-bold text-lg border-b border-gray-200 mb-4 pb-1 uppercase">
+              Signos Vitales
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <FormField
+                label="Temperatura"
+                value={formData.temperatura ? `${formData.temperatura}` : '-'}
+              />
+              <FormField
+                label="P.A."
+                value={
+                  formData.presionArterial ? `${formData.presionArterial}` : '-'
+                }
+              />
+              <FormField
+                label="F.R."
+                value={
+                  formData.frecuenciaRespiratoria
+                    ? `${formData.frecuenciaRespiratoria}`
+                    : '-'
+                }
+              />
+              <FormField
+                label="Pulso"
+                value={formData.pulso ? `${formData.pulso}` : '-'}
+              />
+              <FormField
+                label="Peso"
+                value={formData.peso ? `${formData.peso} kg` : '-'}
+              />
+              <FormField
+                label="Talla"
+                value={formData.talla ? `${formData.talla} cm` : '-'}
+              />
+            </div>
+          </section>
+
+          <section>
+            <h3 className="text-[var(--color-primary)] font-bold text-lg border-b border-gray-200 mb-4 pb-1 uppercase">
+              Piel y Anexos
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField label="Color" value={formData.pielColor} />
+              <FormField label="Humedad" value={formData.pielHumedad} />
+              <FormField
+                label="Lesiones"
+                value={
+                  formData.pielLesiones === 'Presentes' &&
+                  formData.pielLesionesObs
+                    ? `Presentes (${formData.pielLesionesObs})`
+                    : formData.pielLesiones
+                }
+              />
+              <FormField
+                label="Anexos"
+                value={
+                  formData.pielAnexos === 'Alterados' && formData.pielAnexosObs
+                    ? `Alterados (${formData.pielAnexosObs})`
+                    : formData.pielAnexos
+                }
+              />
+            </div>
+          </section>
+
+          <section>
+            <h3 className="text-[var(--color-primary)] font-bold text-lg border-b border-gray-200 mb-4 pb-1 uppercase">
+              Tejido Celular Subcutáneo
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <FormField
+                label="Distribución"
+                value={
+                  formData.tcsDistribucion === 'No adecuada' &&
+                  formData.tcsDistribucionObs
+                    ? `No adecuada (${formData.tcsDistribucionObs})`
+                    : formData.tcsDistribucion
+                }
+              />
+              <FormField label="Cantidad" value={formData.tcsCantidad} />
+              <FormField
+                label="Ganglios"
+                value={
+                  formData.ganglios === 'Palpables' && formData.gangliosObs
+                    ? `Palpables (${formData.gangliosObs})`
+                    : formData.ganglios
+                }
+              />
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

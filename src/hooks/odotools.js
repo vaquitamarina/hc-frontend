@@ -2,6 +2,7 @@
    Incluye: utilidades geométricas, addCrown, modos interactivos (corona, ortho, diastema), etc.
    (Archivo modificado para añadir función: addFosasFisurasProfundas)
 */
+import toast from 'react-hot-toast';
 
 function getSvg() {
   return document.querySelector('svg.odo');
@@ -1819,7 +1820,7 @@ export function addFusion(toothName, color = 'blue') {
     const validRight = exists(right);
 
     if (!validLeft && !validRight) {
-      alert(`El diente ${name} no tiene dientes vecinos para fusionar.`);
+      toast.error(`El diente ${name} no tiene dientes vecinos para fusionar.`);
       return false;
     }
 
@@ -1849,7 +1850,9 @@ export function addFusion(toothName, color = 'blue') {
 
       // ⚠️ SI AMBOS ESTÁN OCUPADOS
       else if (leftBusy && rightBusy) {
-        alert(`Los dientes ${left} y ${right} ya tienen círculos de fusión.`);
+        toast.error(
+          `Los dientes ${left} y ${right} ya tienen círculos de fusión.`
+        );
         return false;
       }
 
@@ -1868,7 +1871,7 @@ export function addFusion(toothName, color = 'blue') {
         if (normalized === left || normalized === right) {
           neighbor = normalized;
         } else {
-          alert(`"${choice}" no es un diente válido.`);
+          toast.error(`"${choice}" no es un diente válido.`);
           return false;
         }
       }
@@ -1959,7 +1962,7 @@ export function addGiroversion(
       `[data-id^="giro-${toothDataName.replace(/\W/g, '_')}"]`
     );
     if (exists) {
-      alert(
+      toast.error(
         `Este diente (${toothDataName}) ya tiene un tratamiento de giroversión aplicado.`
       );
       return false;
@@ -2294,7 +2297,7 @@ export function addDentalProsthesis(color = 'blue') {
     if (pts.length === 2) {
       // 1. VALIDACIÓN CLÍNICA
       if (!isValidArcade(names[0], names[1])) {
-        alert(
+        toast.error(
           '❌ Error clínico: La Prótesis Removible debe conectar dientes de la misma arcada.'
         );
         cleanup();
@@ -2393,7 +2396,7 @@ export function addPDC(arcada, color = 'blue', typeId) {
     // Desplazamiento basado en la lógica de Q3/Q4/Q7/Q8 del usuario: Y hacia abajo (positivo)
     displacement = 60;
   } else {
-    alert('❌ Arcada no válida.');
+    toast.error('❌ Arcada no válida.');
     return false;
   }
 
@@ -2460,7 +2463,7 @@ export function addPPF(color = 'blue') {
   const LINE_WIDTH = 5;
   let offset;
 
-  alert(
+  toast(
     'Modo PPF: Haz clic en el primer diente pilar y luego en el segundo diente pilar. Presiona ESC para cancelar.'
   );
 
@@ -2522,7 +2525,7 @@ export function addPPF(color = 'blue') {
     if (pts.length === 2) {
       // 2. VALIDACIÓN CLÍNICA
       if (!isValidArcade(names[0], names[1])) {
-        alert(
+        toast.error(
           '❌ Error clínico: La Prótesis Fija debe conectar dientes de la misma arcada.'
         );
         cleanup();
@@ -2597,7 +2600,7 @@ export function addTransposition(color = 'blue') {
   // 🔑 AJUSTE CLAVE: Aumentamos el desplazamiento a 25 para evitar superposición
   const ARROW_H_OFFSET = 15;
 
-  alert(
+  toast(
     'Modo Transposición Dentaria: Haz clic en el primer diente y luego en el segundo diente que están transpuestos. Presiona ESC para cancelar.'
   );
 
@@ -2655,7 +2658,7 @@ export function addTransposition(color = 'blue') {
     if (pts.length === 2) {
       // 2. VALIDACIÓN CLÍNICA:
       if (!isValidArcade(names[0], names[1])) {
-        alert(
+        toast.error(
           '❌ Error clínico: La Transposición debe ser entre dientes de la misma arcada.'
         );
         cleanup();

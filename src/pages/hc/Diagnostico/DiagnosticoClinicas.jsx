@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
+import toast from 'react-hot-toast';
 import Button from '@ui/Button';
 import TextInput from '@ui/TextInput';
 import SectionTitle from '@ui/SectionTitle';
@@ -57,7 +58,7 @@ export default function DiagnosticoClinicas() {
   const [form, setForm] = useState({
     // Sección V
     fechaRespuesta: '',
-    clinicaRespuesta: '', // "Clínica de:"
+    clinicaRespuesta: '',
 
     // Plan de Trabajo - Exámenes (JSON)
     examenes: {
@@ -80,7 +81,6 @@ export default function DiagnosticoClinicas() {
   });
 
   // Determinamos si ya existe información guardada
-  // Verificamos campos clave de ambas secciones para decidir
   const hasSavedData = Boolean(
     data?.fecha_respuesta || data?.diagnostico_definitivo
   );
@@ -88,18 +88,32 @@ export default function DiagnosticoClinicas() {
   // Cargar datos
   useEffect(() => {
     if (data) {
+      // 1. Extraemos lo que venga del backend, o un objeto vacío si es null
+      const examenesBackend = data.examenes_auxiliares || {};
+
+      // 2. Fusionamos manualmente para garantizar que ninguna llave falte
+      // Si el backend no trae 'radiograficos', usamos el default.
+      const examenesSeguros = {
+        radiograficos: examenesBackend.radiograficos || {
+          checked: false,
+          texto: '',
+        },
+        laboratorio: examenesBackend.laboratorio || {
+          checked: false,
+          texto: '',
+        },
+        modelos: examenesBackend.modelos || { checked: false, texto: '' },
+        fotografia: examenesBackend.fotografia || { checked: false, texto: '' },
+      };
+
       setForm({
         fechaRespuesta: data.fecha_respuesta
           ? data.fecha_respuesta.split('T')[0]
           : '',
         clinicaRespuesta: data.clinica_respuesta || '',
 
-        examenes: data.examenes_auxiliares || {
-          radiograficos: { checked: false, texto: '' },
-          laboratorio: { checked: false, texto: '' },
-          modelos: { checked: false, texto: '' },
-          fotografia: { checked: false, texto: '' },
-        },
+        // Usamos el objeto seguro
+        examenes: examenesSeguros,
 
         interconsultaTipo: data.interconsulta_detalle || '',
         interconsultaFecha: data.fecha_interconsulta
@@ -114,11 +128,11 @@ export default function DiagnosticoClinicas() {
       });
 
       // Auto-activar edición si no hay datos guardados
-      // IMPORTANTE: Quitamos 'isFormMode' de dependencias para evitar bugs al guardar
       if (!data.fecha_respuesta && !data.diagnostico_definitivo) {
         setFormMode();
       }
     }
+    // Cleanup al salir
     return () => {
       setViewMode();
     };
@@ -140,10 +154,10 @@ export default function DiagnosticoClinicas() {
       { idHistory: id, data: form },
       {
         onSuccess: () => {
-          alert('Información clínica guardada correctamente');
+          toast.success('Información clínica guardada correctamente');
           setViewMode();
         },
-        onError: () => alert('Error al guardar'),
+        onError: () => toast.error('Error al guardar'),
       }
     );
   };
@@ -157,7 +171,7 @@ export default function DiagnosticoClinicas() {
         {/* IZQUIERDA: Título (+ ID si ya está guardado) */}
         <div className="flex items-center gap-6">
           <h2 className="text-2xl font-bold">
-            Diagnóstico en Clínicas y Plan de Trabajo
+            V. Diagnóstico en Clínicas y Plan de Trabajo
           </h2>
 
           {/* Si ya hay datos, mostramos el ID aquí a la izquierda */}
@@ -357,14 +371,14 @@ export default function DiagnosticoClinicas() {
           </div>
         </section>
 
-        {/* Botones de Acción */}
         {isFormMode && (
-          <div className="flex justify-end gap-4 pt-6 border-t border-gray-100">
+          <div className="flex justify-end gap-4 mt-4 pt-4 border-t border-gray-100">
             <Button
               variant="secondary"
               onClick={() => {
                 setViewMode();
-                navigate(-1);
+                // Si no hay datos guardados, regresar
+                if (!hasSavedData) navigate(-1);
               }}
             >
               Cancelar

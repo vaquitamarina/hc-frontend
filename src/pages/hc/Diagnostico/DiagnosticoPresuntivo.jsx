@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
+import toast from 'react-hot-toast';
 import Button from '@ui/Button';
 import {
   useDiagnosticoPresuntivo,
@@ -40,10 +41,10 @@ export default function DiagnosticoPresuntivo() {
       { idHistory: id, descripcion },
       {
         onSuccess: () => {
-          alert('Guardado correctamente');
+          toast.success('Guardado correctamente');
           setViewMode();
         },
-        onError: () => alert('Error al guardar'),
+        onError: () => toast.error('Error al guardar'),
       }
     );
   };

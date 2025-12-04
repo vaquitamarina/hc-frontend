@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
+import toast from 'react-hot-toast';
 import Button from '@ui/Button';
 import TextInput from '@ui/TextInput';
 import { useEvolucion, useAddEvolucion } from '@hooks/useEvolucion';
@@ -32,7 +33,7 @@ export default function Evolucion() {
 
   const handleSubmit = () => {
     if (!newEvolucion.actividad || !newEvolucion.alumno) {
-      alert('Complete la actividad y el nombre del alumno');
+      toast.error('Complete la actividad y el nombre del alumno');
       return;
     }
 
@@ -40,7 +41,7 @@ export default function Evolucion() {
       { idHistory: id, data: newEvolucion },
       {
         onSuccess: () => {
-          alert('Evolución agregada correctamente');
+          toast.success('Evolución agregada correctamente');
           setNewEvolucion({
             fecha: new Date().toISOString().split('T')[0],
             actividad: '',
@@ -48,7 +49,7 @@ export default function Evolucion() {
           });
           setViewMode();
         },
-        onError: () => alert('Error al registrar'),
+        onError: () => toast.error('Error al registrar'),
       }
     );
   };

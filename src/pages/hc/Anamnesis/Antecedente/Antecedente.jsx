@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
+import toast from 'react-hot-toast';
 import {
   useAntecedentePersonal,
   useCreateAntecedentePersonal,
@@ -374,7 +375,7 @@ function AntecedentePersonal() {
     e.preventDefault();
 
     if (!id) {
-      alert('Error: ID de historia no disponible.');
+      toast.error('Error: ID de historia no disponible.');
       return;
     }
 
@@ -437,9 +438,9 @@ function AntecedentePersonal() {
       }
 
       await Promise.all(promises);
-      alert('Todos los antecedentes se guardaron correctamente.');
+      toast.success('Todos los antecedentes se guardaron correctamente.');
     } catch (error) {
-      alert('Error al guardar los antecedentes: ' + error.message);
+      toast.error('Error al guardar los antecedentes: ' + error.message);
     }
   };
 
