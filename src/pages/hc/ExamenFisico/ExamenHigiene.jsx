@@ -4,6 +4,7 @@ import { useHigieneOral, useMutateHigieneOral } from '@hooks/useExamenFisico';
 import { useForm } from '@stores/useForm';
 import Button from '@ui/Button';
 import RadioGroup from '@ui/RadioGroup';
+import FormField from '@ui/FormField/FormField'; // Importamos para la vista de resumen
 
 export default function ExamenHigiene() {
   const { id } = useParams();
@@ -24,19 +25,20 @@ export default function ExamenHigiene() {
         setEstadoHigiene(higieneData.estadoHigiene);
       }
 
-      // Si es nuevo, abrimos formulario automáticamente
+      // Si es nuevo (sin datos), abrir editor automáticamente
       if (!higieneData.estadoHigiene) {
         setFormMode();
       }
     }
 
-    // CLEANUP: Cerrar modo edición al salir
+    // CLEANUP: Cerrar modo edición al salir de la pantalla
     return () => {
       setViewMode();
     };
   }, [higieneData, setFormMode, setViewMode]);
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault(); // Prevenir reload si se usa dentro de form
     if (!estadoHigiene) {
       alert('Por favor seleccione una opción');
       return;
@@ -47,13 +49,22 @@ export default function ExamenHigiene() {
       {
         onSuccess: () => {
           alert('Higiene bucal guardada correctamente');
-          setViewMode();
+          setViewMode(); // Cambiar a modo resumen
         },
         onError: () => {
           alert('Error al guardar');
         },
       }
     );
+  };
+
+  // Lógica inteligente para cancelar
+  const handleCancel = () => {
+    if (hasSavedData) {
+      setViewMode(); // Volver al resumen
+    } else {
+      navigate(-1); // Salir si no hay nada guardado
+    }
   };
 
   if (isLoading) return <div className="p-8 text-center">Cargando...</div>;
@@ -90,35 +101,53 @@ export default function ExamenHigiene() {
               onClick={setFormMode}
               className="bg-white text-[var(--color-primary)] hover:bg-gray-100 px-6 py-2 rounded-md transition-colors text-sm font-bold tracking-wide cursor-pointer uppercase shadow-sm"
             >
-              Editar
+              EDITAR
             </button>
           )}
         </div>
       </div>
 
-      {/* CONTENIDO DEL FORMULARIO */}
+      {/* CONTENIDO PRINCIPAL */}
       <div className="p-8">
-        <div className="mb-8 pl-4">
-          <RadioGroup
-            label="Evaluación Clínica de la Higiene:"
-            name="higiene"
-            options={['Bueno', 'Regular', 'Deficiente']}
-            value={estadoHigiene}
-            onChange={setEstadoHigiene}
-            disabled={!isFormMode}
-            row={true}
-          />
-        </div>
+        {isFormMode ? (
+          /* --- MODO EDICIÓN --- */
+          <div className="flex flex-col gap-8">
+            <div className="pl-4">
+              <RadioGroup
+                label="Evaluación Clínica de la Higiene:"
+                name="higiene"
+                options={['Bueno', 'Regular', 'Deficiente']}
+                value={estadoHigiene}
+                onChange={setEstadoHigiene}
+                disabled={!isFormMode}
+                row={true}
+              />
+            </div>
 
-        {/* Botones de Guardar/Cancelar (Solo en modo edición) */}
-        {isFormMode && (
-          <div className="flex justify-end gap-4 pt-4 border-t border-gray-100">
-            <Button variant="secondary" onClick={setViewMode}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSubmit} disabled={isPending}>
-              {isPending ? 'Guardando...' : 'Guardar Evaluación'}
-            </Button>
+            {/* Botones de Guardar/Cancelar */}
+            <div className="flex justify-end gap-4 pt-4 border-t border-gray-100">
+              <Button variant="secondary" onClick={handleCancel}>
+                Cancelar
+              </Button>
+              <Button onClick={handleSubmit} disabled={isPending}>
+                {isPending ? 'Guardando...' : 'Guardar Evaluación'}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          /* --- MODO RESUMEN (VISTA) --- */
+          <div className="text-gray-800">
+            <section>
+              <h3 className="text-[var(--color-primary)] font-bold text-lg border-b border-gray-200 mb-4 pb-1 uppercase">
+                Estado Actual
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  label="Evaluación Clínica de la Higiene"
+                  value={estadoHigiene}
+                />
+              </div>
+            </section>
           </div>
         )}
       </div>

@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router';
+import { useParams, useNavigate } from 'react-router';
 import Button from '@ui/Button';
 import TextInput from '@ui/TextInput';
+import FormField from '@ui/FormField/FormField'; // Para el resumen
+import SectionTitle from '@ui/SectionTitle'; // Para títulos ordenados
 import { useDerivacion, useMutateDerivacion } from '@hooks/useDiagnostico';
 import { useForm } from '@stores/useForm';
 
 export default function DerivacionClinicas() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { isFormMode, setFormMode, setViewMode } = useForm();
 
   const { data, isLoading } = useDerivacion(id);
@@ -20,8 +23,11 @@ export default function DerivacionClinicas() {
     docente: '',
   });
 
-  // Determinamos si ya existe información guardada (si hay fecha u observaciones)
-  const hasSavedData = Boolean(data?.fechaDerivacion || data?.observaciones);
+  // Determinamos si ya existe información guardada
+  const hasSavedData = Boolean(
+    data?.fechaDerivacion ||
+      (data?.destinos && Object.values(data.destinos).some((v) => v))
+  );
 
   useEffect(() => {
     if (data) {
@@ -35,16 +41,17 @@ export default function DerivacionClinicas() {
         docente: data.docente || '',
       });
 
-      // Auto-activar edición SOLO si parece un registro nuevo (sin fecha guardada).
-      // Eliminamos isFormMode de las dependencias para evitar bucles al guardar.
-      if (!data.fechaDerivacion) {
+      // Si es nuevo (sin datos), activamos edición automáticamente
+      if (!hasSavedData) {
         setFormMode();
       }
     }
+
+    // CLEANUP: Cerrar modo edición al salir
     return () => {
       setViewMode();
     };
-  }, [data, setFormMode, setViewMode]);
+  }, [data, hasSavedData, setFormMode, setViewMode]);
 
   const handleCheckbox = (key) => {
     setFormData((prev) => ({
@@ -66,6 +73,14 @@ export default function DerivacionClinicas() {
     );
   };
 
+  const handleCancel = () => {
+    if (hasSavedData) {
+      setViewMode(); // Volver al resumen
+    } else {
+      navigate(-1); // Salir si es nuevo
+    }
+  };
+
   const clinicasOptions = [
     { key: 'periodoncia', label: 'Periodoncia' },
     { key: 'cirugia', label: 'Cirugía bucal' },
@@ -82,9 +97,9 @@ export default function DerivacionClinicas() {
       <div className="bg-[var(--color-primary)] text-white px-8 py-5 rounded-t-lg flex justify-between items-center">
         {/* IZQUIERDA */}
         <div className="flex items-center gap-6">
-          <h2 className="text-2xl font-bold">Derivado a Clínicas</h2>
+          <h2 className="text-2xl font-bold">IV. Derivado a Clínicas</h2>
 
-          {/* CASO GUARDADO: El ID se mueve aquí */}
+          {/* CASO GUARDADO: El ID se muestra aquí a la izquierda */}
           {hasSavedData && (
             <>
               <div className="h-8 w-px bg-white/30 hidden md:block"></div>
@@ -124,81 +139,131 @@ export default function DerivacionClinicas() {
         </div>
       </div>
 
-      {/* CONTENIDO DEL FORMULARIO */}
-      <div className="p-8 flex flex-col gap-6">
-        {/* Checkboxes */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {clinicasOptions.map((opt) => (
-            <label
-              key={opt.key}
-              className={`flex items-center gap-3 cursor-pointer p-3 rounded-md border ${formData.destinos[opt.key] ? 'bg-blue-50 border-blue-200' : 'border-transparent hover:bg-gray-50'} transition-colors`}
-            >
-              <input
-                type="checkbox"
-                checked={!!formData.destinos[opt.key]}
-                onChange={() => handleCheckbox(opt.key)}
-                disabled={!isFormMode}
-                className="w-5 h-5 accent-[var(--color-primary)]"
+      {/* CONTENIDO PRINCIPAL */}
+      <div className="p-8">
+        {isFormMode ? (
+          /* --- MODO EDICIÓN --- */
+          <div className="flex flex-col gap-6">
+            <h4 className="font-bold text-gray-700 mb-2">
+              Seleccione Clínicas de Destino:
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {clinicasOptions.map((opt) => (
+                <label
+                  key={opt.key}
+                  className={`flex items-center gap-3 cursor-pointer p-3 rounded-md border ${
+                    formData.destinos[opt.key]
+                      ? 'bg-blue-50 border-blue-200'
+                      : 'border-transparent hover:bg-gray-50'
+                  } transition-colors`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={!!formData.destinos[opt.key]}
+                    onChange={() => handleCheckbox(opt.key)}
+                    className="w-5 h-5 accent-[var(--color-primary)]"
+                  />
+                  <span className="text-gray-700 font-medium">{opt.label}</span>
+                </label>
+              ))}
+            </div>
+
+            <div className="border-t pt-6">
+              <label
+                htmlFor="observaciones-textarea"
+                className="block font-bold text-gray-700 mb-2"
+              >
+                Observaciones:
+              </label>
+              <textarea
+                id="observaciones-textarea"
+                className="w-full p-3 border-2 border-gray-200 rounded-lg h-24 resize-none focus:border-[var(--color-primary)] outline-none"
+                value={formData.observaciones}
+                onChange={(e) =>
+                  setFormData({ ...formData, observaciones: e.target.value })
+                }
               />
-              <span className="text-gray-700 font-medium">{opt.label}</span>
-            </label>
-          ))}
-        </div>
+            </div>
 
-        <div className="border-t pt-6">
-          <label
-            htmlFor="observaciones-textarea"
-            className="block font-bold text-gray-700 mb-2"
-          >
-            Observaciones:
-          </label>
-          <textarea
-            id="observaciones-textarea"
-            className="w-full p-3 border-2 border-gray-200 rounded-lg h-24 resize-none focus:border-[var(--color-primary)] outline-none disabled:bg-gray-50"
-            value={formData.observaciones}
-            onChange={(e) =>
-              setFormData({ ...formData, observaciones: e.target.value })
-            }
-            disabled={!isFormMode}
-          />
-        </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <TextInput
+                label="Fecha:"
+                type="date"
+                value={formData.fechaDerivacion}
+                onChange={(e) =>
+                  setFormData({ ...formData, fechaDerivacion: e.target.value })
+                }
+              />
+              <TextInput
+                label="Alumno:"
+                value={formData.alumno}
+                onChange={(e) =>
+                  setFormData({ ...formData, alumno: e.target.value })
+                }
+              />
+              <TextInput
+                label="Docente:"
+                value={formData.docente}
+                onChange={(e) =>
+                  setFormData({ ...formData, docente: e.target.value })
+                }
+              />
+            </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <TextInput
-            label="Fecha:"
-            type="date"
-            value={formData.fechaDerivacion}
-            onChange={(e) =>
-              setFormData({ ...formData, fechaDerivacion: e.target.value })
-            }
-            disabled={!isFormMode}
-          />
-          <TextInput
-            label="Alumno:"
-            value={formData.alumno}
-            onChange={(e) =>
-              setFormData({ ...formData, alumno: e.target.value })
-            }
-            disabled={!isFormMode}
-          />
-          <TextInput
-            label="Docente:"
-            value={formData.docente}
-            onChange={(e) =>
-              setFormData({ ...formData, docente: e.target.value })
-            }
-            disabled={!isFormMode}
-          />
-        </div>
+            <div className="flex justify-end gap-4 mt-4 pt-4 border-t border-gray-100">
+              <Button variant="secondary" onClick={handleCancel}>
+                Cancelar
+              </Button>
+              <Button onClick={handleSubmit} disabled={isPending}>
+                {isPending ? 'Guardando...' : 'Guardar Derivación'}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          /* --- MODO RESUMEN (VISTA) --- */
+          <div className="flex flex-col gap-8 text-gray-800">
+            <section>
+              <SectionTitle title="Destinos Seleccionados" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {clinicasOptions.filter((opt) => formData.destinos[opt.key])
+                  .length > 0 ? (
+                  clinicasOptions
+                    .filter((opt) => formData.destinos[opt.key])
+                    .map((opt) => (
+                      <div
+                        key={opt.key}
+                        className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-gray-700 font-medium flex items-center gap-2"
+                      >
+                        <span className="w-2 h-2 rounded-full bg-[var(--color-primary)]"></span>
+                        {opt.label}
+                      </div>
+                    ))
+                ) : (
+                  <p className="text-gray-500 italic p-2">
+                    Ninguna clínica seleccionada.
+                  </p>
+                )}
+              </div>
+            </section>
 
-        {isFormMode && (
-          <div className="flex justify-end gap-4 mt-4 pt-4 border-t border-gray-100">
-            <Button variant="secondary" onClick={setViewMode}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSubmit} disabled={isPending}>
-              {isPending ? 'Guardando...' : 'Guardar Derivación'}
-            </Button>
+            <section>
+              <SectionTitle title="Detalles de la Derivación" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-3">
+                  <FormField
+                    label="Observaciones"
+                    value={formData.observaciones}
+                  />
+                </div>
+                <FormField
+                  label="Fecha"
+                  value={formData.fechaDerivacion}
+                  type="date"
+                />
+                <FormField label="Alumno" value={formData.alumno} />
+                <FormField label="Docente" value={formData.docente} />
+              </div>
+            </section>
           </div>
         )}
       </div>

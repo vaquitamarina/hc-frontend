@@ -17,7 +17,7 @@ export function useCurrentUser() {
 export function useLogin() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: fetchLogin,
     onSuccess: () => {
