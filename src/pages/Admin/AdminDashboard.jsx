@@ -7,7 +7,7 @@ function AdminDashboard() {
         <h1 className="text-2xl font-semibold">Panel de Administración</h1>
         <Link
           to="/admin/create-student"
-          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
+          className="bg-[var(--color-primary-soft)] hover:bg-[var(--color-primary)] text-white font-semibold px-4 py-2 rounded"
         >
           Crear Estudiante
         </Link>
