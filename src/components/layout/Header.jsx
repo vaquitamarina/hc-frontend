@@ -1,6 +1,16 @@
 import { LogOut } from 'lucide-react';
+import { fetchLogout } from '../../services/fetchLogout';
 
 export default function Header() {
+  const handleLogout = async () => {
+    try {
+      await fetchLogout();
+      localStorage.clear();
+      window.location.href = '/login';
+    } catch {
+      alert('Error al cerrar sesión');
+    }
+  };
   return (
     <header className="flex justify-between items-center px-16 py-6 bg-[var(--color-primary)] !text-[var(--color-white)] shadow-[0_2px_4px_rgba(0,0,0,0.1)] top-0 left-0 w-full h-24 flex-shrink-0">
       <div className="flex items-center gap-4 flex-row">
@@ -13,7 +23,10 @@ export default function Header() {
         </div>
       </div>
       <div className="flex items-center">
-        <LogOut className="text-2xl cursor-pointer !text-[var(--color-white)] hover:opacity-80 transition-opacity duration-200" />
+        <LogOut
+          className="text-2xl cursor-pointer !text-[var(--color-white)] hover:opacity-80 transition-opacity duration-200"
+          onClick={handleLogout}
+        />
       </div>
     </header>
   );
