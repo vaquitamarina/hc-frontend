@@ -28,7 +28,7 @@ export function useAssignPatient() {
         queryKey: ['patient-by-history', variables.idHistory],
       });
       // Invalidar la lista de historias
-      queryClient.invalidateQueries({ queryKey: ['historias'] });
+      queryClient.invalidateQueries({ queryKey: ['hcs'] });
     },
   });
 }
@@ -59,7 +59,7 @@ export function useCreateHistoriaClinica() {
     mutationFn: (studentId) => registerHc(studentId),
     onSuccess: () => {
       // Puedes invalidar queries relacionadas aquí si es necesario
-      queryClient.invalidateQueries({ queryKey: ['historias'] });
+      queryClient.invalidateQueries({ queryKey: ['hcs'] });
       toast.success('Historia Clínica creada con éxito');
     },
     onError: (error) => {
@@ -76,7 +76,7 @@ export function useRegisterHc() {
   return useMutation({
     mutationFn: (studentId) => registerHc(studentId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['historias'] });
+      queryClient.invalidateQueries({ queryKey: ['hcs'] });
       toast.success('Historia Clínica registrada con éxito');
     },
     onError: (error) => {
